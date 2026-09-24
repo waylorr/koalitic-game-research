@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KOALITIC GAME — Workflow</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#e9f5fb;background:#050b12;--cyan:#68dcfb;--red:#ff304e;--line:#31596c;--panel:#0b1c27;--muted:#9ab8c5}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 5%,#12384d,#050b12 46%)}button,input,select{font:inherit}button{cursor:pointer;color:inherit}button:disabled{opacity:.45;cursor:not-allowed}header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line);background:#07121be8}.brand{font-size:19px;font-weight:800;letter-spacing:.13em}.brand b{color:var(--red)}.brand span{color:var(--cyan)}.sub{color:#84a8b9;font-size:12px;margin-top:4px}.tabs{display:flex;gap:8px}.tabs button,.ui-btn{border:1px solid var(--line);background:#0b202d;padding:10px 15px}.tabs button.active,.ui-btn.primary{border-color:var(--red);box-shadow:0 0 18px #ff304c48}.ui-btn:hover,.tabs button:hover{border-color:var(--cyan)}.view{display:none}.view.active{display:block}.notice{padding:10px 24px;background:#271c14;border-bottom:1px solid #765334;color:#ffd098;font-size:12px}
+.flow-wrap{overflow:auto;padding:25px}.flow{width:1440px;height:1100px;position:relative;margin:auto;border:1px solid var(--line);background-image:linear-gradient(#21405633 1px,transparent 1px),linear-gradient(90deg,#21405633 1px,transparent 1px);background-size:30px 30px}.flow svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.flow path{fill:none;stroke:var(--cyan);stroke-width:2;marker-end:url(#arrow)}.flow path.pending{stroke:#ecaa60;stroke-dasharray:7 5}.node{position:absolute;width:260px;min-height:155px;padding:12px;background:#081822ed;border:1px solid var(--line);text-align:left;box-shadow:0 12px 28px #0008}.node:hover{border-color:var(--cyan)}.node img{width:76px;height:44px;object-fit:cover;float:right;border:1px solid var(--line)}.node strong{display:block;font-size:13px;letter-spacing:.1em}.node small{display:block;color:#8eafbd;margin:8px 0;font-size:11px;line-height:1.4}.badge{font-size:10px;color:var(--cyan)}.badge.pending{color:#efb673}
+.proto-layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px;padding:18px}.stage{position:relative;width:100%;aspect-ratio:16/9;background:#07131d;overflow:hidden;border:1px solid var(--line)}.stage.wide{aspect-ratio:auto;min-height:720px}.stage>img{width:100%;height:100%;object-fit:contain;display:block}.hotspot{position:absolute;background:transparent;border:2px solid transparent;padding:0}.show-hotspots .hotspot{border-color:var(--red);background:#ff304c22}.hotspot:hover{border-color:var(--cyan);background:#66dfff22}.hotspot span{display:none;position:absolute;top:-24px;left:0;white-space:nowrap;background:#061019;color:white;font-size:11px;padding:4px}.show-hotspots .hotspot span,.hotspot:hover span{display:block}.side{background:#081a26;border:1px solid var(--line);padding:15px}.side h2{font-size:17px;margin:0 0 10px}.side p{font-size:12px;line-height:1.5;color:#aac3d0}.side .ui-btn{display:block;width:100%;text-align:left;margin:7px 0;font-size:12px}.side label{display:block;font-size:12px;margin:12px 0;color:#9fbdc9}.side input[type=checkbox]{margin-left:8px}.side-kicker{font-size:10px;color:var(--cyan);letter-spacing:.1em;margin-top:20px}
+
+.menu-scene{height:100%;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 31%,#16435b 0%,#071b2b 35%,#030911 77%)}.menu-scene:before{content:"";position:absolute;width:29%;aspect-ratio:1;left:35%;top:12%;border:2px solid #74d7ff;border-radius:50%;box-shadow:0 0 36px #2fbfff99,inset 0 0 45px #59cfff77,0 0 100px #1768ad77;background:repeating-radial-gradient(circle,#1a658244 0 2px,transparent 3px 20px)}.menu-scene:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 49.9%,#6cdcff55 50%,transparent 50.1%),repeating-linear-gradient(0deg,transparent 0 27px,#56beed10 28px 29px);pointer-events:none}.menu-brand{position:absolute;z-index:2;left:5%;top:6%;font-size:clamp(18px,3vw,43px);font-weight:800;letter-spacing:.11em}.menu-brand b{color:var(--red)}.menu-brand span{color:var(--cyan)}.menu-tag{display:block;margin-top:7px;font-size:11px;letter-spacing:.55em;color:#9bb7c6;font-weight:400}.menu-buttons{position:absolute;z-index:2;left:29%;right:29%;top:49%;display:grid;gap:11px}.menu-buttons button{border:1px solid #7acde5;background:#081926ed;color:white;padding:16px 18px;text-align:left;font-size:clamp(11px,1.45vw,20px);letter-spacing:.12em;box-shadow:0 0 16px #1a97bf55}.menu-buttons button:first-child{border-color:var(--red);box-shadow:0 0 20px #ff304c77}.menu-buttons button:hover{background:#173a4b}.menu-quit{position:absolute;z-index:2;bottom:4%;right:4%;border:0;background:transparent;color:#bed6df;letter-spacing:.1em}.episodes-screen{height:100%;padding:6% 12%;background:radial-gradient(circle at 76% 31%,#164058,#071722 48%,#030910);overflow:auto}.episodes-screen h1{font-size:clamp(21px,3vw,42px);letter-spacing:.13em;margin:0 0 4px}.episodes-screen p{font-size:12px;color:var(--muted);margin:0 0 24px}.episode-cards{display:grid;gap:10px;max-width:850px}.episode-card{display:flex;align-items:center;gap:18px;width:100%;min-height:118px;background:#0a1c29dc;border:1px solid var(--line);padding:12px;text-align:left}.episode-card:hover{border-color:var(--cyan)}.episode-card.new{border-style:dashed}.episode-card .thumb{width:145px;aspect-ratio:16/9;background:linear-gradient(145deg,#1d4965,#06121d);border:1px solid #487d94;display:grid;place-items:center;flex:none;font-size:30px;color:var(--cyan);overflow:hidden}.episode-card .thumb img{width:100%;height:100%;object-fit:cover}.episode-card strong{display:block;letter-spacing:.1em}.episode-card small{display:block;margin-top:8px;color:#9ebac8}.episode-actions{margin-top:16px}
+.form{height:100%;padding:5% 8%;background:radial-gradient(circle at 82% 32%,#0b3a52,#06121d 48%,#03080e);overflow:auto}.form h1,.placeholder h1{font-size:clamp(20px,3vw,42px);letter-spacing:.12em}.form p,.placeholder p{color:#9dbdca}.form .field{max-width:650px;margin:12px 0;padding:12px;background:#0a1b27e8;border:1px solid var(--line)}.form label{display:block;font-size:12px;color:#9dbdca;margin-bottom:6px}.form input,.form select{width:100%;background:#07131e;border:1px solid #3c718a;color:white;padding:10px}.form .actions{display:flex;gap:12px;margin-top:20px}.placeholder{height:100%;padding:8%;background:radial-gradient(circle at 80% 25%,#11374d,#07121d 50%,#03080e)}.placeholder .ui-btn{margin-top:16px}
+
+.config-screen,.editor-screen{min-height:720px;padding:13px;background:radial-gradient(circle at 51% 34%,#10334a,#07131e 48%,#03090f);display:flex;flex-direction:column;gap:10px}.work-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:4px 2px 11px}.work-head h1{font-size:18px;letter-spacing:.14em;margin:0 auto 0 0}.work-head select,.inspector select,.inspector input{background:#081b27;color:white;border:1px solid var(--line);padding:7px;max-width:100%}.work-head .ui-btn{padding:7px 10px;font-size:11px}.work-grid{display:grid;grid-template-columns:25% minmax(0,1fr) 24%;gap:9px;flex:1;min-height:0}.work-panel{border:1px solid var(--line);background:#071621db;padding:10px;min-width:0}.work-panel h2{font-size:13px;letter-spacing:.1em;margin:0 0 8px}.work-panel p,.work-panel small{color:var(--muted);font-size:11px;line-height:1.4}.module-list{max-height:555px;overflow:auto}.zone-label{margin:12px 0 5px;color:var(--cyan);font-size:10px;letter-spacing:.14em}.module-row{display:flex;align-items:center;gap:5px;border-bottom:1px solid #244251}.module-row.selected{background:#184052}.module-row button{flex:1;min-width:0;border:0;background:transparent;text-align:left;padding:8px 3px;font-size:11px}.module-row input{accent-color:#55d6f7}.inspector label{display:block;color:var(--muted);font-size:10px;letter-spacing:.08em;margin:12px 0}.inspector select{display:block;width:100%;margin-top:5px}.inspector .ui-btn{font-size:10px;padding:6px;margin:3px 2px 0 0}.state-active{border-color:var(--red)!important;color:#fff}.demo-wrap{display:flex;flex-direction:column;gap:8px}.demo-wrap>p{margin:0}.hud-demo{position:relative;aspect-ratio:16/9;min-height:250px;overflow:hidden;background:radial-gradient(circle at 50% 45%,#19506a 0%,#0b2639 25%,#06121d 65%,#02060a 100%);border:1px solid #39738b}.hud-demo:before{content:"";position:absolute;inset:0;background-image:linear-gradient(#52d7fc12 1px,transparent 1px),linear-gradient(90deg,#52d7fc12 1px,transparent 1px);background-size:30px 30px;transform:perspective(450px) rotateX(24deg) scale(1.25);opacity:.5}.hud-core{position:absolute;left:45%;top:38%;width:10%;aspect-ratio:1;border:1px solid #68dcfb;border-radius:50%;box-shadow:0 0 38px #49bfff77,inset 0 0 24px #49bfff55}.hud-bar,.hud-left,.hud-right,.pov-item{position:absolute;background:#071a26e0;border:1px solid #5dc0dfbb;box-shadow:0 0 12px #3cc6ef33;font-size:clamp(8px,.65vw,12px)}.hud-bar{left:19%;right:19%;top:2%;height:9%;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}.hud-bar span{cursor:pointer}.hud-left{left:2%;top:13%;bottom:7%;width:23%;padding:6px;overflow:hidden}.hud-left.folded{width:5%;padding:4px}.hud-right{right:2%;top:15%;bottom:13%;width:23%;padding:7px;overflow:hidden}.hud-item{display:block;width:100%;border:1px solid #2d6178;background:#0b2231b0;color:#e8f8ff;text-align:left;margin:5px 0;padding:5px;font-size:clamp(8px,.6vw,11px)}.hud-item.highlight{border-color:var(--red);box-shadow:0 0 10px #ff304c77}.hud-item:hover{border-color:var(--cyan)}.hud-valuebar{display:block;height:6px;border:1px solid #759cab;margin:5px 0}.hud-valuebar i{display:block;height:100%;background:linear-gradient(90deg,#ffc34e,#fae08d)}.gear-wheel{width:70px;height:70px;border:1px solid var(--cyan);border-radius:50%;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);place-items:center;background:#081522;box-shadow:0 0 18px #2ac6ff44}.gear-wheel i{font-style:normal;font-size:12px}.pov-item{left:40%;bottom:9%;padding:5px 9px}.hud-demo.holo .hud-item.highlight{box-shadow:0 0 20px #41e6ffbb}.hud-demo.pulse .hud-item.highlight{animation:pulse 1.2s ease-in-out infinite alternate}@keyframes pulse{to{box-shadow:0 0 18px #ff304c}}
+.hud-item.disabled{opacity:.35}.hud-item.accent-red{border-color:#ff647c}.hud-bar button{border:0;background:transparent;font-size:inherit;padding:0;color:inherit}.hud-bar button:hover,.hud-bar button.highlight{color:var(--red);text-shadow:0 0 10px var(--red)}.pov-item.highlight{border-color:var(--red);box-shadow:0 0 13px #ff304c99}.editor-grid{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:10px}.editor-grid .hud-demo{z-index:1;background:transparent}.timeline{border:1px solid var(--line);background:#071621e8;padding:10px;margin-top:auto}.timeline h2{font-size:13px;margin:0 0 8px}.timeline .track{display:grid;grid-template-columns:180px 1fr 75px;gap:8px;align-items:center;border-top:1px solid #294759;padding:8px 0;font-size:11px}.timeline input[type=range]{width:100%;accent-color:var(--cyan)}.timeline input[type=number]{width:70px;background:#09212f;border:1px solid var(--line);color:white;padding:5px}.timeline .indent{padding-left:15px;color:#abd4e4}.mini-note{font-size:11px;color:var(--muted)}
+
+.asset-screen{min-height:720px;padding:14px;background:radial-gradient(circle at 76% 28%,#123b50,#071522 48%,#030910);display:flex;flex-direction:column;gap:10px}.asset-tabs{display:flex;gap:7px;flex-wrap:wrap}.asset-tabs button{background:#0a2230;border:1px solid var(--line);padding:9px 12px;font-size:11px;letter-spacing:.08em}.asset-tabs button.active{border-color:var(--red);box-shadow:0 0 14px #ff304c55}.asset-grid{display:grid;grid-template-columns:33% minmax(0,1fr);gap:10px;flex:1}.asset-list{max-height:515px;overflow:auto}.asset-row{display:flex;width:100%;align-items:center;gap:9px;background:#0b2230;border:1px solid #28546b;padding:8px;margin:7px 0;text-align:left;font-size:11px}.asset-row.selected{border-color:var(--red);background:#301b29}.asset-row small{display:block;color:var(--muted);margin-top:3px}.asset-mini{width:45px;height:38px;flex:none;border:1px solid #3f7792;background:#143749;display:grid;place-items:center;overflow:hidden}.asset-mini img,.asset-mini video{width:100%;height:100%;object-fit:cover}.asset-detail h3{font-size:15px;margin:2px 0 10px}.asset-detail label{display:block;margin:12px 0 4px;color:var(--muted);font-size:11px}.asset-detail input,.asset-detail select,.asset-detail textarea,.asset-search{width:100%;background:#071723;color:white;border:1px solid var(--line);padding:8px}.asset-detail textarea{min-height:65px;resize:vertical}.asset-detail .ui-btn{font-size:11px;padding:7px 10px}.asset-detail .media-preview{width:100%;height:210px;object-fit:contain;background:#041019;border:1px solid var(--line)}.component-sheet{border:1px solid #4889a6;background:#0b2433;padding:14px;margin:12px 0;min-height:125px}.component-sheet.red{border-color:#ff6279}.component-sheet.white{border-color:#e0edf3}.component-sheet.hover{box-shadow:0 0 22px #54caff99}.component-sheet.selected,.component-sheet.active{box-shadow:0 0 22px #ff345888}.component-sheet.disabled{opacity:.42}.component-sheet strong{font-size:17px;letter-spacing:.1em}.child-chip{border:1px solid var(--line);background:#0d2a3a;padding:5px 7px;margin:3px;font-size:10px}.child-chip.selected{border-color:var(--red)}.asset-empty{padding:24px;color:#b1c8d3;border:1px dashed var(--line);font-size:12px;line-height:1.5}.asset-note{font-size:11px;color:#b5cbd4;line-height:1.5}.state-btn{padding:6px 8px;border:1px solid var(--line);background:#0b2634;color:white;margin:3px;font-size:10px}.state-btn.active{border-color:var(--red)}
+
+.spec{padding:20px;max-width:1500px;margin:auto}.spec article{margin:0 0 18px;border:1px solid var(--line);background:#081824}.spec h2{margin:0;padding:12px;background:#0d2634;font-size:16px}.spec p{padding:0 12px;color:#a4bfcc;font-size:12px}.spec table{width:100%;border-collapse:collapse;font-size:12px}.spec th,.spec td{text-align:left;vertical-align:top;padding:8px;border-top:1px solid #214051;word-break:break-word}.spec th{color:var(--cyan)}.status{position:fixed;bottom:15px;right:15px;background:#0b2632;border:1px solid var(--cyan);padding:10px 13px;max-width:400px;z-index:20;display:none}.status.show{display:block}@media(max-width:1100px){.proto-layout{grid-template-columns:1fr}.work-grid{grid-template-columns:220px minmax(0,1fr) 210px}.side{max-height:none}}@media(max-width:760px){header{flex-wrap:wrap}.work-grid,.editor-grid,.asset-grid{grid-template-columns:1fr}.stage.wide{min-height:1100px}.module-list{max-height:220px}.menu-buttons{left:20%;right:20%}.timeline .track{grid-template-columns:110px 1fr 55px}.spec{overflow:auto}}
+.specimen-card{border:1px solid #4b95b2;background:linear-gradient(135deg,#0c2c3cdd,#07131ddd);max-width:310px;min-height:82px;padding:12px;margin-bottom:12px;font-size:12px;letter-spacing:.06em;box-shadow:inset 0 0 18px #46c2f322}.specimen-card p{margin:7px 0}.specimen-card b{float:right;color:var(--cyan)}.specimen-card small{display:block;margin-top:5px}.specimen-wheel{text-align:center}.specimen-map{height:65px;margin-top:10px;display:grid;place-items:center;border:1px solid var(--line);background:repeating-linear-gradient(90deg,#3cb5e315 0 1px,transparent 1px 20px),repeating-linear-gradient(0deg,#3cb5e315 0 1px,transparent 1px 20px);color:var(--cyan);font-size:25px}.component-sheet.hidden,.component-sheet.exit{opacity:.28}.component-sheet.pinned{box-shadow:0 0 22px #54caffaa}
+
+.zone-toggle{float:right;color:#b5cbd4;font-size:9px;letter-spacing:0}.zone-toggle input{accent-color:var(--cyan)}.module-row .small-icon{flex:none;width:18px;padding:4px 0;text-align:center;color:var(--cyan)}.module-row small{padding:0 4px}.work-panel input:not([type=checkbox]),.work-panel select,.work-panel textarea{max-width:100%}.work-panel>label input{display:block;width:100%;margin-top:4px;background:#081b27;color:white;border:1px solid var(--line);padding:7px}.inspector-section{border-top:1px solid var(--line);margin-top:12px;padding-top:8px}.inspector-section h3{font-size:11px;color:var(--cyan);letter-spacing:.12em;margin:0}.inspector input[type=number],.inspector input[type=text]{display:block;width:100%;background:#081b27;color:white;border:1px solid var(--line);padding:7px;margin-top:5px}.inspector details{border-top:1px solid var(--line);margin-top:13px;padding-top:10px}.inspector summary{cursor:pointer;color:var(--cyan);font-size:11px}.hud-bar{justify-content:space-around;overflow:hidden}.hud-bar .hud-item{display:inline-block;width:auto;white-space:nowrap;margin:0;padding:2px;border:0;background:transparent}.hud-bar .hud-item.highlight{color:var(--red)}.profile-line{display:flex;align-items:center;gap:5px}.profile-image{display:inline-grid;place-items:center;width:28px;height:28px;flex:none;border:1px solid var(--cyan);object-fit:cover}.hud-item small{display:block;color:#a7c4d1}.hud-item strong{color:#fff}.gear-wheel i.active{color:var(--red);text-shadow:0 0 12px var(--red)}.hud-item.hover,.hud-item.pinned{box-shadow:0 0 18px #5bdcffaa}.hud-item.disabled{opacity:.3}.preview-stack{position:relative}.preview-stack .episode-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}.preview-stack .hud-demo{position:relative;z-index:1;background:transparent}.timeline-row{display:flex;justify-content:space-between;gap:10px;width:100%;padding:7px 12px;background:#071b28;border:0;border-top:1px solid #294759;text-align:left;font-size:11px}.timeline-row.selected{background:#143d50;border-left:2px solid var(--red)}.timeline-row:hover{background:#1a3b4d}.overlay-palette{display:grid;gap:4px;margin-top:8px}.overlay-palette button{border:1px solid var(--line);background:#0c2938;text-align:left;padding:6px;font-size:10px}.overlay-palette button:hover{border-color:var(--cyan)}.asset-filters{margin-top:8px}.asset-row[hidden]{display:none}.component-sheet .child-chip{display:inline-block}.component-sheet .specimen-card{max-width:none}.component-sheet.hidden,.component-sheet.exit{opacity:.3}.component-sheet.hover,.component-sheet.pinned{box-shadow:0 0 20px #58d9ff99}
+.screen-failure{max-width:560px;margin:8% auto;padding:26px;border:1px solid #ff6375;background:#241420;color:#f5d9de}.screen-failure p{line-height:1.5}.component-failure{display:grid;place-items:center;min-height:140px;color:#ffc2c8;border-color:#ff6375}
+
+.timeline-scroll{max-height:310px;overflow-y:auto;overflow-x:hidden;border:1px solid #294759;scrollbar-color:#4a849b #0a1c27}.tl-group{display:flex;align-items:center;min-height:27px;border-top:1px solid #244252;background:#0c2431}.tl-group.depth-1{background:#0a1d29}.tl-group button{border:0;background:none;text-align:left;font-size:11px;padding:6px 9px;flex:1}.tl-group.depth-1 button:first-child{padding-left:24px}.tl-group .tl-select{flex:none;color:var(--cyan);font-size:14px}.tl-child{padding:4px 10px 4px 41px;background:#081a24;color:#a7c4d1;font-size:10px;border-top:1px solid #1d3542}.tl-property{display:grid;grid-template-columns:minmax(145px,24%) minmax(170px,20%) minmax(140px,1fr);align-items:center;min-height:32px;border-top:1px solid #244252;background:#061722;font-size:10px}.tl-prop-label{padding-left:46px;color:#d4eaf4}.tl-edit{display:flex;gap:3px;padding:3px}.tl-edit input,.tl-edit select{width:100%;min-width:45px;max-width:none!important;background:#0b2634;border:1px solid #3b7187;color:white;font-size:10px;padding:3px}.tl-edit button{border:1px solid #3b7187;background:#123142;padding:3px;flex:none}.tl-lane{position:relative;height:24px;margin:0 12px;border-top:1px solid #31596c;border-bottom:1px solid #31596c;background:repeating-linear-gradient(90deg,#3a748522 0 1px,transparent 1px 10%)}.tl-lane i{position:absolute;top:0;bottom:0;border-left:1px solid var(--red);pointer-events:none}.tl-keyframe{position:absolute;top:1px;transform:translateX(-50%);border:0;background:transparent;color:var(--cyan);font-size:13px;padding:2px;z-index:1}.tl-keyframe.active{color:var(--red)}.tl-keyframe:hover{color:white}.timeline small{display:block;margin-top:7px;color:#9fbfcb;font-size:10px}.hud-left.pinned{border-color:var(--red);box-shadow:0 0 15px #ff304c88}.hud-left.rail-collapse{animation:rail-collapse .32s ease-in-out}.hud-left.rail-expand{animation:rail-expand .32s ease-in-out}@keyframes rail-collapse{from{width:23%}to{width:5%}}@keyframes rail-expand{from{width:5%}to{width:23%}}@media(max-width:760px){.tl-property{grid-template-columns:minmax(105px,26%) minmax(135px,30%) minmax(100px,1fr)}.tl-prop-label{padding-left:15px}}
+.tl-constant{padding-left:12px;color:#8db3c3;font-size:10px;letter-spacing:.07em}
+
+</style>
+</head>
+<body>
+<header><div><div class="brand"><b>╱╱</b> KOALITIC <span>GAME</span> · THE SYSTEM</div><div class="sub">Workflow workbench · generated from workflow.json · product UI in English</div></div><nav class="tabs"><button data-view="flow" class="active">FLOW MAP</button><button data-view="prototype">PROTOTYPE</button><button data-view="spec">SPEC</button></nav></header>
+<div class="notice">Code-native workflow prototype. Save Template / Save Episode store this project locally in this browser when storage is available; the save message confirms the result. UI Components are a read-only catalog.</div>
+<section id="flow" class="view active"><div class="flow-wrap"><div class="flow" id="flow-canvas"></div></div></section>
+<section id="prototype" class="view"><div class="proto-layout"><div class="stage" id="stage"></div><aside class="side"><h2 id="screen-title"></h2><p id="screen-note"></p><div class="side-kicker">NAVIGATION IN THIS SCREEN</div><div id="routes"></div></aside></div></section>
+<section id="spec" class="view"><div class="spec" id="spec-content"></div></section>
+<div class="status" id="status"></div>
+<script>/* Local prototype storage. Media blobs are written once, separately from small project snapshots. */
+const ProjectStore = (() => {
+  const databaseName = 'koalitic-workflow-prototype';
+  let connection;
+  let writes = Promise.resolve();
+  let storedMediaIds = new Set();
+
+  function open() {
+    if (connection) return connection;
+    if (typeof indexedDB === 'undefined') return Promise.resolve(null);
+    connection = new Promise(resolve => {
+      try {
+        const request = indexedDB.open(databaseName, 2);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains('projects')) db.createObjectStore('projects');
+          if (!db.objectStoreNames.contains('media')) db.createObjectStore('media');
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => resolve(null);
+        request.onblocked = () => resolve(null);
+      } catch { resolve(null); }
+    });
+    return connection;
+  }
+
+  function read(db, store, key) {
+    return new Promise(resolve => {
+      try {
+        const request = db.transaction(store, 'readonly').objectStore(store).get(key);
+        request.onsuccess = () => resolve(request.result ?? null);
+        request.onerror = () => resolve(null);
+      } catch { resolve(null); }
+    });
+  }
+
+  async function load() {
+    const db = await open();
+    if (!db) return null;
+    const snapshot = await read(db, 'projects', 'current');
+    if (!snapshot || ![1,2].includes(snapshot.formatVersion) || !Array.isArray(snapshot.media)) return null;
+    if (snapshot.formatVersion === 1) return snapshot; // Previous prototype format included blobs inline.
+    const blobs = await Promise.all(snapshot.media.map(item => read(db, 'media', item.id)));
+    storedMediaIds = new Set(snapshot.media.filter((_,i) => blobs[i]).map(item => item.id));
+    return { ...snapshot, media: snapshot.media.map((item,i) => ({...item,blob:blobs[i]})) };
+  }
+
+  async function writeSnapshot(snapshot) {
+    const db = await open();
+    if (!db) return false;
+    const newMedia = snapshot.media.filter(item => item.blob && !storedMediaIds.has(item.id));
+    const metadata = { ...snapshot, formatVersion: 2, media:snapshot.media.map(({blob,...item}) => item) };
+    return new Promise(resolve => {
+      try {
+        const transaction = db.transaction(['projects','media'], 'readwrite');
+        const mediaStore = transaction.objectStore('media');
+        for (const item of newMedia) mediaStore.put(item.blob,item.id);
+        transaction.objectStore('projects').put(metadata,'current');
+        transaction.oncomplete = () => { for (const item of newMedia) storedMediaIds.add(item.id); resolve(true); };
+        transaction.onerror = () => resolve(false);
+        transaction.onabort = () => resolve(false);
+      } catch { resolve(false); }
+    });
+  }
+
+  function save(snapshot) {
+    writes = writes.then(() => writeSnapshot(snapshot), () => writeSnapshot(snapshot));
+    return writes;
+  }
+
+  return Object.freeze({ load, save });
+})();
+
+const DATA = {"version":"0.7","language":"en","phase":"workflow_definition","principle":"THE WORLD IS THE GAME. THE SYSTEM is an authoring application over real footage, not a simulated 3D game.","status_meaning":{"approved":"Current product decision; reconsider only with a clear reason.","draft":"Working decision to validate in the next block review.","pending":"Intent recorded; detailed behavior is not yet specified."},"screens":{"main_menu":{"title":"MAIN MENU","status":"approved","visual_status":"html_template","visual_note":"Code-native menu with EPISODES, CONFIGURE HUD and ASSETS. Final cinematic imagery will be designed later.","controls":[{"id":"episodes","component":"PrimaryButton","label":"EPISODES","interaction":"click","action_type":"navigate","target":"episodes","status":"approved"},{"id":"configure_hud","component":"SecondaryButton","label":"CONFIGURE HUD","interaction":"click","action_type":"navigate","target":"configure_hud","status":"approved"},{"id":"assets","component":"SecondaryButton","label":"ASSETS","interaction":"click","action_type":"navigate","target":"assets","status":"approved"},{"id":"quit_game","component":"TextButton","label":"QUIT GAME","interaction":"click","action_type":"command","command":"QUIT_APP","status":"draft"}]},"new_episode":{"title":"NEW EPISODE","status":"draft","visual_status":"html_template","visual_note":"Choose a name and video/image; an existing HUD template is optional because the default is preselected.","controls":[{"id":"episode_name","component":"TextInput","label":"EPISODE NAME","interaction":"input","action_type":"input","writes":["draft_episode.name"],"validation":"nonempty_trimmed","status":"approved"},{"id":"media","component":"MediaDropzone","label":"VIDEO / IMAGE","interaction":"select_file","action_type":"input","writes":["draft_episode.media"],"validation":"video_or_image","status":"approved"},{"id":"hud_preset","component":"PresetSelector","label":"HUD TEMPLATE (OPTIONAL)","interaction":"select","action_type":"select","reads":["saved_hud_templates"],"writes":["draft_episode.hud_template_id"],"status":"approved"},{"id":"cancel","component":"SecondaryButton","label":"CANCEL","interaction":"click","action_type":"navigate","target":"episodes","status":"approved"},{"id":"create_episode","component":"PrimaryButton","label":"CREATE EPISODE","interaction":"click","action_type":"command_then_navigate","command":"CREATE_EPISODE","target":"episode_editor","reads":["draft_episode.name","draft_episode.media","draft_episode.hud_template_id"],"enabled_when":["episode_name_valid","media_selected"],"persistence":"create episode with selected or default template snapshot and media reference","status":"draft"}]},"episodes":{"title":"EPISODES","status":"approved","visual_status":"html_template","visual_note":"Code-native episode cards plus NEW EPISODE on one screen; no internal Load/New tabs.","controls":[{"id":"girona","component":"EpisodeCard","label":"GIRONA","interaction":"click","action_type":"command_then_navigate","command":"OPEN_EPISODE","payload":{"episode_id":"girona_example"},"target":"episode_editor","status":"approved"},{"id":"new_episode","component":"EpisodeCard","label":"NEW EPISODE","interaction":"click","action_type":"navigate","target":"new_episode","status":"approved"},{"id":"back","component":"BackButton","label":"BACK","interaction":"click","action_type":"navigate","target":"main_menu","status":"approved"}]},"configure_hud":{"title":"CONFIGURE HUD","status":"draft","visual_status":"html_wireframe","visual_note":"Template context of the shared HUD workspace. Fixed zones, module order, variants, motion and preview states; no episode data.","controls":[{"id":"back","component":"BackButton","label":"BACK","interaction":"click","action_type":"navigate","target":"main_menu","status":"approved"},{"id":"preset","component":"PresetSelector","label":"HUD PRESET","interaction":"select","action_type":"select","reads":["saved_hud_presets"],"writes":["selected_hud_preset_id"],"status":"draft"},{"id":"new_preset","component":"SecondaryButton","label":"NEW","interaction":"click","action_type":"command","command":"CREATE_BASE_HUD_PRESET","status":"draft"},{"id":"duplicate","component":"SecondaryButton","label":"DUPLICATE","interaction":"click","action_type":"command","command":"DUPLICATE_HUD_PRESET","status":"draft"},{"id":"save","component":"PrimaryButton","label":"SAVE","interaction":"click","action_type":"command","command":"SAVE_HUD_PRESET","persistence":"update selected preset","status":"draft"},{"id":"module_select","component":"HUDModuleRow","label":"SELECT MODULE","interaction":"click","action_type":"set_state","writes":["selected_module_id"],"status":"draft"},{"id":"module_enabled","component":"Toggle","label":"ENABLED","interaction":"click","action_type":"set_state","writes":["working_preset.modules[selected_module_id].enabled"],"status":"draft"},{"id":"variant","component":"Select","label":"VISUAL VARIANT","interaction":"select","action_type":"select","writes":["working_preset.modules[selected_module_id].variant_id"],"status":"draft"},{"id":"motion","component":"Select","label":"MOTION PRESET","interaction":"select","action_type":"select","writes":["working_preset.modules[selected_module_id].motion_id"],"status":"draft"},{"id":"rail_motion","component":"Select","label":"LEFT RAIL TRANSITION","interaction":"select","action_type":"select","writes":["working_preset.zoneMotion.LEFT_RAIL"],"status":"draft"},{"id":"preview_state","component":"StateSelector","label":"PREVIEW STATE","interaction":"select","action_type":"set_state","writes":["preview_only.module_state"],"persistence":"none","status":"draft"}]},"assets":{"title":"ASSETS","status":"draft","visual_status":"html_template","visual_note":"Media files, reusable Data Library records and a read-only UI component catalog. Template appearance lives in CONFIGURE HUD; episode data and time live in the Episode Editor.","controls":[{"id":"back","component":"BackButton","label":"BACK","interaction":"click","action_type":"navigate","target":"main_menu","status":"approved"},{"id":"library_tab","component":"TabBar","label":"MEDIA / DATA LIBRARY / UI COMPONENTS","interaction":"click","action_type":"set_state","writes":["assets.active_tab"],"status":"draft"},{"id":"import","component":"PrimaryButton","label":"IMPORT MEDIA","interaction":"select_file","action_type":"command","command":"IMPORT_MEDIA","status":"draft"},{"id":"search","component":"TextInput","label":"SEARCH","interaction":"input","action_type":"input","writes":["assets.search_query"],"status":"draft"},{"id":"media_card","component":"MediaCard","label":"MEDIA CARD","interaction":"click","action_type":"set_state","writes":["assets.selected_media_id"],"status":"draft"},{"id":"content_record","component":"ContentCard","label":"CONTENT RECORD","interaction":"click","action_type":"set_state","writes":["assets.selected_content_id"],"status":"draft"},{"id":"component_card","component":"UIComponentCard","label":"UI COMPONENT","interaction":"click","action_type":"set_state","writes":["assets.selected_component_id"],"status":"draft"},{"id":"new_record","component":"PrimaryButton","label":"NEW DATA RECORD","interaction":"click","action_type":"command","command":"CREATE_DATA_RECORD","status":"draft"},{"id":"remove_record","component":"SecondaryButton","label":"DELETE OR ARCHIVE RECORD","interaction":"click","action_type":"command","command":"REMOVE_DATA_RECORD","status":"draft"},{"id":"component_preview_state","component":"StateSelector","label":"STATE PREVIEW","interaction":"select","action_type":"set_state","writes":["assets.preview_state"],"status":"draft"}]},"episode_editor":{"title":"EPISODE EDITOR","status":"draft","visual_status":"html_wireframe","visual_note":"Episode context of the shared HUD workspace: media, Data Library bindings, HUD choice, time tracks and manual POV overlays. Browser-local save prototype.","controls":[{"id":"playhead","component":"TimelineScrubber","label":"PLAYHEAD","interaction":"input","action_type":"input","writes":["episode.preview_time"],"status":"draft"},{"id":"timeline_expand","component":"TimelineTree","label":"EXPAND ZONE / COMPONENT","interaction":"click","action_type":"set_state","writes":["timeline.expanded_nodes"],"status":"draft"},{"id":"timeline_keyframe","component":"KeyframeControl","label":"ADD / JUMP / DELETE KEYFRAME","interaction":"click","action_type":"command","command":"EDIT_PROPERTY_KEYFRAME","status":"draft"},{"id":"timeline_property","component":"PropertyControl","label":"EDIT PROPERTY AT PLAYHEAD","interaction":"input","action_type":"input","writes":["episode.tracks[selected_property]"],"status":"draft"},{"id":"timeline_binding","component":"RecordSelector","label":"ASSIGN PLAYER / GEAR IN TIMELINE","interaction":"select","action_type":"select","writes":["episode.bindings"],"status":"draft"},{"id":"timeline_overlay_property","component":"OverlayPropertyControl","label":"EDIT OVERLAY TEXT / RANGE / POSITION","interaction":"input","action_type":"input","writes":["episode.overlays[selected]"],"status":"draft"},{"id":"hud_template_choice","component":"PresetSelector","label":"CHOOSE HUD TEMPLATE","interaction":"select","action_type":"select","reads":["saved_hud_presets"],"writes":["pending_hud_template_id"],"status":"draft"},{"id":"apply_hud_template","component":"SecondaryButton","label":"APPLY HUD","interaction":"click","action_type":"command","command":"APPLY_HUD_TEMPLATE_TO_EPISODE","status":"draft"},{"id":"undo_hud_template","component":"SecondaryButton","label":"UNDO HUD CHANGE","interaction":"click","action_type":"command","command":"RESTORE_PREVIOUS_EPISODE_HUD","status":"draft"},{"id":"stamina_value","component":"ValueTrack","label":"STAMINA VALUE","interaction":"input","action_type":"input","writes":["episode.tracks.stamina_value"],"status":"draft"},{"id":"xp_value","component":"ValueTrack","label":"PLAYER XP","interaction":"input","action_type":"input","writes":["episode.tracks.xp"],"status":"draft"},{"id":"left_rail_state","component":"PanelStateButton","label":"LEFT RAIL FOLDED / OPEN / PINNED","interaction":"click","action_type":"set_state","writes":["episode.tracks.left_rail_state"],"status":"draft"},{"id":"player_binding","component":"RecordSelector","label":"PLAYER","interaction":"select","action_type":"select","writes":["episode.bindings.player"],"status":"draft"},{"id":"gear_slots","component":"RecordSelector","label":"FIVE GEAR SLOTS","interaction":"select","action_type":"select","writes":["episode.bindings.gear"],"status":"draft"},{"id":"location_track","component":"RecordTrack","label":"LOCATION AT PLAYHEAD","interaction":"select","action_type":"select","writes":["episode.tracks.location"],"status":"draft"},{"id":"overlay_add","component":"OverlayPalette","label":"ADD POV OVERLAY","interaction":"drag_drop","action_type":"set_state","writes":["episode.overlays"],"status":"draft"},{"id":"overlay_position","component":"PositionTrack","label":"OVERLAY POSITION AT PLAYHEAD","interaction":"drag_drop","action_type":"set_state","writes":["episode.overlays[selected].positions"],"status":"draft"},{"id":"save_episode","component":"PrimaryButton","label":"SAVE EPISODE","interaction":"click","action_type":"command","command":"SAVE_EPISODE","status":"draft"},{"id":"exit_editor","component":"BackButton","label":"EPISODES","interaction":"click","action_type":"navigate","target":"episodes","status":"draft"}]}},"scenarios":[{"id":"create_first_episode","status":"draft","steps":["main_menu.episodes","episodes.new_episode","new_episode.episode_name","new_episode.media","new_episode.hud_preset","new_episode.create_episode"],"expected_screen":"episode_editor"},{"id":"open_existing_girona","status":"approved","steps":["main_menu.episodes","episodes.girona"],"expected_screen":"episode_editor"},{"id":"switch_episode_hud","status":"draft","steps":["main_menu.episodes","episodes.girona","episode_editor.hud_template_choice","episode_editor.apply_hud_template","episode_editor.save_episode"],"expected_screen":"episode_editor"},{"id":"configure_hud_preset","status":"draft","steps":["main_menu.configure_hud","configure_hud.module_select","configure_hud.module_enabled","configure_hud.save"],"expected_screen":"configure_hud"},{"id":"inspect_component_catalog","status":"draft","steps":["main_menu.assets","assets.library_tab","assets.component_card","assets.component_preview_state"],"expected_screen":"assets"}],"ui_components":{"Player Profile":{"zone":"LEFT RAIL","label":"PLAYER PROFILE","description":"Identity, portrait, level and XP display.","children":["Portrait","Player Name","Level","XP Value","XP Bar"],"states":["Compact","Hover","Open","Pinned","Disabled"],"variants":["Compact Glass","Holographic Card"],"motions":["Smooth Reveal","Pulse"],"content_binding":"player record","episode_bindings":[{"key":"player","child":"Player Name","label":"Player Record","kind":"Player"}],"timeline_properties":[{"key":"xp","child":"XP Value","label":"XP / Progress Bar","kind":"number","interpolation":"linear","min":0}]},"Inventory / Loadout":{"zone":"LEFT RAIL","label":"INVENTORY / LOADOUT","description":"Shows the equipment selected for this episode.","children":["Header","Gear Slots","Selected Item"],"states":["Compact","Hover","Open","Pinned","Disabled"],"variants":["Compact Glass","Expanded Cards"],"motions":["Smooth Reveal","Snap"],"content_binding":"episode gear slots"},"Gear Radial":{"zone":"LEFT RAIL","label":"GEAR RADIAL","description":"Five authored sectors for selecting gear.","children":["Center Selection","Sector 1","Sector 2","Sector 3","Sector 4","Sector 5"],"states":["Folded","Hover","Open","Pinned","Selected","Disabled"],"variants":["Five Sector","Holographic Five Sector"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode gear slots","episode_bindings":[{"key":"gear:0","child":"Sector 1","label":"Gear Record","kind":"Gear"},{"key":"gear:1","child":"Sector 2","label":"Gear Record","kind":"Gear"},{"key":"gear:2","child":"Sector 3","label":"Gear Record","kind":"Gear"},{"key":"gear:3","child":"Sector 4","label":"Gear Record","kind":"Gear"},{"key":"gear:4","child":"Sector 5","label":"Gear Record","kind":"Gear"}],"timeline_properties":[{"key":"gearSelection","child":"Center Selection","label":"Selected Sector","kind":"sector","interpolation":"hold"}]},"Stamina":{"zone":"LEFT RAIL","label":"STAMINA","description":"One animated percentage drives the number and bar.","children":["Icon","Label","Value Number","Progress Bar"],"states":["Compact","Hover","Open","Pinned","Disabled"],"variants":["Segmented Bar","Glass Bar"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode value track","timeline_properties":[{"key":"stamina","child":"Value Number","label":"Value / Progress Bar","kind":"number","interpolation":"linear","min":0,"max":100}]},"Time Left":{"zone":"LEFT RAIL","label":"TIME LEFT","description":"Countdown display from the episode timeline.","children":["Clock Icon","Time Number"],"states":["Compact","Open","Disabled"],"variants":["Digital","Minimal"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode timer"},"Logo / System Online":{"zone":"TOP BAR","label":"SYSTEM ONLINE","description":"KOALITIC identity and system status.","children":["Logo","System Status"],"states":["Idle","Hover","Active","Disabled"],"variants":["Compact","Holographic"],"motions":["Smooth Reveal","Pulse"],"content_binding":"system status"},"Navigation Tabs":{"zone":"TOP BAR","label":"NAVIGATION TABS","description":"Profile, Map, Gear, Quest, Gallery and Codex navigation.","children":["Profile Tab","Map Tab","Gear Tab","Quest Tab","Gallery Tab","Codex Tab"],"states":["Idle","Hover","Selected","Disabled"],"variants":["Line Tabs","Glass Tabs"],"motions":["Smooth Reveal","Snap"],"content_binding":"active HUD tab"},"Location Header":{"zone":"TOP BAR","label":"LOCATION HEADER","description":"Current place and optional coordinates.","children":["Place Name","Subtitle","Coordinates"],"states":["Compact","Open","Disabled"],"variants":["Compact","Detailed"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode location record","timeline_properties":[{"key":"location","child":"Place Name","label":"Location Record","kind":"location","interpolation":"hold"}]},"Active Mission":{"zone":"RIGHT RAIL","label":"ACTIVE MISSION","description":"Current quest and progress.","children":["Mission Title","Objective","Progress"],"states":["Compact","Hover","Open","Pinned","Disabled"],"variants":["Compact Card","Detailed Card"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode mission record"},"Photo Opportunities":{"zone":"RIGHT RAIL","label":"PHOTO OPPORTUNITIES","description":"Photo goals and completion states.","children":["Header","Goal Card","Completion Count"],"states":["Compact","Hover","Open","Pinned","Disabled"],"variants":["List","Glass Cards"],"motions":["Smooth Reveal","Snap"],"content_binding":"episode photo goals"},"Location / Mini Map":{"zone":"RIGHT RAIL","label":"LOCATION / MINI MAP","description":"Compact place map and markers.","children":["Map Frame","Player Marker","Quest Marker","Location Label"],"states":["Compact","Hover","Open","Pinned","Disabled"],"variants":["Wireframe","Satellite"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode map record"},"Codex Compact":{"zone":"RIGHT RAIL","label":"CODEX COMPACT","description":"Short contextual knowledge entry.","children":["Entry Title","Fact Lines","Illustration"],"states":["Compact","Hover","Open","Pinned","Disabled"],"variants":["Text","Illustrated"],"motions":["Smooth Reveal","Snap"],"content_binding":"episode codex record"},"Weather / Location":{"zone":"POV OVERLAYS","label":"WEATHER / LOCATION","description":"Temporary place and weather callout over the footage.","children":["Anchor","Place Label","Weather Icon","Temperature"],"states":["Hidden","Appear","Visible","Exit"],"variants":["Compact","Holographic"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode location and weather"},"Person Identification":{"zone":"POV OVERLAYS","label":"PERSON IDENTIFICATION","description":"Manual callout anchored to a person in the footage; no automatic detection.","children":["Anchor","Person Name","Context Label","Connector"],"states":["Hidden","Appear","Visible","Exit"],"variants":["Compact","Holographic"],"motions":["Smooth Reveal","Pulse"],"content_binding":"local text or person record"},"System Notification":{"zone":"POV OVERLAYS","label":"SYSTEM NOTIFICATION","description":"Temporary status, warning or alert.","children":["Icon","Message","Priority Accent"],"states":["Hidden","Appear","Visible","Exit"],"variants":["Info","Warning"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode notification event"},"Photo Result":{"zone":"POV OVERLAYS","label":"PHOTO RESULT","description":"Captured photo and rank reveal.","children":["Photo Thumbnail","Rank","XP Reward"],"states":["Hidden","Appear","Visible","Exit"],"variants":["Compact","Cinematic"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode photo result event"},"Quest Reveal":{"zone":"POV OVERLAYS","label":"QUEST REVEAL","description":"New quest announcement.","children":["Quest Title","Objective","Symbol"],"states":["Hidden","Appear","Visible","Exit"],"variants":["Compact","Cinematic"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode quest event"},"Level Up":{"zone":"POV OVERLAYS","label":"LEVEL UP","description":"Player level milestone.","children":["Level Number","XP Burst","Title"],"states":["Hidden","Appear","Visible","Exit"],"variants":["Compact","Cinematic"],"motions":["Smooth Reveal","Pulse"],"content_binding":"episode level event"}},"timeline_zone_properties":{"LEFT RAIL":[{"key":"leftRail","label":"Panel State","kind":"rail_state","interpolation":"hold","states":["Folded","Open","Pinned"]}]},"content_records":[{"id":"player_jordi","type":"Player","name":"Jordi","note":"Example player record; choose a portrait from imported media later.","defaultLevel":12,"defaultXp":3250,"xpGoal":5000},{"id":"player_arnau","type":"Player","name":"Arnau","note":"Second reusable player for testing episode bindings.","defaultLevel":8,"defaultXp":1800,"xpGoal":3000},{"id":"gear_nikon","type":"Gear","name":"Nikon Z5 II","note":"Example equipment record; episode slots refer to records, not imported files directly."},{"id":"location_girona","type":"Location","name":"Girona","note":"Example place record for map and location labels."},{"id":"location_barcelona","type":"Location","name":"Barcelona","note":"Example place record to demonstrate a location change during one episode."}]};
+const screens = DATA.screens;
+const components = DATA.ui_components;
+const componentNames = Object.keys(components);
+const zones = {};
+for (const name of componentNames) (zones[components[name].zone] ??= []).push(name);
+const shellZones = ['LEFT RAIL', 'TOP BAR', 'RIGHT RAIL'];
+const overlayNames = zones['POV OVERLAYS'] || [];
+const clone = value => JSON.parse(JSON.stringify(value));
+const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+})[char]);
+const get = id => document.getElementById(id);
+const initialModules = Object.fromEntries(componentNames.filter(name => components[name].zone !== 'POV OVERLAYS').map(name => [
+  name, { enabled: !['Time Left', 'Codex Compact'].includes(name), variant: components[name].variants[0], motion: components[name].motions[0] }
+]));
+function baseTemplate(name = 'HUD V1') {
+  return { id: 'hud_' + Date.now(), name, modules: clone(initialModules), order: clone(Object.fromEntries(shellZones.map(zone => [zone, zones[zone]]))), zoneEnabled: Object.fromEntries(shellZones.map(zone => [zone, true])), zoneMotion: {'LEFT RAIL':'Smooth Reveal'} };
+}
+const templates = [baseTemplate()];
+const records = clone(DATA.content_records).map(record => ({ ...record, archived: false }));
+const media = [];
+const episodes = [];
+let current = 'main_menu', view = 'flow', templateId = templates[0].id, working = clone(templates[0]), dirty = false;
+let episode = null, selectedModule = 'Player Profile', selectedOverlayId = null, selectedComponent = 'Player Profile';
+let previousEpisodeHud = null;
+let pendingEpisodeHudId = null;
+let componentPreviewState = null, templatePreviewState = 'Open', previewHidden = new Set();
+let assetsTab = 'media', assetSearch = '', selectedRecordId = records[0]?.id, selectedMediaId = null, dataFilter = 'all';
+let playhead = 0;
+const timelineOpen = new Set(['zone:LEFT RAIL','module:Player Profile','module:Stamina']);
+let timelineScrollTop = 0;
+let lastEpisodeRail = null;
+const positions = { main_menu: [590,45], episodes: [100,330], configure_hud: [1000,330], new_episode: [100,690], assets: [1000,690], episode_editor: [590,850] };
+
+
+function notify(message) { const node = get('status'); node.textContent = message; node.classList.add('show'); setTimeout(() => node.classList.remove('show'), 3000); }
+function currentTemplate() { return templates.find(item => item.id === templateId); }
+function currentHud() { return current === 'episode_editor' ? episode.hud : working; }
+function recordById(id) { return records.find(item => item.id === id); }
+function mediaById(id) { return media.find(item => item.id === id); }
+function recordOptions(type, selectedId) {
+  return '<option value="">Choose from Data Library…</option>' + records.filter(item => item.type === type && (!item.archived || item.id === selectedId)).map(item =>
+    `<option value="${escapeHtml(item.id)}" ${selectedId === item.id ? 'selected' : ''}>${escapeHtml(item.name)}${item.archived ? ' (archived)' : ''}</option>`
+  ).join('');
+}
+function playerForEpisode() { return episode?.bindings.player || null; }
+function gearForEpisode(slot) { return episode?.bindings.gear[slot] || null; }
+function newEpisodeModel(name, mediaItem, template, example = false) {
+  const player = example ? records.find(item => item.type === 'Player' && !item.archived) : null;
+  const gear = example ? records.find(item => item.type === 'Gear' && !item.archived) : null;
+  return {
+    id: 'episode_' + Date.now() + '_' + Math.random().toString(36).slice(2), name,
+    mediaId: mediaItem?.id || null, mediaUrl: mediaItem?.url || null, mediaKind: mediaItem?.kind || null,
+    sourceTemplate: template.name, sourceTemplateId: template.id, hud: clone(template),
+    bindings: { player: player ? clone(player) : null, gear: [gear ? clone(gear) : null, null, null, null, null], location: null },
+    tracks: { xp: [{t:0,v:player?.defaultXp ?? 0}], stamina: example ? [{t:0,v:100},{t:90,v:80}] : [{t:0,v:100}], leftRail: [{t:0,v:'Open'}], gearSelection: [{t:0,v:1}], location: [] },
+    overlays: [], duration: 120
+  };
+}
+episodes.push(newEpisodeModel('GIRONA', null, templates[0], true));
+function openEpisode(id) { const stored = episodes.find(item => item.id === id); if (!stored) return; episode = clone(stored); previousEpisodeHud = null; pendingEpisodeHudId = null; playhead = 0; lastEpisodeRail = null; selectedModule = 'Player Profile'; selectedOverlayId = null; openScreen('episode_editor'); }
+function applyHudTemplate(template) {
+  if (!episode || !template || episode.sourceTemplateId === template.id && JSON.stringify(episode.hud) === JSON.stringify(template)) return false;
+  previousEpisodeHud = {hud:clone(episode.hud), sourceTemplate:episode.sourceTemplate, sourceTemplateId:episode.sourceTemplateId};
+  episode.hud = clone(template);
+  episode.sourceTemplate = template.name;
+  episode.sourceTemplateId = template.id;
+  pendingEpisodeHudId = null;
+  selectedModule = episode.hud.modules[selectedModule] ? selectedModule : 'Player Profile';
+  return true;
+}
+function restorePreviousHud() {
+  if (!episode || !previousEpisodeHud) return false;
+  const previous = previousEpisodeHud;
+  previousEpisodeHud = {hud:clone(episode.hud),sourceTemplate:episode.sourceTemplate,sourceTemplateId:episode.sourceTemplateId};
+  episode.hud = clone(previous.hud); episode.sourceTemplate = previous.sourceTemplate; episode.sourceTemplateId = previous.sourceTemplateId;
+  return true;
+}
+function setView(next) {
+  view = next;
+  document.querySelectorAll('.view').forEach(node => node.classList.toggle('active', node.id === next));
+  document.querySelectorAll('[data-view]').forEach(node => node.classList.toggle('active', node.dataset.view === next));
+  if (next === 'prototype') renderPrototype();
+}
+function openScreen(id) { if (id === 'episode_editor' && !episode) episode = clone(episodes[0]); current = id; setView('prototype'); }
+function control(id) { return screens[current].controls.find(item => item.id === id); }
+function importFile(file, sourceNote = '') {
+  if (!/^(image|video)\//.test(file.type)) return null;
+  const item = { id: 'media_' + Date.now() + '_' + Math.random().toString(36).slice(2), name: file.name,
+    kind: file.type.startsWith('image/') ? 'image' : 'video', size: file.size, url: URL.createObjectURL(file), blob: file, sourceNote };
+  media.push(item); return item;
+}
+function projectSnapshot() {
+  return {templates:clone(templates),records:clone(records),episodes:clone(episodes),
+    media:media.map(({url, ...item}) => item)};
+}
+async function persistProject(label) {
+  const stored = await ProjectStore.save(projectSnapshot());
+  notify(stored ? label + ' saved on this device' : label + ' saved for this session only; browser storage unavailable');
+  return stored;
+}
+function hydrateProject(snapshot) {
+  if (!Array.isArray(snapshot?.templates) || !Array.isArray(snapshot?.episodes) || !Array.isArray(snapshot?.records) || !Array.isArray(snapshot?.media)) return false;
+  for (const item of media) if (item.url?.startsWith('blob:')) URL.revokeObjectURL(item.url);
+  templates.splice(0,templates.length,...snapshot.templates);
+  if (!templates.length) templates.push(baseTemplate());
+  records.splice(0,records.length,...snapshot.records);
+  media.splice(0,media.length,...snapshot.media.map(item => ({...item,url:item.blob ? URL.createObjectURL(item.blob) : null})));
+  const urls = new Map(media.map(item => [item.id,item.url]));
+  episodes.splice(0,episodes.length,...snapshot.episodes.map(item => ({...item,sourceTemplateId:item.sourceTemplateId || templates.find(template => template.name === item.sourceTemplate)?.id || templates[0]?.id,mediaUrl:urls.get(item.mediaId) || null})));
+  templateId = templates[0].id; working = clone(templates[0]);
+  episode = null; previousEpisodeHud = null; pendingEpisodeHudId = null;
+  return true;
+}
+function saveEpisode() {
+  const index = episodes.findIndex(item => item.id === episode.id);
+  if (index >= 0) episodes[index] = clone(episode); else episodes.push(clone(episode));
+  persistProject('Episode');
+}
+function saveTemplate() {
+  const index = templates.findIndex(item => item.id === templateId);
+  if (index >= 0) templates[index] = clone(working); else templates.push(clone(working));
+  dirty = false; renderPrototype(); persistProject(working.name);
+}
+function duplicateTemplate(fromBase = false) {
+  const number = templates.length + 1;
+  working = fromBase ? baseTemplate('HUD V' + number) : clone(working);
+  working.id = 'hud_' + Date.now() + '_' + number; working.name = 'HUD V' + number;
+  templateId = working.id; dirty = true; renderPrototype();
+}
+function runControl(id) {
+  const item = control(id); if (!item) return;
+  if (id === 'create_episode') {
+    const name = get('episode-name')?.value.trim();
+    const file = get('media-input')?.files?.[0];
+    let mediaItem = mediaById(get('existing-media')?.value);
+    if (!name || (!file && !mediaItem)) { notify('Enter a name and choose a video or image.'); return; }
+    if (file) mediaItem = importFile(file, 'Imported with episode ' + name);
+    const template = templates.find(preset => preset.id === get('hud-select')?.value) || templates[0];
+    episode = newEpisodeModel(name, mediaItem, template); episodes.push(clone(episode));
+    selectedModule = 'Player Profile'; playhead = 0; openScreen('episode_editor'); return;
+  }
+  if (id === 'girona') { openEpisode(episodes[0].id); return; }
+  if (id === 'import') { get('asset-files')?.click(); return; }
+  if (id === 'save_episode') { saveEpisode(); return; }
+  if (id === 'save') { saveTemplate(); return; }
+  if (id === 'new_preset') { duplicateTemplate(true); return; }
+  if (id === 'duplicate') { duplicateTemplate(); return; }
+  if (item.target) { openScreen(item.target); return; }
+  notify((item.command || item.label) + ' · prototype action');
+}
+function moveModule(name, direction) {
+  const order = currentHud().order[components[name].zone], index = order.indexOf(name), next = index + direction;
+  if (next < 0 || next >= order.length) return;
+  [order[index], order[next]] = [order[next], order[index]];
+  if (current === 'configure_hud') dirty = true;
+  renderPrototype();
+}
+function createOverlay(name, x = 50, y = 50) {
+  if (!episode || !overlayNames.includes(name)) return;
+  const overlay = { id: 'overlay_' + Date.now(), component: name, positions: [{t:playhead,x,y}], start: playhead, end: Math.min(episode.duration, playhead + 5), text: components[name].label };
+  episode.overlays.push(overlay); selectedOverlayId = overlay.id; renderPrototype();
+}
+
+function trackValue(points, time, fallback) {
+  if (!points?.length) return fallback;
+  const sorted = [...points].sort((a,b) => a.t - b.t);
+  if (time < sorted[0].t) return fallback;
+  if (time === sorted[0].t) return sorted[0].v;
+  for (let i = 1; i < sorted.length; i++) {
+    if (time <= sorted[i].t) {
+      const a = sorted[i-1], b = sorted[i];
+      return typeof a.v === 'number' && typeof b.v === 'number'
+        ? a.v + (b.v - a.v) * (time - a.t) / (b.t - a.t) : a.v;
+    }
+  }
+  return sorted.at(-1).v;
+}
+function setPoint(key, value) {
+  const points = episode.tracks[key] ??= [];
+  const existing = points.find(point => point.t === playhead);
+  if (existing) existing.v = value;
+  else points.push({ t: playhead, v: value });
+  points.sort((a,b) => a.t-b.t);
+}
+function timelineValue(property) {
+  const fallback = property.key === 'leftRail' ? 'Open' : property.key === 'stamina' ? 100 : property.key === 'gearSelection' ? 1 : property.key === 'xp' ? playerForEpisode()?.defaultXp ?? 0 : episode.bindings.location;
+  return trackValue(episode.tracks[property.key], playhead, fallback);
+}
+function timelineProperty(key) {
+  return [...Object.values(DATA.timeline_zone_properties).flat(),...componentNames.flatMap(name => components[name].timeline_properties || [])].find(property => property.key === key);
+}
+function setTimelineValue(property, raw) {
+  let value = raw;
+  if (property.kind === 'number') value = Math.min(property.max ?? Infinity,Math.max(property.min ?? 0,Number(raw)));
+  else if (property.kind === 'sector') value = Number(raw);
+  else if (property.kind === 'location') { const chosen = recordById(raw); value = chosen ? clone(chosen) : null; if (playhead === 0) episode.bindings.location = value; }
+  setPoint(property.key,value);
+}
+function setEpisodeBinding(key,id) {
+  const chosen = recordById(id), snapshot = chosen ? clone(chosen) : null;
+  if (key === 'player') {
+    episode.bindings.player = snapshot;
+    if (snapshot) episode.tracks.xp = [{t:0,v:snapshot.defaultXp ?? 0}];
+  } else if (key.startsWith('gear:')) episode.bindings.gear[Number(key.split(':')[1])] = snapshot;
+}
+function overlayPosition(item, time) {
+  const points = [...item.positions].sort((a,b) => a.t-b.t);
+  if (time <= points[0].t) return points[0];
+  for (let i = 1; i < points.length; i++) {
+    if (time <= points[i].t) {
+      const a = points[i-1], b = points[i], ratio = (time-a.t)/(b.t-a.t);
+      return {x:a.x+(b.x-a.x)*ratio,y:a.y+(b.y-a.y)*ratio};
+    }
+  }
+  return points.at(-1);
+}
+function setOverlayPosition(item, x, y) {
+  const position = {t:playhead,x:Math.max(0,Math.min(100,x)),y:Math.max(0,Math.min(100,y))};
+  const index = item.positions.findIndex(point => point.t === playhead);
+  if (index >= 0) item.positions[index] = position; else item.positions.push(position);
+  item.positions.sort((a,b) => a.t-b.t);
+}
+function timeLabel(time) { const sec = Math.round(time); return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0'); }
+
+function renderFlow() {
+  const canvas = get('flow-canvas');
+  let svg = '<svg viewBox="0 0 1440 1100"><defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0L0 6L9 3Z" fill="#68dcfb"/></marker></defs>';
+  for (const [id, screen] of Object.entries(screens)) {
+    const a = positions[id];
+    for (const item of screen.controls) {
+      if (!item.target || item.target === 'main_menu' || item.target === id) continue;
+      const b = positions[item.target];
+      svg += `<path class="${item.status === 'pending' ? 'pending' : ''}" d="M${a[0]+130} ${a[1]+155} C${a[0]+130} ${a[1]+210},${b[0]+130} ${b[1]-55},${b[0]+130} ${b[1]-6}"/>`;
+    }
+  }
+  canvas.innerHTML = svg + '</svg>' + Object.entries(screens).map(([id, screen]) => {
+    const [x,y] = positions[id];
+    return `<button class="node" data-open="${id}" style="left:${x}px;top:${y}px"><strong>${escapeHtml(screen.title)}</strong><span class="badge ${screen.status}">${screen.status.toUpperCase()}</span><small>${escapeHtml(screen.visual_note)}</small></button>`;
+  }).join('');
+}
+function renderSpec() {
+  get('spec-content').innerHTML = '<h1>WORKFLOW SPEC</h1><p>Generated from workflow.json. The live prototype covers the first vertical slice.</p>' +
+    Object.entries(screens).map(([id, screen]) => `<article><h2>${escapeHtml(screen.title)} · ${escapeHtml(screen.status.toUpperCase())}</h2><p>${escapeHtml(screen.visual_note)}</p><table><thead><tr><th>CONTROL</th><th>COMPONENT</th><th>ACTION</th><th>COMMAND / TARGET</th><th>STATUS</th></tr></thead><tbody>${screen.controls.map(item => `<tr><td>${escapeHtml(item.label)}<br><small>${escapeHtml(id+'.'+item.id)}</small></td><td>${escapeHtml(item.component)}</td><td>${escapeHtml(item.action_type)}</td><td>${escapeHtml(item.command || item.target || '')}</td><td>${escapeHtml(item.status)}</td></tr>`).join('')}</tbody></table></article>`).join('') +
+    `<article><h2>HUD COMPONENT CONTRACT · ${componentNames.length} TYPES</h2><p>Code-authored registry. Template controls only look and inclusion; episode bindings and tracks own content and time. “Catalog only” means no complete episode control yet.</p><table><thead><tr><th>ZONE / COMPONENT</th><th>CHILDREN</th><th>EPISODE CONSTANTS</th><th>TIME TRACKS</th><th>VARIANTS / MOTION</th></tr></thead><tbody>${componentNames.map(name => { const def = components[name]; return `<tr><td>${escapeHtml(def.zone)}<br><strong>${escapeHtml(def.label)}</strong></td><td>${def.children.map(escapeHtml).join(' · ')}</td><td>${(def.episode_bindings || []).map(item => escapeHtml(item.child + ': ' + item.kind)).join('<br>') || '—'}</td><td>${(def.timeline_properties || []).map(item => escapeHtml(item.child + ': ' + item.label + ' [' + item.interpolation + ']')).join('<br>') || 'Catalog only / overlay instance'}</td><td>${def.variants.map(escapeHtml).join(' / ')}<br>${def.motions.map(escapeHtml).join(' / ')}</td></tr>`; }).join('')}</tbody></table></article>` +
+    `<article><h2>ZONE TIMELINE CONTRACT</h2><table><thead><tr><th>ZONE</th><th>PROPERTY</th><th>STATES</th><th>EVALUATION</th></tr></thead><tbody>${Object.entries(DATA.timeline_zone_properties).flatMap(([zone,props]) => props.map(property => `<tr><td>${escapeHtml(zone)}</td><td>${escapeHtml(property.label)}</td><td>${property.states.map(escapeHtml).join(' / ')}</td><td>${escapeHtml(property.interpolation)} · motion belongs to HUD template</td></tr>`)).join('')}</tbody></table><p>Child values continue evaluating while a parent rail is folded.</p></article>`;
+}
+function menuScreen() {
+  return `<div class="menu-scene"><div class="menu-brand"><b>╱╱</b> KOALITIC <span>GAME</span><span class="menu-tag">THE SYSTEM</span></div><div class="menu-buttons">${screens.main_menu.controls.filter(item => item.target).map(item => `<button data-control="${item.id}">${escapeHtml(item.label)} →</button>`).join('')}</div><button class="menu-quit" data-control="quit_game">QUIT GAME</button></div>`;
+}
+function episodesScreen() {
+  return `<div class="episodes-screen"><h1>EPISODES</h1><p>Continue an episode or create a new one.</p><div class="episode-cards">${episodes.map(item => `<button class="episode-card" data-episode-id="${escapeHtml(item.id)}"><span class="thumb">${item.mediaKind === 'image' ? `<img src="${item.mediaUrl}" alt="">` : '▶'}</span><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.sourceTemplate)} · episode-specific data and timeline</small></span><span style="margin-left:auto">→</span></button>`).join('')}<button class="episode-card new" data-control="new_episode"><span class="thumb">＋</span><span><strong>NEW EPISODE</strong><small>Video or image + optional HUD template</small></span></button></div><div class="episode-actions"><button class="ui-btn" data-control="back">← BACK</button></div></div>`;
+}
+function newEpisodeScreen() {
+  return `<div class="form"><h1>NEW EPISODE</h1><p>Choose media and start editing. HUD V1 is selected by default.</p><div class="field"><label>01 · EPISODE NAME</label><input id="episode-name" placeholder="Episode name"></div><div class="field"><label>02 · VIDEO / IMAGE</label><select id="existing-media"><option value="">Choose from Media Library…</option>${media.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`).join('')}</select><input id="media-input" type="file" accept="image/*,video/*"><small>A new file is added to Media Library and takes priority.</small></div><div class="field"><label>03 · HUD TEMPLATE (OPTIONAL)</label><select id="hud-select">${templates.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`).join('')}</select></div><div class="actions"><button class="ui-btn" data-control="cancel">CANCEL</button><button class="ui-btn primary" data-control="create_episode">CREATE EPISODE →</button></div></div>`;
+}
+
+function renderPlayerProfile(state, label) {
+  const player = state.player;
+  const image = player?.mediaId && mediaById(player.mediaId)?.kind === 'image' ? mediaById(player.mediaId) : null;
+  const portrait = image ? `<img class="profile-image" src="${image.url}" alt="">` : '<span class="profile-image">◉</span>';
+  const xpGoal = player?.xpGoal || 5000;
+  const width = Math.max(0,Math.min(100,100*state.xp/xpGoal));
+  return `<span class="profile-line">${portrait}<span>${label}<br><strong>${escapeHtml(player?.name || 'CHOOSE PLAYER')}</strong> · LV ${escapeHtml(player?.defaultLevel ?? '—')}</span></span><span class="hud-valuebar"><i style="width:${width}%"></i></span><small>${state.xp.toLocaleString()} / ${xpGoal.toLocaleString()} XP</small>`;
+}
+
+function renderStamina(state, label) {
+  return `${label} <strong>${state.stamina}%</strong><span class="hud-valuebar"><i style="width:${Math.max(0,Math.min(100,state.stamina))}%"></i></span>`;
+}
+
+function renderGearRadial(state, label) {
+  const sectors = Array.from({length:5},(_,i) => `<i class="${state.selectedGear === i+1 ? 'active' : ''}" title="${escapeHtml(state.gear[i]?.name || 'Empty slot')}">${state.gear[i] ? '◈' : '·'}</i>`).join('');
+  return `${label}<div class="gear-wheel">${sectors}</div><small>${escapeHtml(state.gear[state.selectedGear-1]?.name || 'No gear selected')}</small>`;
+}
+
+function renderLocation(state, label) { return `${label} · ${escapeHtml(state.location?.name || 'NO LOCATION')}`; }
+
+const componentRenderers = Object.freeze({
+  'Player Profile': renderPlayerProfile,
+  'Stamina': renderStamina,
+  'Gear Radial': renderGearRadial,
+  'Location Header': renderLocation,
+  'Location / Mini Map': renderLocation
+});
+
+function zoneTree(mode) {
+  const hud = mode === 'template' ? working : episode.hud;
+  return shellZones.map(zone => `<div class="zone-label">${escapeHtml(zone)} ${mode === 'template' ? `<label class="zone-toggle"><input type="checkbox" data-zone-enabled="${zone}" ${hud.zoneEnabled[zone] ? 'checked' : ''}> INCLUDE</label>` : ''}</div>${hud.order[zone].map(name => {
+    const enabled = hud.modules[name].enabled;
+    return `<div class="module-row ${selectedModule === name && !selectedOverlayId ? 'selected' : ''}"><button data-select-module="${escapeHtml(name)}">${escapeHtml(components[name].label)}</button>${mode === 'template' ? `<button class="small-icon" data-move-module="${escapeHtml(name)}" data-direction="-1" title="Move up">↑</button><button class="small-icon" data-move-module="${escapeHtml(name)}" data-direction="1" title="Move down">↓</button><input aria-label="Include ${escapeHtml(name)}" type="checkbox" data-toggle-module="${escapeHtml(name)}" ${enabled ? 'checked' : ''}>` : `<small>${enabled ? 'ON' : 'OFF'}</small>`}</div>`;
+  }).join('')}`).join('');
+}
+function sampleData(mode) {
+  if (mode === 'template') return { player: {name:'DEMO PLAYER',defaultLevel:12,defaultXp:3250,xpGoal:5000}, xp:3250, stamina:72, rail:'Open', gear:[], selectedGear:1, location:{name:'DEMO LOCATION'} };
+  const player = playerForEpisode();
+  return { player, xp: Math.round(trackValue(episode.tracks.xp,playhead,player?.defaultXp ?? 0)),
+    stamina: Math.round(trackValue(episode.tracks.stamina,playhead,100)), rail: trackValue(episode.tracks.leftRail,playhead,'Open'),
+    gear: episode.bindings.gear, selectedGear: trackValue(episode.tracks.gearSelection,playhead,1),
+    location: trackValue(episode.tracks.location,playhead,episode.bindings.location) };
+}
+function moduleMarkup(name, mode, state) {
+  const label = escapeHtml(components[name].label);
+  return componentRenderers[name]?.(state,label) ?? label;
+}
+function safeModuleMarkup(name, mode, state) {
+  try { return moduleMarkup(name, mode, state); }
+  catch (error) { console.error('HUD component failed: ' + name, error); return `${escapeHtml(components[name]?.label || name)} · unavailable`; }
+}
+function hudCanvas(mode) {
+  const hud = mode === 'template' ? working : episode.hud, data = sampleData(mode);
+  const rail = mode === 'template' ? templatePreviewState : data.rail;
+  const railChanged = mode === 'episode' && lastEpisodeRail !== null && lastEpisodeRail !== rail;
+  if (mode === 'episode') lastEpisodeRail = rail;
+  const railAnimation = railChanged && hud.zoneMotion?.['LEFT RAIL'] === 'Smooth Reveal' ? (rail === 'Folded' ? ' rail-collapse' : ' rail-expand') : '';
+  const zoneActive = zone => hud.zoneEnabled[zone] && (mode !== 'template' || !previewHidden.has(zone));
+  const renderZone = zone => {
+    if (!zoneActive(zone)) return '';
+    if (zone === 'LEFT RAIL' && rail === 'Folded') return `<button class="hud-item" data-rail-open="true">▶</button>`;
+    return hud.order[zone].filter(name => hud.modules[name].enabled && (mode !== 'template' || !previewHidden.has(name))).map(name => {
+      const cfg = hud.modules[name], selected = selectedModule === name && !selectedOverlayId;
+      const previewState = mode === 'template' && selected && components[name].states.includes(componentPreviewState) ? componentPreviewState.toLowerCase() : '';
+      return `<button class="hud-item ${selected ? 'highlight' : ''} ${cfg.motion === 'Pulse' ? 'pulse' : ''} ${previewState}" data-select-module="${escapeHtml(name)}">${safeModuleMarkup(name,mode,data)}</button>`;
+    }).join('');
+  };
+  const overlays = mode === 'episode' ? episode.overlays.filter(item => playhead >= item.start && playhead <= item.end).map(item => {
+    const position = overlayPosition(item,playhead);
+    return `<button class="pov-item ${selectedOverlayId === item.id ? 'highlight' : ''}" style="left:${position.x}%;top:${position.y}%;bottom:auto" data-overlay-id="${escapeHtml(item.id)}" draggable="true">⌖ ${escapeHtml(item.text)}</button>`;
+  }).join('') : '';
+  const top = renderZone('TOP BAR');
+  return `<div class="hud-demo" id="hud-canvas" data-hud-drop="true"><div class="hud-core"></div>${zoneActive('TOP BAR') ? `<div class="hud-bar">${top || 'THE SYSTEM'}</div>` : ''}${zoneActive('LEFT RAIL') ? `<div class="hud-left ${rail === 'Folded' ? 'folded' : ''}${railAnimation} ${rail === 'Pinned' ? 'pinned' : ''}">${renderZone('LEFT RAIL')}</div>` : ''}${zoneActive('RIGHT RAIL') ? `<div class="hud-right">${renderZone('RIGHT RAIL')}</div>` : ''}${overlays}</div>`;
+}
+function safeHudCanvas(mode) {
+  try { return hudCanvas(mode); }
+  catch (error) { console.error('HUD preview failed', error); return '<div class="hud-demo component-failure">HUD preview unavailable · episode data remains editable</div>'; }
+}
+function templateInspector() {
+  const name = selectedModule, def = components[name], cfg = working.modules[name];
+  const state = componentPreviewState && def.states.includes(componentPreviewState) ? componentPreviewState : def.states[0];
+  return `<h2>COMPONENT · ${escapeHtml(def.label)}</h2><p>${escapeHtml(def.zone)} · reusable visual settings</p>
+    <label>INCLUDED <input type="checkbox" data-toggle-module="${escapeHtml(name)}" ${cfg.enabled ? 'checked' : ''}></label>
+    <label>VISUAL VARIANT<select data-template-setting="variant">${def.variants.map(value => `<option ${cfg.variant === value ? 'selected' : ''}>${escapeHtml(value)}</option>`).join('')}</select></label>
+    <label>MOTION PRESET<select data-template-setting="motion">${def.motions.map(value => `<option ${cfg.motion === value ? 'selected' : ''}>${escapeHtml(value)}</option>`).join('')}</select></label>
+    <label>PREVIEW STATE</label><div>${def.states.map(value => `<button class="state-btn ${state === value ? 'active' : ''}" data-component-state="${escapeHtml(value)}">${escapeHtml(value)}</button>`).join('')}</div>
+    <button class="ui-btn" data-preview-hide="${escapeHtml(name)}">${previewHidden.has(name) ? 'SHOW IN PREVIEW' : 'HIDE IN PREVIEW'}</button>
+    <p>Children: ${def.children.map(escapeHtml).join(' · ')}</p><button class="ui-btn" data-open-component="${escapeHtml(name)}">VIEW IN UI CATALOG →</button>
+    <p>Episode player, gear and numeric values are assigned in the Episode Editor.</p>`;
+}
+function overlayInspector() {
+  const item = episode.overlays.find(entry => entry.id === selectedOverlayId);
+  if (!item) return '';
+  const position = overlayPosition(item,playhead);
+  return `<h2>POV OVERLAY</h2><p>${escapeHtml(components[item.component].label)} · manual placement</p>
+    <label>TEXT<input id="overlay-text" value="${escapeHtml(item.text)}"></label>
+    <label>START (SECONDS)<input id="overlay-start" type="number" min="0" max="${episode.duration}" value="${item.start}"></label>
+    <label>END (SECONDS)<input id="overlay-end" type="number" min="0" max="${episode.duration}" value="${item.end}"></label>
+    <label>X AT ${timeLabel(playhead)} (%)<input id="overlay-x" type="number" min="0" max="100" value="${Math.round(position.x)}"></label>
+    <label>Y AT ${timeLabel(playhead)} (%)<input id="overlay-y" type="number" min="0" max="100" value="${Math.round(position.y)}"></label>
+    <p>Drag the overlay at different playhead times to create manual position points. ${item.positions.length} point(s). No AI detection.</p>
+    <button class="ui-btn" data-remove-overlay="${escapeHtml(item.id)}">REMOVE INSTANCE</button>`;
+}
+function episodeInspector() {
+  if (selectedOverlayId) return overlayInspector();
+  const name = selectedModule, def = components[name], cfg = episode.hud.modules[name];
+  let data = '<p>This component has no episode data in the first vertical slice.</p>';
+  let time = '<p>No animated property for this component yet.</p>';
+  if (name === 'Player Profile') {
+    const player = playerForEpisode(), xp = Math.round(trackValue(episode.tracks.xp,playhead,0));
+    data = `<label>PLAYER<select id="episode-player">${recordOptions('Player',player?.id)}</select></label><p>Portrait and name come from one reusable player record. This episode keeps its own snapshot.</p>`;
+    time = `<label>XP AT ${timeLabel(playhead)}<input id="episode-xp" type="number" min="0" value="${xp}"></label><p>One XP track drives the number and progress bar. Level defaults to the selected player.</p>`;
+  } else if (name === 'Stamina') {
+    const value = Math.round(trackValue(episode.tracks.stamina,playhead,100));
+    data = '<p>No Data Library record: stamina is an episode value.</p>';
+    time = `<label>STAMINA AT ${timeLabel(playhead)}<input id="episode-stamina" type="number" min="0" max="100" value="${value}"></label><p>The number and bar read the same track.</p>`;
+  } else if (name === 'Gear Radial') {
+    data = `<p>Choose five equipment records for this episode.</p>${Array.from({length:5},(_,i) => `<label>SECTOR ${i+1}<select data-gear-slot="${i}">${recordOptions('Gear',gearForEpisode(i)?.id)}</select></label>`).join('')}`;
+    time = `<label>SELECTED SECTOR AT ${timeLabel(playhead)}<select id="gear-selection">${[1,2,3,4,5].map(value => `<option value="${value}" ${trackValue(episode.tracks.gearSelection,playhead,1) === value ? 'selected' : ''}>${value}</option>`).join('')}</select></label>`;
+  } else if (name === 'Location Header' || name === 'Location / Mini Map') {
+    const location = trackValue(episode.tracks.location,playhead,episode.bindings.location);
+    data = `<label>LOCATION AT ${timeLabel(playhead)}<select id="episode-location">${recordOptions('Location',location?.id)}</select></label>`;
+    time = `<p>Changing this selection creates a discrete location point at the playhead. Current: ${escapeHtml(location?.name || 'none')}.</p>`;
+  }
+  return `<h2>${escapeHtml(def.label)}</h2><p>${escapeHtml(def.zone)} · episode instance</p>
+    <div class="inspector-section"><h3>DATA</h3>${data}</div>
+    <div class="inspector-section"><h3>TIME</h3>${time}</div>
+    <details><summary>LOOK · LOCAL OVERRIDE</summary><p>The episode has a visual snapshot of ${escapeHtml(episode.sourceTemplate)}. Change only this episode.</p>
+    <label>INCLUDED IN THIS EPISODE <input id="episode-module-enabled" type="checkbox" ${cfg.enabled ? 'checked' : ''}></label>
+    <label>VARIANT<select data-episode-setting="variant">${def.variants.map(value => `<option ${cfg.variant === value ? 'selected' : ''}>${escapeHtml(value)}</option>`).join('')}</select></label>
+    <label>MOTION<select data-episode-setting="motion">${def.motions.map(value => `<option ${cfg.motion === value ? 'selected' : ''}>${escapeHtml(value)}</option>`).join('')}</select></label>
+    <button class="ui-btn" data-save-look="true">SAVE EPISODE LOOK AS TEMPLATE</button></details>`;
+}
+function workspaceInspector(mode) {
+  try { return `<div class="work-panel inspector">${mode === 'template' ? templateInspector() : episodeInspector()}</div>`; }
+  catch (error) { console.error('Inspector failed', error); return '<div class="work-panel inspector component-failure">Inspector unavailable · timeline and saved data remain available</div>'; }
+}
+function configScreen() {
+  return `<div class="config-screen"><div class="work-head"><h1>HUD TEMPLATES</h1><span class="mini-note">VISUAL ONLY</span>
+    <select id="preset-select">${[...templates.map(item => item.id === working.id ? working : item),...(templates.some(item => item.id === working.id) ? [] : [working])].map(item => `<option value="${escapeHtml(item.id)}" ${item.id === templateId ? 'selected' : ''}>${escapeHtml(item.name)}${item.id === working.id && dirty ? ' · UNSAVED' : ''}</option>`).join('')}</select>
+    <button class="ui-btn" data-control="new_preset">NEW FROM BASE</button><button class="ui-btn" data-control="duplicate">DUPLICATE</button><button class="ui-btn primary" data-control="save">SAVE TEMPLATE</button></div>
+    <div class="work-grid"><div class="work-panel"><h2>FIXED HUD ZONES</h2><small>Include zones and modules. Reorder modules within their zone.</small><label class="mini-note">TEMPLATE NAME<input id="template-name" value="${escapeHtml(working.name)}"></label><div class="module-list">${zoneTree('template')}</div></div>
+    <div class="work-panel demo-wrap"><h2>SHARED HUD PREVIEW · DEMO DATA</h2>${safeHudCanvas('template')}
+      <div><span class="mini-note">LEFT RAIL STATE </span>${['Folded','Open','Pinned'].map(value => `<button class="state-btn ${templatePreviewState === value ? 'active' : ''}" data-preview-rail="${value}">${value}</button>`).join('')}</div>
+      <label class="mini-note">LEFT RAIL TRANSITION <select id="rail-motion"><option ${working.zoneMotion?.['LEFT RAIL'] === 'Smooth Reveal' ? 'selected' : ''}>Smooth Reveal</option><option ${working.zoneMotion?.['LEFT RAIL'] === 'Snap' ? 'selected' : ''}>Snap</option></select></label>
+      <p>${dirty ? 'Unsaved visual changes' : 'Template ready'}. Save Template stores it locally when browser storage is available. Demo values never enter an episode.</p></div>
+    ${workspaceInspector('template')}</div><button class="ui-btn" style="align-self:flex-start" data-control="back">← MAIN MENU</button></div>`;
+}
+
+function episodeMedia() {
+  if (!episode.mediaUrl) return '';
+  return episode.mediaKind === 'image'
+    ? `<img class="episode-media" src="${episode.mediaUrl}" alt="Episode footage">`
+    : `<video class="episode-media" src="${episode.mediaUrl}" muted playsinline preload="metadata"></video>`;
+}
+function timelineRows() {
+  const group = (id,label,depth,select) => `<div class="tl-group depth-${depth}"><button data-timeline-toggle="${escapeHtml(id)}" aria-expanded="${timelineOpen.has(id)}">${timelineOpen.has(id) ? '▾' : '▸'} ${escapeHtml(label)}</button>${select ? `<button class="tl-select" data-select-module="${escapeHtml(select)}">◎</button>` : ''}</div>`;
+  const propertyRow = property => {
+    const value = timelineValue(property), points = episode.tracks[property.key] || [];
+    const options = property.kind === 'rail_state' ? property.states.map(state => `<option ${value === state ? 'selected' : ''}>${state}</option>`).join('')
+      : property.kind === 'sector' ? [1,2,3,4,5].map(n => `<option value="${n}" ${value === n ? 'selected' : ''}>${n}</option>`).join('')
+      : property.kind === 'location' ? recordOptions('Location',value?.id) : '';
+    const input = property.kind === 'number' ? `<input data-timeline-value="${property.key}" aria-label="${escapeHtml(property.label)}" type="number" min="${property.min ?? 0}" ${property.max !== undefined ? `max="${property.max}"` : ''} value="${Math.round(value)}">`
+      : `<select data-timeline-value="${property.key}" aria-label="${escapeHtml(property.label)}">${options}</select>`;
+    const markers = points.map(point => `<button class="tl-keyframe ${point.t === playhead ? 'active' : ''}" style="left:${100*point.t/episode.duration}%" data-goto-keyframe="${point.t}" title="${timeLabel(point.t)} · ${escapeHtml(point.v?.name ?? point.v)}">◆</button>`).join('');
+    return `<div class="tl-property"><span class="tl-prop-label">↳ ${escapeHtml(property.label)}</span><span class="tl-edit">${input}<button data-add-keyframe="${property.key}" title="Add keyframe at playhead">◆+</button><button data-delete-keyframe="${property.key}" title="Delete keyframe at playhead" ${points.length <= 1 || !points.some(point => point.t === playhead) ? 'disabled' : ''}>×</button></span><span class="tl-lane">${markers}<i style="left:${100*playhead/episode.duration}%"></i></span></div>`;
+  };
+  const bindingRow = binding => {
+    const selected = binding.key === 'player' ? episode.bindings.player?.id : episode.bindings.gear[Number(binding.key.split(':')[1])]?.id;
+    return `<div class="tl-property tl-binding"><span class="tl-prop-label">↳ ${escapeHtml(binding.label)}</span><span class="tl-edit"><select data-timeline-binding="${escapeHtml(binding.key)}" aria-label="${escapeHtml(binding.label)}">${recordOptions(binding.kind,selected)}</select></span><span class="tl-constant">EPISODE CONSTANT · ${escapeHtml(recordById(selected)?.name || 'unassigned')}</span></div>`;
+  };
+  let html = '';
+  for (const zone of shellZones) {
+    const zid = 'zone:' + zone;
+    html += group(zid,zone,0);
+    if (!timelineOpen.has(zid)) continue;
+    for (const property of DATA.timeline_zone_properties[zone] || []) html += propertyRow(property);
+    if (!episode.hud.zoneEnabled[zone]) continue;
+    for (const name of episode.hud.order[zone]) {
+      if (!episode.hud.modules[name]?.enabled) continue;
+      const mid = 'module:' + name, def = components[name];
+      html += group(mid,def.label,1,name);
+      if (!timelineOpen.has(mid)) continue;
+      for (const child of def.children) {
+        const props = (def.timeline_properties || []).filter(property => property.child === child);
+        const bindings = (def.episode_bindings || []).filter(binding => binding.child === child);
+        html += `<div class="tl-child">${escapeHtml(child)}${props.length || bindings.length ? '' : ' · display only'}</div>`;
+        for (const binding of bindings) html += bindingRow(binding);
+        for (const property of props) html += propertyRow(property);
+      }
+    }
+  }
+  if (episode.overlays.length) {
+    html += group('zone:POV OVERLAYS','POV OVERLAYS',0);
+    if (timelineOpen.has('zone:POV OVERLAYS')) for (const item of episode.overlays) {
+      const oid = 'overlay:' + item.id, position = overlayPosition(item,playhead);
+      html += `<div class="tl-group depth-1"><button data-timeline-toggle="${escapeHtml(oid)}" aria-expanded="${timelineOpen.has(oid)}">${timelineOpen.has(oid) ? '▾' : '▸'} ${escapeHtml(item.text)}</button><button class="tl-select" data-overlay-id="${escapeHtml(item.id)}">◎</button></div>`;
+      if (!timelineOpen.has(oid)) continue;
+      for (const [key,label,value,type] of [['text','Message',item.text,'text'],['start','Start (s)',item.start,'number'],['end','End (s)',item.end,'number'],['x','Position X (%)',Math.round(position.x),'number'],['y','Position Y (%)',Math.round(position.y),'number']]) {
+        html += `<div class="tl-property tl-binding"><span class="tl-prop-label">↳ ${label}</span><span class="tl-edit"><input type="${type}" data-timeline-overlay-id="${escapeHtml(item.id)}" data-timeline-overlay-field="${key}" value="${escapeHtml(value)}" ${type === 'number' ? 'min="0"' : ''}></span><span class="tl-constant">${key === 'x' || key === 'y' ? item.positions.length + ' POSITION POINT(S)' : key === 'text' ? 'EPISODE TEXT' : 'VISIBILITY RANGE'}</span></div>`;
+      }
+    }
+  }
+  return html;
+}
+function editorScreen() {
+  const rail = trackValue(episode.tracks.leftRail,playhead,'Open');
+  return `<div class="editor-screen"><div class="work-head"><h1>${escapeHtml(episode.name)} · EPISODE EDITOR</h1><label class="mini-note">HUD TEMPLATE <select id="episode-hud-select">${templates.map(item => `<option value="${escapeHtml(item.id)}" ${(pendingEpisodeHudId || episode.sourceTemplateId) === item.id ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select></label><button class="ui-btn" data-apply-episode-hud="true">APPLY HUD</button>${previousEpisodeHud ? '<button class="ui-btn" data-restore-hud="true">UNDO HUD CHANGE</button>' : ''}<span class="mini-note">${timeLabel(playhead)}</span><button class="ui-btn primary" data-control="save_episode">SAVE EPISODE</button><button class="ui-btn" data-control="exit_editor">EPISODES →</button></div>
+    <div class="work-grid"><div class="work-panel"><h2>HUD TREE</h2><small>Episode instance of the selected template.</small><div class="module-list">${zoneTree('episode')}</div>
+      <h2>POV OVERLAYS</h2><small>Drag onto the video, or click to add at centre.</small><div class="overlay-palette">${overlayNames.map(name => `<button draggable="true" data-overlay-palette="${escapeHtml(name)}">${escapeHtml(components[name].label)}</button>`).join('')}</div></div>
+    <div class="work-panel demo-wrap"><h2>VIDEO + SHARED HUD PREVIEW</h2><div class="preview-stack">${episodeMedia()}${safeHudCanvas('episode')}</div>
+      <div><span class="mini-note">LEFT RAIL AT ${timeLabel(playhead)} </span>${['Folded','Open','Pinned'].map(value => `<button class="state-btn ${rail === value ? 'active' : ''}" data-set-rail="${value}">${value}</button>`).join('')}</div>
+      <small>Panel state is a parent track. Its children keep evaluating while folded.</small></div>${workspaceInspector('episode')}</div>
+    <div class="timeline"><h2>TIMELINE · HUD HIERARCHY</h2><div class="track"><span>PLAYHEAD</span><input id="playhead" type="range" min="0" max="${episode.duration}" value="${playhead}"><strong>${timeLabel(playhead)}</strong></div><div class="timeline-scroll">${timelineRows()}</div>
+    <small>Expand zone → component → child. Edit values at the playhead to create keyframes. Panel states and records hold; numbers interpolate. Motion is inherited from the HUD component.</small></div></div>`;
+}
+
+function mediaThumb(item) { return item.kind === 'image' ? `<img src="${item.url}" alt="">` : '<span>▶</span>'; }
+function mediaAssets() {
+  const items = media.filter(item => item.name.toLowerCase().includes(assetSearch));
+  const selected = mediaById(selectedMediaId);
+  return `<div class="asset-grid"><div class="work-panel"><h2>MEDIA LIBRARY</h2><button class="ui-btn" data-control="import">+ IMPORT IMAGES / VIDEOS</button><input id="asset-files" type="file" accept="image/*,video/*" multiple hidden>
+    <p class="asset-note">An imported file can be selected in New Episode or linked to a Data Library record.</p><div class="asset-list">${items.length ? items.map(item => `<button class="asset-row ${item.id === selectedMediaId ? 'selected' : ''}" data-media-id="${escapeHtml(item.id)}"><span class="asset-mini">${mediaThumb(item)}</span><span>${escapeHtml(item.name)}<small>${escapeHtml(item.kind.toUpperCase())} · ${(item.size/1048576).toFixed(1)} MB</small></span></button>`).join('') : '<div class="asset-empty">No imported files yet.</div>'}</div></div>
+    <div class="work-panel asset-detail"><h2>MEDIA DETAIL</h2>${selected ? `<h3>${escapeHtml(selected.name)}</h3>${selected.kind === 'image' ? `<img class="media-preview" src="${selected.url}" alt="">` : `<video class="media-preview" src="${selected.url}" controls></video>`}<p class="asset-note">Imported media is stored locally with the project when browser storage is available. A browser cannot reveal its full PC path.</p><label>OPTIONAL SOURCE NOTE</label><input id="media-source-note" value="${escapeHtml(selected.sourceNote)}" placeholder="Folder or project reference">` : '<div class="asset-empty">Select a file to inspect it.</div>'}</div></div>`;
+}
+function recordUsage(id) {
+  return episodes.filter(item => Object.values(item.bindings).some(binding =>
+    Array.isArray(binding) ? binding.some(record => record?.id === id) : binding?.id === id
+  ) || item.tracks.location?.some(point => point.v?.id === id)).map(item => item.name);
+}
+function dataAssets() {
+  const items = records.filter(item => (item.name + ' ' + item.type).toLowerCase().includes(assetSearch))
+    .filter(item => dataFilter === 'all' || (dataFilter === 'used' ? recordUsage(item.id).length : !item.archived));
+  const selected = recordById(selectedRecordId), usage = selected ? recordUsage(selected.id) : [];
+  return `<div class="asset-grid"><div class="work-panel"><h2>DATA LIBRARY</h2><button class="ui-btn" data-add-record="true">+ NEW RECORD</button>
+    <div class="asset-filters">${[['all','ALL'],['used','USED IN EPISODES'],['active','ACTIVE']].map(([id,label]) => `<button class="state-btn ${dataFilter === id ? 'active' : ''}" data-data-filter="${id}">${label}</button>`).join('')}</div>
+    <p class="asset-note">One reusable record per player, gear item or place. Episode bindings keep their own snapshots.</p>
+    <div class="asset-list">${items.map(item => `<button class="asset-row ${item.id === selectedRecordId ? 'selected' : ''}" data-record-id="${escapeHtml(item.id)}"><span class="asset-mini">◇</span><span>${escapeHtml(item.name)}<small>${escapeHtml(item.type)}${item.archived ? ' · ARCHIVED' : ''}</small></span></button>`).join('')}</div></div>
+    <div class="work-panel asset-detail"><h2>RECORD DETAIL</h2>${selected ? `<p class="asset-note">Stable ID: ${escapeHtml(selected.id)} · Used in: ${escapeHtml(usage.join(', ') || 'none')}</p>
+      <label>TYPE</label><select id="record-type">${['Player','Gear','Location','Mission','Photo','Codex','Person'].map(type => `<option ${selected.type === type ? 'selected' : ''}>${type}</option>`).join('')}</select>
+      <label>NAME</label><input id="record-name" value="${escapeHtml(selected.name)}">
+      <label>NOTES</label><textarea id="record-note">${escapeHtml(selected.note || '')}</textarea>
+      <label>IMAGE / VIDEO</label><select id="record-media"><option value="">None</option>${media.map(item => `<option value="${escapeHtml(item.id)}" ${selected.mediaId === item.id ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select>
+      ${selected.type === 'Player' ? `<label>DEFAULT LEVEL</label><input id="record-level" type="number" min="1" value="${selected.defaultLevel ?? 1}"><label>DEFAULT XP</label><input id="record-xp" type="number" min="0" value="${selected.defaultXp ?? 0}"><label>XP GOAL</label><input id="record-goal" type="number" min="1" value="${selected.xpGoal ?? 5000}">` : ''}
+      <p class="asset-note">Changes here do not rewrite existing episode snapshots.</p>
+      <button class="ui-btn" data-record-action="${usage.length ? (selected.archived ? 'restore' : 'archive') : 'delete'}">${usage.length ? (selected.archived ? 'RESTORE' : 'ARCHIVE') : 'DELETE'} RECORD</button>`
+      : '<div class="asset-empty">Select or create a record.</div>'}</div></div>`;
+}
+function componentSpecimen(name) {
+  const def = components[name], state = componentPreviewState && def.states.includes(componentPreviewState) ? componentPreviewState : def.states[0];
+  const demo = sampleData('template');
+  return `<div class="component-sheet ${escapeHtml(state.toLowerCase())}"><div class="specimen-card">${safeModuleMarkup(name,'template',demo)}</div>
+    <div>${def.children.map(child => `<span class="child-chip">${escapeHtml(child)}</span>`).join('')}</div></div>`;
+}
+function componentAssets() {
+  const names = componentNames.filter(name => (name + ' ' + components[name].label + ' ' + components[name].zone).toLowerCase().includes(assetSearch));
+  const def = components[selectedComponent], state = componentPreviewState && def.states.includes(componentPreviewState) ? componentPreviewState : def.states[0];
+  return `<div class="asset-grid"><div class="work-panel"><h2>UI COMPONENT CATALOG</h2><p class="asset-note">Closed components authored in code. Browse their anatomy, variants and states; episode values live in the editor.</p>
+    <div class="asset-list">${names.map(name => `<button class="asset-row ${name === selectedComponent ? 'selected' : ''}" data-component-id="${escapeHtml(name)}"><span class="asset-mini">▧</span><span>${escapeHtml(components[name].label)}<small>${escapeHtml(components[name].zone)} · ${components[name].children.length} children</small></span></button>`).join('')}</div></div>
+    <div class="work-panel asset-detail"><h2>${escapeHtml(def.label)}</h2><p class="asset-note">${escapeHtml(def.description)} · ${escapeHtml(def.zone)}</p>${componentSpecimen(selectedComponent)}
+    <label>PREVIEW STATE</label><div>${def.states.map(value => `<button class="state-btn ${state === value ? 'active' : ''}" data-component-state="${escapeHtml(value)}">${escapeHtml(value)}</button>`).join('')}</div>
+    <p class="asset-note">Variants: ${def.variants.map(escapeHtml).join(' · ')}<br>Motion: ${def.motions.map(escapeHtml).join(' · ')}</p>
+    ${def.zone !== 'POV OVERLAYS' ? `<button class="ui-btn" data-configure-component="${escapeHtml(selectedComponent)}">OPEN IN HUD TEMPLATES →</button>` : '<p class="asset-note">Add an instance of this overlay directly in an Episode Editor.</p>'}</div></div>`;
+}
+function assetsScreen() {
+  return `<div class="asset-screen"><div class="work-head"><h1>ASSETS</h1><span class="mini-note">ONE LIBRARY · THREE VIEWS</span><button class="ui-btn" data-control="back">← MAIN MENU</button></div>
+    <div class="asset-tabs">${[['media','MEDIA'],['data','DATA LIBRARY'],['components','UI COMPONENTS']].map(([id,label]) => `<button class="${assetsTab === id ? 'active' : ''}" data-assets-tab="${id}">${label}</button>`).join('')}</div>
+    <input id="asset-search" class="asset-search" value="${escapeHtml(assetSearch)}" placeholder="Search ${escapeHtml(assetsTab)}...">
+    <div style="flex:1">${assetsTab === 'media' ? mediaAssets() : assetsTab === 'data' ? dataAssets() : componentAssets()}</div></div>`;
+}
+
+function handleTimelineClick(data) {
+  if (data.timelineToggle) { timelineOpen.has(data.timelineToggle) ? timelineOpen.delete(data.timelineToggle) : timelineOpen.add(data.timelineToggle); renderPrototype(); return true; }
+  if (data.gotoKeyframe !== undefined) { playhead = Number(data.gotoKeyframe); renderPrototype(); return true; }
+  if (data.addKeyframe) { const property = timelineProperty(data.addKeyframe); if (property) setTimelineValue(property, property.kind === 'location' ? timelineValue(property)?.id || '' : timelineValue(property)); renderPrototype(); return true; }
+  if (data.deleteKeyframe) { const points = episode.tracks[data.deleteKeyframe]; if (points?.length > 1) episode.tracks[data.deleteKeyframe] = points.filter(point => point.t !== playhead); renderPrototype(); return true; }
+  return false;
+}
+
+function handleNavigationClick(data) {
+  if (data.view) { setView(data.view); return true; }
+  if (data.open) { openScreen(data.open); return true; }
+  if (data.episodeId) { openEpisode(data.episodeId); return true; }
+  if (data.control) { runControl(data.control); return true; }
+  return false;
+}
+
+function handleHudClick(data) {
+  if (data.selectModule) { selectedModule = data.selectModule; selectedOverlayId = null; renderPrototype(); return true; }
+  if (data.overlayId) { selectedOverlayId = data.overlayId; renderPrototype(); return true; }
+  if (data.overlayPalette) { createOverlay(data.overlayPalette); return true; }
+  if (data.removeOverlay) { episode.overlays = episode.overlays.filter(item => item.id !== data.removeOverlay); selectedOverlayId = null; renderPrototype(); return true; }
+  if (data.setRail) { setPoint('leftRail', data.setRail); renderPrototype(); return true; }
+  if (data.railOpen) { if (current === 'configure_hud') templatePreviewState = 'Open'; else setPoint('leftRail','Open'); renderPrototype(); return true; }
+  if (data.previewRail) { templatePreviewState = data.previewRail; renderPrototype(); return true; }
+  if (data.componentState) { componentPreviewState = data.componentState; renderPrototype(); return true; }
+  if (data.previewHide) { previewHidden.has(data.previewHide) ? previewHidden.delete(data.previewHide) : previewHidden.add(data.previewHide); renderPrototype(); return true; }
+  if (data.moveModule) { moveModule(data.moveModule, Number(data.direction)); return true; }
+  return false;
+}
+
+function handleAssetsClick(data) {
+  if (data.assetsTab) { assetsTab = data.assetsTab; assetSearch = ''; renderPrototype(); return true; }
+  if (data.mediaId) { selectedMediaId = data.mediaId; renderPrototype(); return true; }
+  if (data.recordId) { selectedRecordId = data.recordId; renderPrototype(); return true; }
+  if (data.componentId) { selectedComponent = data.componentId; componentPreviewState = null; renderPrototype(); return true; }
+  if (data.dataFilter) { dataFilter = data.dataFilter; renderPrototype(); return true; }
+  if (data.addRecord) {
+    const item = {id:'record_'+Date.now(),type:'Gear',name:'New record',note:'',mediaId:'',archived:false};
+    records.push(item); selectedRecordId = item.id; renderPrototype(); persistProject('Data library'); return true;
+  }
+  if (data.recordAction) {
+    const item = recordById(selectedRecordId); if (!item) return true;
+    if (data.recordAction === 'delete' && !recordUsage(item.id).length) {
+      records.splice(records.indexOf(item),1); selectedRecordId = records[0]?.id || null;
+    } else if (data.recordAction === 'archive') item.archived = true;
+    else if (data.recordAction === 'restore') item.archived = false;
+    renderPrototype(); persistProject('Data library'); return true;
+  }
+  if (data.openComponent) { selectedComponent = data.openComponent; componentPreviewState = null; assetsTab = 'components'; openScreen('assets'); return true; }
+  if (data.configureComponent) { selectedModule = data.configureComponent; openScreen('configure_hud'); return true; }
+  return false;
+}
+
+function handleEpisodeClick(data) {
+  if (data.applyEpisodeHud) { const chosen = templates.find(item => item.id === (pendingEpisodeHudId || get('episode-hud-select')?.value)); if (applyHudTemplate(chosen)) { renderPrototype(); notify(chosen.name + ' applied. Episode data and timeline kept.'); } return true; }
+  if (data.restoreHud) { if (restorePreviousHud()) renderPrototype(); return true; }
+  if (data.saveLook) {
+    const number = templates.length + 1, copy = clone(episode.hud);
+    copy.id = 'hud_' + Date.now() + '_' + number; copy.name = 'HUD V' + number;
+    templates.push(copy); persistProject(copy.name); return true;
+  }
+  return false;
+}
+
+function renderPrototype() {
+  const screen = screens[current], stage = get('stage');
+  if (current === 'episode_editor') timelineScrollTop = stage.querySelector?.('.timeline-scroll')?.scrollTop ?? timelineScrollTop;
+  get('screen-title').textContent = screen.title + ' · ' + screen.status.toUpperCase();
+  get('screen-note').textContent = screen.visual_note;
+  get('routes').innerHTML = screen.controls.filter(item => item.target).map(item =>
+    `<button class="ui-btn" data-control="${item.id}">${escapeHtml(item.label)} → ${escapeHtml(item.target)}</button>`).join('');
+  stage.className = 'stage' + (['configure_hud','episode_editor','assets'].includes(current) ? ' wide' : '');
+  const renderers = { main_menu: menuScreen, episodes: episodesScreen, new_episode: newEpisodeScreen,
+    configure_hud: configScreen, episode_editor: editorScreen, assets: assetsScreen };
+  try { stage.innerHTML = renderers[current]?.() || ''; }
+  catch (error) {
+    console.error('Screen failed: ' + current, error);
+    stage.innerHTML = `<div class="screen-failure"><h2>${escapeHtml(screen.title)} UNAVAILABLE</h2><p>This screen failed to render. Other screens and saved work are still accessible.</p><button class="ui-btn" data-open="main_menu">← MAIN MENU</button></div>`;
+    return;
+  }
+  if (current === 'episode_editor') { const scroll = stage.querySelector?.('.timeline-scroll'); if (scroll) scroll.scrollTop = timelineScrollTop; }
+  if (current === 'episode_editor' && episode.mediaKind === 'video') {
+    const video = stage.querySelector('video.episode-media');
+    if (video) video.addEventListener('loadedmetadata', () => {
+      video.currentTime = Math.min(playhead, Math.max(0,video.duration-0.04));
+      const duration = Math.ceil(video.duration);
+      if (Number.isFinite(duration) && duration > 0 && episode.duration !== duration) {
+        episode.duration = duration;
+        const slider = get('playhead'); if (slider) slider.max = String(duration);
+      }
+    });
+  }
+}
+document.addEventListener('click', event => {
+  const button = event.target.closest('button'); if (!button) return;
+  const data = button.dataset;
+  for (const handler of [handleTimelineClick,handleNavigationClick,handleHudClick,handleAssetsClick,handleEpisodeClick]) {
+    try { if (handler(data)) return; }
+    catch (error) { console.error('Interaction failed',error); notify('This action failed; other screens remain available'); return; }
+  }
+});
+document.addEventListener('change', event => {
+  const field = event.target, id = field.id;
+  if (id === 'episode-hud-select') { pendingEpisodeHudId = field.value; return; }
+  if (field.dataset.timelineBinding) { setEpisodeBinding(field.dataset.timelineBinding,field.value); renderPrototype(); return; }
+  if (field.dataset.timelineOverlayId) {
+    const item = episode.overlays.find(entry => entry.id === field.dataset.timelineOverlayId), key = field.dataset.timelineOverlayField;
+    if (item) {
+      if (key === 'x' || key === 'y') { const position = overlayPosition(item,playhead); setOverlayPosition(item,key === 'x' ? Number(field.value) : position.x,key === 'y' ? Number(field.value) : position.y); }
+      else item[key] = key === 'text' ? field.value : Math.max(0,Math.min(episode.duration,Number(field.value)));
+      item.end = Math.max(item.start,item.end);
+    }
+    renderPrototype(); return;
+  }
+  if (field.dataset.timelineValue) { const property = timelineProperty(field.dataset.timelineValue); if (property) setTimelineValue(property,field.value); renderPrototype(); return; }
+  if (id === 'asset-files') {
+    for (const file of field.files) { const item = importFile(file); if (item) selectedMediaId = item.id; }
+    renderPrototype(); persistProject('Media library'); return;
+  }
+  if (id === 'media-source-note') { const item = mediaById(selectedMediaId); if (item) item.sourceNote = field.value; persistProject('Media library'); return; }
+  if (id === 'preset-select') { templateId = field.value; working = clone(currentTemplate()); dirty = false; renderPrototype(); return; }
+  if (id === 'rail-motion') { working.zoneMotion ??= {}; working.zoneMotion['LEFT RAIL'] = field.value; dirty = true; renderPrototype(); return; }
+  if (id === 'template-name') { working.name = field.value.trim() || working.name; dirty = true; renderPrototype(); return; }
+  if (field.dataset.zoneEnabled) { working.zoneEnabled[field.dataset.zoneEnabled] = field.checked; dirty = true; renderPrototype(); return; }
+  if (field.dataset.toggleModule) { working.modules[field.dataset.toggleModule].enabled = field.checked; dirty = true; selectedModule = field.dataset.toggleModule; renderPrototype(); return; }
+  if (field.dataset.templateSetting) { working.modules[selectedModule][field.dataset.templateSetting] = field.value; dirty = true; renderPrototype(); return; }
+  if (field.dataset.episodeSetting) { episode.hud.modules[selectedModule][field.dataset.episodeSetting] = field.value; renderPrototype(); return; }
+  if (id === 'episode-module-enabled') { episode.hud.modules[selectedModule].enabled = field.checked; renderPrototype(); return; }
+  if (id === 'playhead') { playhead = Number(field.value); renderPrototype(); return; }
+  if (id === 'episode-player') {
+    setEpisodeBinding('player',field.value);
+    renderPrototype(); return;
+  }
+  if (id === 'episode-location') {
+    const chosen = recordById(field.value), snapshot = chosen ? clone(chosen) : null;
+    if (playhead === 0) episode.bindings.location = snapshot;
+    setPoint('location',snapshot); renderPrototype(); return;
+  }
+  if (field.dataset.gearSlot !== undefined) {
+    setEpisodeBinding('gear:'+field.dataset.gearSlot,field.value);
+    renderPrototype(); return;
+  }
+  if (id === 'episode-xp' || id === 'episode-stamina') {
+    const value = Math.max(0, Number(field.value)); setPoint(id === 'episode-xp' ? 'xp' : 'stamina', id === 'episode-stamina' ? Math.min(100,value) : value);
+    renderPrototype(); return;
+  }
+  if (id === 'gear-selection') { setPoint('gearSelection',Number(field.value)); renderPrototype(); return; }
+  const overlay = episode?.overlays.find(item => item.id === selectedOverlayId);
+  const overlayField = {'overlay-text':'text','overlay-start':'start','overlay-end':'end','overlay-x':'x','overlay-y':'y'}[id];
+  if (overlay && overlayField) {
+    if (overlayField === 'x' || overlayField === 'y') {
+      const position = overlayPosition(overlay,playhead);
+      setOverlayPosition(overlay,overlayField === 'x' ? Number(field.value) : position.x,overlayField === 'y' ? Number(field.value) : position.y);
+    } else overlay[overlayField] = overlayField === 'text' ? field.value : Number(field.value);
+    overlay.start = Math.max(0,Math.min(episode.duration,overlay.start));
+    overlay.end = Math.max(overlay.start,Math.min(episode.duration,overlay.end));
+    renderPrototype(); return;
+  }
+  const record = recordById(selectedRecordId);
+  const recordField = {'record-type':'type','record-name':'name','record-note':'note','record-media':'mediaId','record-level':'defaultLevel','record-xp':'defaultXp','record-goal':'xpGoal'}[id];
+  if (record && recordField) {
+    record[recordField] = ['defaultLevel','defaultXp','xpGoal'].includes(recordField) ? Math.max(0,Number(field.value)) : field.value;
+    renderPrototype(); persistProject('Data library');
+  }
+});
+document.addEventListener('input', event => {
+  if (event.target.id !== 'asset-search') return;
+  assetSearch = event.target.value.toLowerCase();
+  document.querySelectorAll('.asset-list .asset-row').forEach(row => { row.hidden = !row.textContent.toLowerCase().includes(assetSearch); });
+});
+document.addEventListener('dragstart', event => {
+  const palette = event.target.closest('[data-overlay-palette]');
+  const instance = event.target.closest('[data-overlay-id]');
+  if (palette) event.dataTransfer.setData('text/plain','new:'+palette.dataset.overlayPalette);
+  else if (instance) event.dataTransfer.setData('text/plain','move:'+instance.dataset.overlayId);
+});
+document.addEventListener('dragover', event => { if (event.target.closest('#hud-canvas') && current === 'episode_editor') event.preventDefault(); });
+document.addEventListener('drop', event => {
+  const canvas = event.target.closest('#hud-canvas'); if (!canvas || current !== 'episode_editor') return;
+  event.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.max(0,Math.min(100,100*(event.clientX-rect.left)/rect.width));
+  const y = Math.max(0,Math.min(100,100*(event.clientY-rect.top)/rect.height));
+  const data = event.dataTransfer.getData('text/plain');
+  if (data.startsWith('new:')) createOverlay(data.slice(4),x,y);
+  else if (data.startsWith('move:')) {
+    const item = episode.overlays.find(overlay => overlay.id === data.slice(5));
+    if (item) { setOverlayPosition(item,x,y); selectedOverlayId = item.id; renderPrototype(); }
+  }
+});
+renderFlow();
+renderSpec();
+renderPrototype();
+ProjectStore.load().then(snapshot => {
+  if (hydrateProject(snapshot)) { renderPrototype(); notify('Saved project loaded from this device'); }
+});
+</script>
+</body>
+</html>

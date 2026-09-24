@@ -1,0 +1,675 @@
+{
+  "version": "0.7",
+  "language": "en",
+  "phase": "workflow_definition",
+  "principle": "THE WORLD IS THE GAME. THE SYSTEM is an authoring application over real footage, not a simulated 3D game.",
+  "status_meaning": {
+    "approved": "Current product decision; reconsider only with a clear reason.",
+    "draft": "Working decision to validate in the next block review.",
+    "pending": "Intent recorded; detailed behavior is not yet specified."
+  },
+  "screens": {
+    "main_menu": {
+      "title": "MAIN MENU",
+      "status": "approved",
+      "visual_status": "html_template",
+      "visual_note": "Code-native menu with EPISODES, CONFIGURE HUD and ASSETS. Final cinematic imagery will be designed later.",
+      "controls": [
+        {
+          "id": "episodes",
+          "component": "PrimaryButton",
+          "label": "EPISODES",
+          "interaction": "click",
+          "action_type": "navigate",
+          "target": "episodes",
+          "status": "approved"
+        },
+        {
+          "id": "configure_hud",
+          "component": "SecondaryButton",
+          "label": "CONFIGURE HUD",
+          "interaction": "click",
+          "action_type": "navigate",
+          "target": "configure_hud",
+          "status": "approved"
+        },
+        {
+          "id": "assets",
+          "component": "SecondaryButton",
+          "label": "ASSETS",
+          "interaction": "click",
+          "action_type": "navigate",
+          "target": "assets",
+          "status": "approved"
+        },
+        {
+          "id": "quit_game",
+          "component": "TextButton",
+          "label": "QUIT GAME",
+          "interaction": "click",
+          "action_type": "command",
+          "command": "QUIT_APP",
+          "status": "draft"
+        }
+      ]
+    },
+    "new_episode": {
+      "title": "NEW EPISODE",
+      "status": "draft",
+      "visual_status": "html_template",
+      "visual_note": "Choose a name and video/image; an existing HUD template is optional because the default is preselected.",
+      "controls": [
+        {
+          "id": "episode_name",
+          "component": "TextInput",
+          "label": "EPISODE NAME",
+          "interaction": "input",
+          "action_type": "input",
+          "writes": [
+            "draft_episode.name"
+          ],
+          "validation": "nonempty_trimmed",
+          "status": "approved"
+        },
+        {
+          "id": "media",
+          "component": "MediaDropzone",
+          "label": "VIDEO / IMAGE",
+          "interaction": "select_file",
+          "action_type": "input",
+          "writes": [
+            "draft_episode.media"
+          ],
+          "validation": "video_or_image",
+          "status": "approved"
+        },
+        {
+          "id": "hud_preset",
+          "component": "PresetSelector",
+          "label": "HUD TEMPLATE (OPTIONAL)",
+          "interaction": "select",
+          "action_type": "select",
+          "reads": [
+            "saved_hud_templates"
+          ],
+          "writes": [
+            "draft_episode.hud_template_id"
+          ],
+          "status": "approved"
+        },
+        {
+          "id": "cancel",
+          "component": "SecondaryButton",
+          "label": "CANCEL",
+          "interaction": "click",
+          "action_type": "navigate",
+          "target": "episodes",
+          "status": "approved"
+        },
+        {
+          "id": "create_episode",
+          "component": "PrimaryButton",
+          "label": "CREATE EPISODE",
+          "interaction": "click",
+          "action_type": "command_then_navigate",
+          "command": "CREATE_EPISODE",
+          "target": "episode_editor",
+          "reads": [
+            "draft_episode.name",
+            "draft_episode.media",
+            "draft_episode.hud_template_id"
+          ],
+          "enabled_when": [
+            "episode_name_valid",
+            "media_selected"
+          ],
+          "persistence": "create episode with selected or default template snapshot and media reference",
+          "status": "draft"
+        }
+      ]
+    },
+    "episodes": {
+      "title": "EPISODES",
+      "status": "approved",
+      "visual_status": "html_template",
+      "visual_note": "Code-native episode cards plus NEW EPISODE on one screen; no internal Load/New tabs.",
+      "controls": [
+        {
+          "id": "girona",
+          "component": "EpisodeCard",
+          "label": "GIRONA",
+          "interaction": "click",
+          "action_type": "command_then_navigate",
+          "command": "OPEN_EPISODE",
+          "payload": {
+            "episode_id": "girona_example"
+          },
+          "target": "episode_editor",
+          "status": "approved"
+        },
+        {
+          "id": "new_episode",
+          "component": "EpisodeCard",
+          "label": "NEW EPISODE",
+          "interaction": "click",
+          "action_type": "navigate",
+          "target": "new_episode",
+          "status": "approved"
+        },
+        {
+          "id": "back",
+          "component": "BackButton",
+          "label": "BACK",
+          "interaction": "click",
+          "action_type": "navigate",
+          "target": "main_menu",
+          "status": "approved"
+        }
+      ]
+    },
+    "configure_hud": {
+      "title": "CONFIGURE HUD",
+      "status": "draft",
+      "visual_status": "html_wireframe",
+      "visual_note": "Template context of the shared HUD workspace. Fixed zones, module order, variants, motion and preview states; no episode data.",
+      "controls": [
+        {
+          "id": "back",
+          "component": "BackButton",
+          "label": "BACK",
+          "interaction": "click",
+          "action_type": "navigate",
+          "target": "main_menu",
+          "status": "approved"
+        },
+        {
+          "id": "preset",
+          "component": "PresetSelector",
+          "label": "HUD PRESET",
+          "interaction": "select",
+          "action_type": "select",
+          "reads": [
+            "saved_hud_presets"
+          ],
+          "writes": [
+            "selected_hud_preset_id"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "new_preset",
+          "component": "SecondaryButton",
+          "label": "NEW",
+          "interaction": "click",
+          "action_type": "command",
+          "command": "CREATE_BASE_HUD_PRESET",
+          "status": "draft"
+        },
+        {
+          "id": "duplicate",
+          "component": "SecondaryButton",
+          "label": "DUPLICATE",
+          "interaction": "click",
+          "action_type": "command",
+          "command": "DUPLICATE_HUD_PRESET",
+          "status": "draft"
+        },
+        {
+          "id": "save",
+          "component": "PrimaryButton",
+          "label": "SAVE",
+          "interaction": "click",
+          "action_type": "command",
+          "command": "SAVE_HUD_PRESET",
+          "persistence": "update selected preset",
+          "status": "draft"
+        },
+        {
+          "id": "module_select",
+          "component": "HUDModuleRow",
+          "label": "SELECT MODULE",
+          "interaction": "click",
+          "action_type": "set_state",
+          "writes": [
+            "selected_module_id"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "module_enabled",
+          "component": "Toggle",
+          "label": "ENABLED",
+          "interaction": "click",
+          "action_type": "set_state",
+          "writes": [
+            "working_preset.modules[selected_module_id].enabled"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "variant",
+          "component": "Select",
+          "label": "VISUAL VARIANT",
+          "interaction": "select",
+          "action_type": "select",
+          "writes": [
+            "working_preset.modules[selected_module_id].variant_id"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "motion",
+          "component": "Select",
+          "label": "MOTION PRESET",
+          "interaction": "select",
+          "action_type": "select",
+          "writes": [
+            "working_preset.modules[selected_module_id].motion_id"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "rail_motion",
+          "component": "Select",
+          "label": "LEFT RAIL TRANSITION",
+          "interaction": "select",
+          "action_type": "select",
+          "writes": [
+            "working_preset.zoneMotion.LEFT_RAIL"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "preview_state",
+          "component": "StateSelector",
+          "label": "PREVIEW STATE",
+          "interaction": "select",
+          "action_type": "set_state",
+          "writes": [
+            "preview_only.module_state"
+          ],
+          "persistence": "none",
+          "status": "draft"
+        }
+      ]
+    },
+    "assets": {
+      "title": "ASSETS",
+      "status": "draft",
+      "visual_status": "html_template",
+      "visual_note": "Media files, reusable Data Library records and a read-only UI component catalog. Template appearance lives in CONFIGURE HUD; episode data and time live in the Episode Editor.",
+      "controls": [
+        {
+          "id": "back",
+          "component": "BackButton",
+          "label": "BACK",
+          "interaction": "click",
+          "action_type": "navigate",
+          "target": "main_menu",
+          "status": "approved"
+        },
+        {
+          "id": "library_tab",
+          "component": "TabBar",
+          "label": "MEDIA / DATA LIBRARY / UI COMPONENTS",
+          "interaction": "click",
+          "action_type": "set_state",
+          "writes": [
+            "assets.active_tab"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "import",
+          "component": "PrimaryButton",
+          "label": "IMPORT MEDIA",
+          "interaction": "select_file",
+          "action_type": "command",
+          "command": "IMPORT_MEDIA",
+          "status": "draft"
+        },
+        {
+          "id": "search",
+          "component": "TextInput",
+          "label": "SEARCH",
+          "interaction": "input",
+          "action_type": "input",
+          "writes": [
+            "assets.search_query"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "media_card",
+          "component": "MediaCard",
+          "label": "MEDIA CARD",
+          "interaction": "click",
+          "action_type": "set_state",
+          "writes": [
+            "assets.selected_media_id"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "content_record",
+          "component": "ContentCard",
+          "label": "CONTENT RECORD",
+          "interaction": "click",
+          "action_type": "set_state",
+          "writes": [
+            "assets.selected_content_id"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "component_card",
+          "component": "UIComponentCard",
+          "label": "UI COMPONENT",
+          "interaction": "click",
+          "action_type": "set_state",
+          "writes": [
+            "assets.selected_component_id"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "new_record",
+          "component": "PrimaryButton",
+          "label": "NEW DATA RECORD",
+          "interaction": "click",
+          "action_type": "command",
+          "command": "CREATE_DATA_RECORD",
+          "status": "draft"
+        },
+        {
+          "id": "remove_record",
+          "component": "SecondaryButton",
+          "label": "DELETE OR ARCHIVE RECORD",
+          "interaction": "click",
+          "action_type": "command",
+          "command": "REMOVE_DATA_RECORD",
+          "status": "draft"
+        },
+        {
+          "id": "component_preview_state",
+          "component": "StateSelector",
+          "label": "STATE PREVIEW",
+          "interaction": "select",
+          "action_type": "set_state",
+          "writes": [
+            "assets.preview_state"
+          ],
+          "status": "draft"
+        }
+      ]
+    },
+    "episode_editor": {
+      "title": "EPISODE EDITOR",
+      "status": "draft",
+      "visual_status": "html_wireframe",
+      "visual_note": "Episode context of the shared HUD workspace: media, Data Library bindings, HUD choice, time tracks and manual POV overlays. Browser-local save prototype.",
+      "controls": [
+        {
+          "id": "playhead",
+          "component": "TimelineScrubber",
+          "label": "PLAYHEAD",
+          "interaction": "input",
+          "action_type": "input",
+          "writes": [
+            "episode.preview_time"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "timeline_expand",
+          "component": "TimelineTree",
+          "label": "EXPAND ZONE / COMPONENT",
+          "interaction": "click",
+          "action_type": "set_state",
+          "writes": [
+            "timeline.expanded_nodes"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "timeline_keyframe",
+          "component": "KeyframeControl",
+          "label": "ADD / JUMP / DELETE KEYFRAME",
+          "interaction": "click",
+          "action_type": "command",
+          "command": "EDIT_PROPERTY_KEYFRAME",
+          "status": "draft"
+        },
+        {
+          "id": "timeline_property",
+          "component": "PropertyControl",
+          "label": "EDIT PROPERTY AT PLAYHEAD",
+          "interaction": "input",
+          "action_type": "input",
+          "writes": [
+            "episode.tracks[selected_property]"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "timeline_binding",
+          "component": "RecordSelector",
+          "label": "ASSIGN PLAYER / GEAR IN TIMELINE",
+          "interaction": "select",
+          "action_type": "select",
+          "writes": [
+            "episode.bindings"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "timeline_overlay_property",
+          "component": "OverlayPropertyControl",
+          "label": "EDIT OVERLAY TEXT / RANGE / POSITION",
+          "interaction": "input",
+          "action_type": "input",
+          "writes": [
+            "episode.overlays[selected]"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "hud_template_choice",
+          "component": "PresetSelector",
+          "label": "CHOOSE HUD TEMPLATE",
+          "interaction": "select",
+          "action_type": "select",
+          "reads": [
+            "saved_hud_presets"
+          ],
+          "writes": [
+            "pending_hud_template_id"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "apply_hud_template",
+          "component": "SecondaryButton",
+          "label": "APPLY HUD",
+          "interaction": "click",
+          "action_type": "command",
+          "command": "APPLY_HUD_TEMPLATE_TO_EPISODE",
+          "status": "draft"
+        },
+        {
+          "id": "undo_hud_template",
+          "component": "SecondaryButton",
+          "label": "UNDO HUD CHANGE",
+          "interaction": "click",
+          "action_type": "command",
+          "command": "RESTORE_PREVIOUS_EPISODE_HUD",
+          "status": "draft"
+        },
+        {
+          "id": "stamina_value",
+          "component": "ValueTrack",
+          "label": "STAMINA VALUE",
+          "interaction": "input",
+          "action_type": "input",
+          "writes": [
+            "episode.tracks.stamina_value"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "xp_value",
+          "component": "ValueTrack",
+          "label": "PLAYER XP",
+          "interaction": "input",
+          "action_type": "input",
+          "writes": [
+            "episode.tracks.xp"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "left_rail_state",
+          "component": "PanelStateButton",
+          "label": "LEFT RAIL FOLDED / OPEN / PINNED",
+          "interaction": "click",
+          "action_type": "set_state",
+          "writes": [
+            "episode.tracks.left_rail_state"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "player_binding",
+          "component": "RecordSelector",
+          "label": "PLAYER",
+          "interaction": "select",
+          "action_type": "select",
+          "writes": [
+            "episode.bindings.player"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "gear_slots",
+          "component": "RecordSelector",
+          "label": "FIVE GEAR SLOTS",
+          "interaction": "select",
+          "action_type": "select",
+          "writes": [
+            "episode.bindings.gear"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "location_track",
+          "component": "RecordTrack",
+          "label": "LOCATION AT PLAYHEAD",
+          "interaction": "select",
+          "action_type": "select",
+          "writes": [
+            "episode.tracks.location"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "overlay_add",
+          "component": "OverlayPalette",
+          "label": "ADD POV OVERLAY",
+          "interaction": "drag_drop",
+          "action_type": "set_state",
+          "writes": [
+            "episode.overlays"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "overlay_position",
+          "component": "PositionTrack",
+          "label": "OVERLAY POSITION AT PLAYHEAD",
+          "interaction": "drag_drop",
+          "action_type": "set_state",
+          "writes": [
+            "episode.overlays[selected].positions"
+          ],
+          "status": "draft"
+        },
+        {
+          "id": "save_episode",
+          "component": "PrimaryButton",
+          "label": "SAVE EPISODE",
+          "interaction": "click",
+          "action_type": "command",
+          "command": "SAVE_EPISODE",
+          "status": "draft"
+        },
+        {
+          "id": "exit_editor",
+          "component": "BackButton",
+          "label": "EPISODES",
+          "interaction": "click",
+          "action_type": "navigate",
+          "target": "episodes",
+          "status": "draft"
+        }
+      ]
+    }
+  },
+  "scenarios": [
+    {
+      "id": "create_first_episode",
+      "status": "draft",
+      "steps": [
+        "main_menu.episodes",
+        "episodes.new_episode",
+        "new_episode.episode_name",
+        "new_episode.media",
+        "new_episode.hud_preset",
+        "new_episode.create_episode"
+      ],
+      "expected_screen": "episode_editor"
+    },
+    {
+      "id": "open_existing_girona",
+      "status": "approved",
+      "steps": [
+        "main_menu.episodes",
+        "episodes.girona"
+      ],
+      "expected_screen": "episode_editor"
+    },
+    {
+      "id": "switch_episode_hud",
+      "status": "draft",
+      "steps": [
+        "main_menu.episodes",
+        "episodes.girona",
+        "episode_editor.hud_template_choice",
+        "episode_editor.apply_hud_template",
+        "episode_editor.save_episode"
+      ],
+      "expected_screen": "episode_editor"
+    },
+    {
+      "id": "configure_hud_preset",
+      "status": "draft",
+      "steps": [
+        "main_menu.configure_hud",
+        "configure_hud.module_select",
+        "configure_hud.module_enabled",
+        "configure_hud.save"
+      ],
+      "expected_screen": "configure_hud"
+    },
+    {
+      "id": "inspect_component_catalog",
+      "status": "draft",
+      "steps": [
+        "main_menu.assets",
+        "assets.library_tab",
+        "assets.component_card",
+        "assets.component_preview_state"
+      ],
+      "expected_screen": "assets"
+    }
+  ]
+}

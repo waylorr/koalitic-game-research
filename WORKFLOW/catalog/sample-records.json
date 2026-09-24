@@ -1,0 +1,40 @@
+{
+  "content_records": [
+    {
+      "id": "player_jordi",
+      "type": "Player",
+      "name": "Jordi",
+      "note": "Example player record; choose a portrait from imported media later.",
+      "defaultLevel": 12,
+      "defaultXp": 3250,
+      "xpGoal": 5000
+    },
+    {
+      "id": "player_arnau",
+      "type": "Player",
+      "name": "Arnau",
+      "note": "Second reusable player for testing episode bindings.",
+      "defaultLevel": 8,
+      "defaultXp": 1800,
+      "xpGoal": 3000
+    },
+    {
+      "id": "gear_nikon",
+      "type": "Gear",
+      "name": "Nikon Z5 II",
+      "note": "Example equipment record; episode slots refer to records, not imported files directly."
+    },
+    {
+      "id": "location_girona",
+      "type": "Location",
+      "name": "Girona",
+      "note": "Example place record for map and location labels."
+    },
+    {
+      "id": "location_barcelona",
+      "type": "Location",
+      "name": "Barcelona",
+      "note": "Example place record to demonstrate a location change during one episode."
+    }
+  ]
+}

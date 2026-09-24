@@ -1,0 +1,565 @@
+{
+  "ui_components": {
+    "Player Profile": {
+      "zone": "LEFT RAIL",
+      "label": "PLAYER PROFILE",
+      "description": "Identity, portrait, level and XP display.",
+      "children": [
+        "Portrait",
+        "Player Name",
+        "Level",
+        "XP Value",
+        "XP Bar"
+      ],
+      "states": [
+        "Compact",
+        "Hover",
+        "Open",
+        "Pinned",
+        "Disabled"
+      ],
+      "variants": [
+        "Compact Glass",
+        "Holographic Card"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "player record",
+      "episode_bindings": [
+        {
+          "key": "player",
+          "child": "Player Name",
+          "label": "Player Record",
+          "kind": "Player"
+        }
+      ],
+      "timeline_properties": [
+        {
+          "key": "xp",
+          "child": "XP Value",
+          "label": "XP / Progress Bar",
+          "kind": "number",
+          "interpolation": "linear",
+          "min": 0
+        }
+      ]
+    },
+    "Inventory / Loadout": {
+      "zone": "LEFT RAIL",
+      "label": "INVENTORY / LOADOUT",
+      "description": "Shows the equipment selected for this episode.",
+      "children": [
+        "Header",
+        "Gear Slots",
+        "Selected Item"
+      ],
+      "states": [
+        "Compact",
+        "Hover",
+        "Open",
+        "Pinned",
+        "Disabled"
+      ],
+      "variants": [
+        "Compact Glass",
+        "Expanded Cards"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Snap"
+      ],
+      "content_binding": "episode gear slots"
+    },
+    "Gear Radial": {
+      "zone": "LEFT RAIL",
+      "label": "GEAR RADIAL",
+      "description": "Five authored sectors for selecting gear.",
+      "children": [
+        "Center Selection",
+        "Sector 1",
+        "Sector 2",
+        "Sector 3",
+        "Sector 4",
+        "Sector 5"
+      ],
+      "states": [
+        "Folded",
+        "Hover",
+        "Open",
+        "Pinned",
+        "Selected",
+        "Disabled"
+      ],
+      "variants": [
+        "Five Sector",
+        "Holographic Five Sector"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode gear slots",
+      "episode_bindings": [
+        {
+          "key": "gear:0",
+          "child": "Sector 1",
+          "label": "Gear Record",
+          "kind": "Gear"
+        },
+        {
+          "key": "gear:1",
+          "child": "Sector 2",
+          "label": "Gear Record",
+          "kind": "Gear"
+        },
+        {
+          "key": "gear:2",
+          "child": "Sector 3",
+          "label": "Gear Record",
+          "kind": "Gear"
+        },
+        {
+          "key": "gear:3",
+          "child": "Sector 4",
+          "label": "Gear Record",
+          "kind": "Gear"
+        },
+        {
+          "key": "gear:4",
+          "child": "Sector 5",
+          "label": "Gear Record",
+          "kind": "Gear"
+        }
+      ],
+      "timeline_properties": [
+        {
+          "key": "gearSelection",
+          "child": "Center Selection",
+          "label": "Selected Sector",
+          "kind": "sector",
+          "interpolation": "hold"
+        }
+      ]
+    },
+    "Stamina": {
+      "zone": "LEFT RAIL",
+      "label": "STAMINA",
+      "description": "One animated percentage drives the number and bar.",
+      "children": [
+        "Icon",
+        "Label",
+        "Value Number",
+        "Progress Bar"
+      ],
+      "states": [
+        "Compact",
+        "Hover",
+        "Open",
+        "Pinned",
+        "Disabled"
+      ],
+      "variants": [
+        "Segmented Bar",
+        "Glass Bar"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode value track",
+      "timeline_properties": [
+        {
+          "key": "stamina",
+          "child": "Value Number",
+          "label": "Value / Progress Bar",
+          "kind": "number",
+          "interpolation": "linear",
+          "min": 0,
+          "max": 100
+        }
+      ]
+    },
+    "Time Left": {
+      "zone": "LEFT RAIL",
+      "label": "TIME LEFT",
+      "description": "Countdown display from the episode timeline.",
+      "children": [
+        "Clock Icon",
+        "Time Number"
+      ],
+      "states": [
+        "Compact",
+        "Open",
+        "Disabled"
+      ],
+      "variants": [
+        "Digital",
+        "Minimal"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode timer"
+    },
+    "Logo / System Online": {
+      "zone": "TOP BAR",
+      "label": "SYSTEM ONLINE",
+      "description": "KOALITIC identity and system status.",
+      "children": [
+        "Logo",
+        "System Status"
+      ],
+      "states": [
+        "Idle",
+        "Hover",
+        "Active",
+        "Disabled"
+      ],
+      "variants": [
+        "Compact",
+        "Holographic"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "system status"
+    },
+    "Navigation Tabs": {
+      "zone": "TOP BAR",
+      "label": "NAVIGATION TABS",
+      "description": "Profile, Map, Gear, Quest, Gallery and Codex navigation.",
+      "children": [
+        "Profile Tab",
+        "Map Tab",
+        "Gear Tab",
+        "Quest Tab",
+        "Gallery Tab",
+        "Codex Tab"
+      ],
+      "states": [
+        "Idle",
+        "Hover",
+        "Selected",
+        "Disabled"
+      ],
+      "variants": [
+        "Line Tabs",
+        "Glass Tabs"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Snap"
+      ],
+      "content_binding": "active HUD tab"
+    },
+    "Location Header": {
+      "zone": "TOP BAR",
+      "label": "LOCATION HEADER",
+      "description": "Current place and optional coordinates.",
+      "children": [
+        "Place Name",
+        "Subtitle",
+        "Coordinates"
+      ],
+      "states": [
+        "Compact",
+        "Open",
+        "Disabled"
+      ],
+      "variants": [
+        "Compact",
+        "Detailed"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode location record",
+      "timeline_properties": [
+        {
+          "key": "location",
+          "child": "Place Name",
+          "label": "Location Record",
+          "kind": "location",
+          "interpolation": "hold"
+        }
+      ]
+    },
+    "Active Mission": {
+      "zone": "RIGHT RAIL",
+      "label": "ACTIVE MISSION",
+      "description": "Current quest and progress.",
+      "children": [
+        "Mission Title",
+        "Objective",
+        "Progress"
+      ],
+      "states": [
+        "Compact",
+        "Hover",
+        "Open",
+        "Pinned",
+        "Disabled"
+      ],
+      "variants": [
+        "Compact Card",
+        "Detailed Card"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode mission record"
+    },
+    "Photo Opportunities": {
+      "zone": "RIGHT RAIL",
+      "label": "PHOTO OPPORTUNITIES",
+      "description": "Photo goals and completion states.",
+      "children": [
+        "Header",
+        "Goal Card",
+        "Completion Count"
+      ],
+      "states": [
+        "Compact",
+        "Hover",
+        "Open",
+        "Pinned",
+        "Disabled"
+      ],
+      "variants": [
+        "List",
+        "Glass Cards"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Snap"
+      ],
+      "content_binding": "episode photo goals"
+    },
+    "Location / Mini Map": {
+      "zone": "RIGHT RAIL",
+      "label": "LOCATION / MINI MAP",
+      "description": "Compact place map and markers.",
+      "children": [
+        "Map Frame",
+        "Player Marker",
+        "Quest Marker",
+        "Location Label"
+      ],
+      "states": [
+        "Compact",
+        "Hover",
+        "Open",
+        "Pinned",
+        "Disabled"
+      ],
+      "variants": [
+        "Wireframe",
+        "Satellite"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode map record"
+    },
+    "Codex Compact": {
+      "zone": "RIGHT RAIL",
+      "label": "CODEX COMPACT",
+      "description": "Short contextual knowledge entry.",
+      "children": [
+        "Entry Title",
+        "Fact Lines",
+        "Illustration"
+      ],
+      "states": [
+        "Compact",
+        "Hover",
+        "Open",
+        "Pinned",
+        "Disabled"
+      ],
+      "variants": [
+        "Text",
+        "Illustrated"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Snap"
+      ],
+      "content_binding": "episode codex record"
+    },
+    "Weather / Location": {
+      "zone": "POV OVERLAYS",
+      "label": "WEATHER / LOCATION",
+      "description": "Temporary place and weather callout over the footage.",
+      "children": [
+        "Anchor",
+        "Place Label",
+        "Weather Icon",
+        "Temperature"
+      ],
+      "states": [
+        "Hidden",
+        "Appear",
+        "Visible",
+        "Exit"
+      ],
+      "variants": [
+        "Compact",
+        "Holographic"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode location and weather"
+    },
+    "Person Identification": {
+      "zone": "POV OVERLAYS",
+      "label": "PERSON IDENTIFICATION",
+      "description": "Manual callout anchored to a person in the footage; no automatic detection.",
+      "children": [
+        "Anchor",
+        "Person Name",
+        "Context Label",
+        "Connector"
+      ],
+      "states": [
+        "Hidden",
+        "Appear",
+        "Visible",
+        "Exit"
+      ],
+      "variants": [
+        "Compact",
+        "Holographic"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "local text or person record"
+    },
+    "System Notification": {
+      "zone": "POV OVERLAYS",
+      "label": "SYSTEM NOTIFICATION",
+      "description": "Temporary status, warning or alert.",
+      "children": [
+        "Icon",
+        "Message",
+        "Priority Accent"
+      ],
+      "states": [
+        "Hidden",
+        "Appear",
+        "Visible",
+        "Exit"
+      ],
+      "variants": [
+        "Info",
+        "Warning"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode notification event"
+    },
+    "Photo Result": {
+      "zone": "POV OVERLAYS",
+      "label": "PHOTO RESULT",
+      "description": "Captured photo and rank reveal.",
+      "children": [
+        "Photo Thumbnail",
+        "Rank",
+        "XP Reward"
+      ],
+      "states": [
+        "Hidden",
+        "Appear",
+        "Visible",
+        "Exit"
+      ],
+      "variants": [
+        "Compact",
+        "Cinematic"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode photo result event"
+    },
+    "Quest Reveal": {
+      "zone": "POV OVERLAYS",
+      "label": "QUEST REVEAL",
+      "description": "New quest announcement.",
+      "children": [
+        "Quest Title",
+        "Objective",
+        "Symbol"
+      ],
+      "states": [
+        "Hidden",
+        "Appear",
+        "Visible",
+        "Exit"
+      ],
+      "variants": [
+        "Compact",
+        "Cinematic"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode quest event"
+    },
+    "Level Up": {
+      "zone": "POV OVERLAYS",
+      "label": "LEVEL UP",
+      "description": "Player level milestone.",
+      "children": [
+        "Level Number",
+        "XP Burst",
+        "Title"
+      ],
+      "states": [
+        "Hidden",
+        "Appear",
+        "Visible",
+        "Exit"
+      ],
+      "variants": [
+        "Compact",
+        "Cinematic"
+      ],
+      "motions": [
+        "Smooth Reveal",
+        "Pulse"
+      ],
+      "content_binding": "episode level event"
+    }
+  },
+  "timeline_zone_properties": {
+    "LEFT RAIL": [
+      {
+        "key": "leftRail",
+        "label": "Panel State",
+        "kind": "rail_state",
+        "interpolation": "hold",
+        "states": [
+          "Folded",
+          "Open",
+          "Pinned"
+        ]
+      }
+    ]
+  }
+}

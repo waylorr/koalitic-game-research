@@ -1,0 +1,14 @@
+# Material original voluminoso. La selección de referencias para Claude está en
+# ENTREGA_CLAUDE/referencias/ASSETS ANTIGUOS/.
+/ASSETS ANTIGUOS/
+
+# Vídeo de referencia local (150 MB). No forma parte del primer clon en la nube.
+/ENTREGA_CLAUDE/referencias/WhatsApp Video 2026-09-15 at 16.52.45.mp4
+
+# Archivos locales y dependencias que no deben entrar en el repositorio.
+.DS_Store
+Thumbs.db
+node_modules/
+.env
+.env.*
+!.env.example
