@@ -38,6 +38,9 @@
 .k-hud { position: absolute; inset: 0; pointer-events: none; }
 .k-hud .k-hit { pointer-events: auto; cursor: pointer; }
 
+/* Container that scales the 1920×1080 stage into the available space */
+.k-stage-outer { position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; padding: 10px; overflow: hidden; }
+
 /* Shell */
 .k-corner { position: absolute; width: 64px; height: 64px; }
 .k-corner path { fill: none; stroke: var(--k-cyan-soft); stroke-width: 2; }

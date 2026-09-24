@@ -1,9 +1,7 @@
 import { createRoot } from 'react-dom/client';
-import '@fontsource/michroma/latin-400.css';
 import '@fontsource/rajdhani/latin-500.css';
 import '@fontsource/rajdhani/latin-600.css';
 import '@fontsource/rajdhani/latin-700.css';
-import './ui/tokens.css';
-import { App } from './app/App';
+import { LabApp } from './LabApp';
 
-createRoot(document.getElementById('root')!).render(<App />);
+createRoot(document.getElementById('root')!).render(<LabApp />);

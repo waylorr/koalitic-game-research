@@ -1,0 +1,61 @@
+/* Engine lab UI: a plain developer page for the time engine, not part of the product look. */
+:root {
+  --ui-bg: #070b10;
+  --ui-panel: #0d141c;
+  --ui-line: #1f2d3a;
+  --ui-text: #d6e4ee;
+  --ui-dim: #7f95a6;
+  --ui-accent: #54e4ff;
+  --ui-key: #ffc331;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { background: var(--ui-bg); color: var(--ui-text); font: 14px/1.4 'Rajdhani', system-ui, sans-serif; }
+button, select, input { max-width: 100%; font: inherit; color: var(--ui-text); background: var(--ui-panel); border: 1px solid var(--ui-line); border-radius: 3px; padding: 4px 10px; }
+button:hover:not(:disabled) { border-color: var(--ui-accent); }
+button:disabled { opacity: 0.35; }
+.lab { display: grid; grid-template-rows: auto 1fr auto; height: 100%; min-height: 640px; padding-inline: 16px; }
+.lab-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-block: 8px; border-bottom: 1px solid var(--ui-line); }
+.lab-bar strong { letter-spacing: 0.12em; margin-right: 8px; }
+.lab-timecode { font-size: 20px; font-weight: 700; color: var(--ui-accent); font-variant-numeric: tabular-nums; min-width: 92px; }
+.lab-file { position: relative; overflow: hidden; border: 1px solid var(--ui-accent); border-radius: 3px; padding: 4px 10px; cursor: pointer; color: var(--ui-accent); }
+.lab-file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.lab-main { display: grid; grid-template-columns: 1fr 320px; min-height: 0; }
+.lab-side { border-left: 1px solid var(--ui-line); padding: 10px 0 10px 14px; overflow: auto; display: flex; flex-direction: column; gap: 14px; }
+.lab-inspector { display: flex; flex-direction: column; gap: 6px; }
+.lab-inspector h3, .lab-help h3 { margin: 0; font-size: 15px; letter-spacing: 0.12em; color: var(--ui-accent); }
+.lab-inspector label { margin-top: 6px; font-size: 13px; letter-spacing: 0.06em; color: var(--ui-dim); display: flex; justify-content: space-between; align-items: center; }
+.lab-seg { display: flex; gap: 4px; flex-wrap: wrap; }
+.lab-seg button.on { border-color: var(--ui-accent); color: var(--ui-accent); }
+.lab-inline { display: flex; gap: 6px; align-items: center; }
+.lab-inline input[type=range] { flex: 1; padding: 0; }
+.lab-inline input[type=number] { width: 70px; }
+.lab-del { padding: 0 7px; line-height: 18px; }
+.lab-hint, .lab-help p { margin: 0; font-size: 13px; color: var(--ui-dim); }
+.lab-help { display: flex; flex-direction: column; gap: 6px; }
+.lab-perf { font-size: 13px; color: var(--ui-dim); display: flex; flex-direction: column; gap: 3px; border: 1px solid var(--ui-line); padding: 8px; }
+.lab-perf b { color: var(--ui-text); }
+.lab-timeline { display: grid; grid-template-columns: 330px 1fr; border-top: 1px solid var(--ui-line); padding-block: 6px 10px; }
+.tl-labels, .tl-lanes { display: flex; flex-direction: column; }
+.tl-lanes { position: relative; overflow: hidden; }
+.tl-label, .tl-lane { height: 28px; border-bottom: 1px solid var(--ui-line); }
+.tl-label { display: flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; overflow: hidden; }
+.tl-label b { color: var(--ui-accent); font-weight: 600; }
+.tl-label small { margin-left: auto; margin-right: 10px; color: var(--ui-dim); }
+.tl-head { color: var(--ui-dim); letter-spacing: 0.08em; }
+.tl-lane { position: relative; }
+.tl-ruler { cursor: ew-resize; background: #0a1118; }
+.tl-tick { position: absolute; top: 6px; font-size: 11px; color: var(--ui-dim); transform: translateX(-50%); pointer-events: none; }
+.tl-key { position: absolute; top: 4px; transform: translateX(-50%); padding: 0 2px; border: none; background: none; color: var(--ui-key); font-size: 14px; line-height: 20px; }
+.tl-clip { position: absolute; top: 4px; height: 20px; padding: 0 6px; font-size: 11px; background: rgba(255, 195, 49, 0.18); border-color: var(--ui-key); overflow: hidden; white-space: nowrap; text-align: left; }
+.tl-playhead { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #ff2d46; pointer-events: none; }
+@media (max-width: 900px) {
+  .lab { height: auto; min-height: 0; }
+  .lab-main { grid-template-columns: 1fr; }
+  .tl-tick:nth-child(even) { display: none; }
+  .lab-side { border-left: none; border-top: 1px solid var(--ui-line); padding-left: 0; }
+  .lab-timeline { grid-template-columns: 150px 1fr; }
+  .lab-side { overflow: visible; }
+  .k-stage-outer { padding-inline: 0; min-height: 220px; }
+}

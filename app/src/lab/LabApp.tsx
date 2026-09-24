@@ -6,7 +6,7 @@ import { removeKeyAt, upsertKey, type Track } from '../core/tracks';
 import { formatTime, snapToFrame, type Ms } from '../core/time';
 import { HudLayer, ScaledStage } from '../hud/HudLayer';
 import { createClock, Samples } from './clock';
-import './spike.css';
+import './lab.css';
 
 type MediaKind = 'image' | 'video';
 interface MediaChoice { kind: MediaKind; url: string; name: string }
@@ -49,7 +49,7 @@ function Playhead({ duration }: { duration: Ms }) {
 
 function Timecode({ fps }: { fps: number }) {
   const { t } = useSyncExternalStore(clock.subscribe, clock.get);
-  return <span className="spike-timecode" data-testid="timecode">{formatTime(t, fps)}</span>;
+  return <span className="lab-timecode" data-testid="timecode">{formatTime(t, fps)}</span>;
 }
 
 function Timeline({ doc, seek }: { doc: EpisodeDoc; seek: (t: Ms) => void }) {
@@ -62,7 +62,7 @@ function Timeline({ doc, seek }: { doc: EpisodeDoc; seek: (t: Ms) => void }) {
   const at = (t: Ms) => `${(100 * t) / doc.durationMs}%`;
   const ticks = Array.from({ length: Math.floor(doc.durationMs / 10_000) + 1 }, (_, i) => i * 10_000);
   return (
-    <div className="spike-timeline">
+    <div className="lab-timeline">
       <div className="tl-labels">
         <span className="tl-label tl-head">TIMELINE · zone › component › child</span>
         {CHANNELS.map(channel => (
@@ -110,37 +110,37 @@ function AtPlayhead({ doc, setDoc }: { doc: EpisodeDoc; setDoc: (change: (doc: E
   const set = <K extends ChannelId>(id: K, v: ChannelValues[K]) => setDoc(d => withTrack(d, id, track => upsertKey(track, at, v, () => newId('key'))));
   const remove = (id: ChannelId) => setDoc(d => withTrack(d, id, track => removeKeyAt(track, at)));
   const keyed = (id: ChannelId) => (doc.tracks[id] as Track<unknown>).some(key => key.t === at);
-  const del = (id: ChannelId) => <button className="spike-del" disabled={!keyed(id)} onClick={() => remove(id)} title="Delete key at playhead">×</button>;
+  const del = (id: ChannelId) => <button className="lab-del" disabled={!keyed(id)} onClick={() => remove(id)} title="Delete key at playhead">×</button>;
   return (
-    <div className="spike-inspector">
+    <div className="lab-inspector">
       <h3>AT {formatTime(t, doc.fps)}</h3>
       <label>LEFT RAIL · Panel State {del('left-rail.state')}</label>
-      <div className="spike-seg">
+      <div className="lab-seg">
         {RAIL_STATES.map(state => (
           <button key={state} data-testid={`rail-${state}`} className={frame.leftRail.state === state ? 'on' : ''} onClick={() => set('left-rail.state', state)}>{state}</button>
         ))}
       </div>
       <label>STAMINA · Value {del('stamina.value')}</label>
-      <div className="spike-inline">
+      <div className="lab-inline">
         <input type="range" min={0} max={100} value={Math.round(frame.stamina.value)} onChange={event => set('stamina.value', Number(event.target.value))} />
         <input data-testid="stamina-input" type="number" min={0} max={100} value={Math.round(frame.stamina.value)} onChange={event => set('stamina.value', Math.min(100, Math.max(0, Number(event.target.value))))} />
       </div>
       <label>PLAYER PROFILE · XP {del('player-profile.xp')}</label>
       <input type="number" min={0} value={Math.round(frame.player?.xp ?? 0)} onChange={event => set('player-profile.xp', Math.max(0, Number(event.target.value)))} />
       <label>GEAR RADIAL · Selected sector {del('gear-radial.selection')}</label>
-      <div className="spike-seg">
+      <div className="lab-seg">
         {[1, 2, 3, 4, 5].map(sector => (
           <button key={sector} className={frame.radial.selected === sector ? 'on' : ''} onClick={() => set('gear-radial.selection', sector)}>{sector}</button>
         ))}
       </div>
-      <p className="spike-hint">Or click a sector on the HUD: the semantic action becomes a key at the playhead.</p>
+      <p className="lab-hint">Or click a sector on the HUD: the semantic action becomes a key at the playhead.</p>
       <label>PLAYER RECORD (episode constant)</label>
       <select value={doc.bindings.player ?? ''} onChange={event => setDoc(d => ({ ...d, bindings: { ...d.bindings, player: event.target.value || null } }))}>
         <option value="rec_player_jordi">JORDI</option>
         <option value="rec_player_arnau">ARNAU</option>
       </select>
       <label>LEFT RAIL MOTION (template: how)</label>
-      <div className="spike-seg">
+      <div className="lab-seg">
         {(['smooth-reveal', 'snap'] as RailMotionId[]).map(motion => (
           <button key={motion} className={doc.hud.leftRailMotion === motion ? 'on' : ''} onClick={() => setDoc(d => ({ ...d, hud: { ...d.hud, leftRailMotion: motion } }))}>{motion}</button>
         ))}
@@ -154,7 +154,7 @@ function PerfPanel() {
   useEffect(() => { const id = setInterval(() => force(n => n + 1), 500); return () => clearInterval(id); }, []);
   const gap = stats.frameGap.percentile(50);
   return (
-    <div className="spike-perf" data-testid="perf">
+    <div className="lab-perf" data-testid="perf">
       <div>UI fps <b>{gap ? (1000 / gap).toFixed(0) : '—'}</b> · worst frame <b>{stats.frameGap.max().toFixed(1)} ms</b></div>
       <div>evaluate p95 <b>{stats.evaluate.percentile(95).toFixed(3)} ms</b> · HUD render p95 <b>{stats.render.percentile(95).toFixed(2)} ms</b></div>
       <div>dropped video frames <b>{stats.droppedVideoFrames}</b> · H.264 in this browser <b>{H264 || 'no'}</b></div>
@@ -162,7 +162,7 @@ function PerfPanel() {
   );
 }
 
-export function SpikeApp() {
+export function LabApp() {
   const [doc, setDocState] = useState<EpisodeDoc>(DEMO_EPISODE);
   const [media, setMedia] = useState<MediaChoice>(PRESETS[0]!);
   const [mediaReady, setMediaReady] = useState(false);
@@ -242,7 +242,7 @@ export function SpikeApp() {
 
   useEffect(() => {
     Object.assign(window, {
-      __spike: {
+      __lab: {
         seek, play, pause,
         time: () => clock.get().t,
         playing: () => clock.get().playing,
@@ -270,19 +270,19 @@ export function SpikeApp() {
   };
 
   return (
-    <div className="spike">
-      <header className="spike-bar">
-        <strong>KOALITIC · H0 TECH SPIKE</strong>
+    <div className="lab">
+      <header className="lab-bar">
+        <strong>KOALITIC · ENGINE LAB (H0)</strong>
         <button data-testid="play" onClick={() => (clock.get().playing ? pause() : play())}>PLAY / PAUSE</button>
         <Timecode fps={doc.fps} />
         <select value={PRESETS.some(p => p.url === media.url) ? media.url : ''} onChange={event => { const preset = PRESETS.find(p => p.url === event.target.value); if (preset) { pause(); setMediaReady(false); setMedia(preset); } }}>
           {!PRESETS.some(p => p.url === media.url) && <option value="">{media.name}</option>}
           {PRESETS.map(preset => <option key={preset.url} value={preset.url}>{preset.name}</option>)}
         </select>
-        <label className="spike-file">LOAD YOUR VIDEO / IMAGE<input type="file" accept="video/*,image/*" onChange={event => onFile(event.target.files?.[0])} /></label>
+        <label className="lab-file">LOAD YOUR VIDEO / IMAGE<input type="file" accept="video/*,image/*" onChange={event => onFile(event.target.files?.[0])} /></label>
         <button onClick={() => { pause(); setDocState(DEMO_EPISODE); seek(0); }}>RESET DEMO</button>
       </header>
-      <main className="spike-main">
+      <main className="lab-main">
         <ScaledStage>
           {media.kind === 'image' ? (
             <img key={media.url} className="k-media" src={media.url} alt="" onLoad={() => setMediaReady(true)} />
@@ -305,10 +305,10 @@ export function SpikeApp() {
           )}
           <HudView doc={doc} onSector={onSector} />
         </ScaledStage>
-        <aside className="spike-side">
+        <aside className="lab-side">
           <AtPlayhead doc={doc} setDoc={setDoc} />
           <PerfPanel />
-          <div className="spike-help">
+          <div className="lab-help">
             <h3>CÓMO PROBAR</h3>
             <p>Carga tu MP4 con «LOAD YOUR VIDEO»: se abre en tu navegador y no se sube a ningún sitio.</p>
             <p>Espacio reproduce/pausa · ←/→ un fotograma · Shift+←/→ un segundo · arrastra la regla para buscar.</p>

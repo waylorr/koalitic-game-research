@@ -5,7 +5,7 @@
 - Responde al creador en español claro. Es el único usuario inicial de la aplicación; decide producto y estética, mientras tú investigas e implementas.
 - KOALITIC es una aplicación de autoría: coloca un HUD interactivo reutilizable sobre vídeo o imagen ya montados. No es un juego 3D ni un editor de montaje de vídeo. El cursor de autoría nunca forma parte del resultado.
 - Empieza por `ENTREGA_CLAUDE/00_INICIO_CLAUDE_CODE.md`, luego `01_CONTEXTO_Y_ENCARGO.md`, `04_WIREFRAME_Y_WORKFLOW.md`, `03_ARBOL_UI_Y_ASSETS.md`, `02_INVESTIGACION_TECNOLOGICA.md` y `WORKFLOW/README.md`. Contrasta esas descripciones con `WORKFLOW/workflow.json`, `WORKFLOW/catalog/components.json` y el prototipo. Si hay contradicción, prevalecen las decisiones recientes del usuario; identifica lo dudoso en vez de inventar un contrato.
-- La auditoría, la decisión técnica propuesta y los hitos están en `ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md` (pendiente de aprobación). La app nueva vive en `app/`; `WORKFLOW/` queda como referencia.
+- La auditoría, la decisión técnica y los hitos están en `ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md` (§0 recoge las últimas decisiones). La app nueva vive en `app/` (menú y catálogo de UI; laboratorio del motor en `app/lab.html`); `WORKFLOW/` sigue siendo la especificación viva del flujo.
 - `KOALITIC_GAME_MASTER_PROMPT.md` es histórico. `ASSETS ANTIGUOS/` y `ENTREGA_CLAUDE/referencias/` son referencias de comportamiento y estética, no código ni pantallas finales que deban copiarse.
 - El stack sigue abierto. Investiga documentación y licencias actuales de las opciones finalistas y recomienda una ruta sencilla con una alternativa. No adoptes una tecnología por aparecer en un documento de investigación.
 

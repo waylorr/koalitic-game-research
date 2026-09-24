@@ -25,11 +25,11 @@ const check = (name, ok, detail) => {
 async function openPage(media = './test-media/backdrop-girona.jpg') {
   const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
   page.on('pageerror', error => check('no page errors', false, error.message));
-  await page.goto(url);
-  await page.waitForFunction(() => window.__spike?.mediaReady());
+  await page.goto(new URL('lab.html', url).href);
+  await page.waitForFunction(() => window.__lab?.mediaReady());
   if (!media.endsWith('backdrop-girona.jpg')) {
-    await page.evaluate(([u, kind]) => window.__spike.loadMedia(u, kind), [media, media.endsWith('.webm') ? 'video' : 'image']);
-    await page.waitForFunction(() => window.__spike.mediaReady());
+    await page.evaluate(([u, kind]) => window.__lab.loadMedia(u, kind), [media, media.endsWith('.webm') ? 'video' : 'image']);
+    await page.waitForFunction(() => window.__lab.mediaReady());
   }
   await page.evaluate(() => document.fonts.ready);
   return page;
@@ -90,36 +90,36 @@ const describe = (sameDom, diff) => `DOM ${sameDom ? 'identical' : 'DIFFERENT'} 
   const stepped = await openPage();
   for (const c of cases) {
     for (const page of [direct, stepped]) {
-      await page.evaluate(apply => { if (apply) { const doc = window.__spike.doc(); window.__spike.setDoc(eval(`(${apply})`)(doc)); } }, c.doc ? c.doc.toString() : null);
+      await page.evaluate(apply => { if (apply) { const doc = window.__lab.doc(); window.__lab.setDoc(eval(`(${apply})`)(doc)); } }, c.doc ? c.doc.toString() : null);
     }
-    await direct.evaluate(t => window.__spike.seek(t), c.t);
+    await direct.evaluate(t => window.__lab.seek(t), c.t);
     await settle(direct);
     const a = await stageShot(direct);
     // Step through the preceding 1.5 s at 30 fps, rendering every frame.
     for (let t = c.t - 1500; t < c.t; t += 1000 / 30) {
-      await stepped.evaluate(t => window.__spike.seek(t), Math.round(t));
+      await stepped.evaluate(t => window.__lab.seek(t), Math.round(t));
       await settle(stepped);
     }
-    await stepped.evaluate(t => window.__spike.seek(t), c.t);
+    await stepped.evaluate(t => window.__lab.seek(t), c.t);
     await settle(stepped);
     const b = await stageShot(stepped);
     const diff = await pixelDiff(direct, a, b);
     const sameDom = (await hudDom(direct)) === (await hudDom(stepped));
     check(`seek == step-through @${c.t} ms (${c.label})`, sameDom && sameLook(diff), describe(sameDom, diff));
-    for (const page of [direct, stepped]) await page.evaluate(() => window.__spike.reset());
+    for (const page of [direct, stepped]) await page.evaluate(() => window.__lab.reset());
   }
   // Real playback path: play ~1.5 s, pause, then jump a fresh page to the same instant.
   for (const from of [19_500, 44_000, 94_000]) {
-    await stepped.evaluate(() => window.__spike.reset());
-    await stepped.evaluate(t => window.__spike.seek(t), from);
-    await stepped.evaluate(() => window.__spike.play());
+    await stepped.evaluate(() => window.__lab.reset());
+    await stepped.evaluate(t => window.__lab.seek(t), from);
+    await stepped.evaluate(() => window.__lab.play());
     await stepped.waitForTimeout(1500);
-    await stepped.evaluate(() => window.__spike.pause());
+    await stepped.evaluate(() => window.__lab.pause());
     await settle(stepped);
-    const t = await stepped.evaluate(() => window.__spike.time());
+    const t = await stepped.evaluate(() => window.__lab.time());
     const b = await stageShot(stepped);
     const fresh = await openPage();
-    await fresh.evaluate(t => window.__spike.seek(t), t);
+    await fresh.evaluate(t => window.__lab.seek(t), t);
     await settle(fresh);
     const a = await stageShot(fresh);
     const diff = await pixelDiff(fresh, a, b);
@@ -134,22 +134,22 @@ const describe = (sameDom, diff) => `DOM ${sameDom ? 'identical' : 'DIFFERENT'} 
 // 2 · Hidden values keep evaluating; opening shows the value of that moment.
 {
   const page = await openPage();
-  await page.evaluate(() => window.__spike.seek(75_000));
+  await page.evaluate(() => window.__lab.seek(75_000));
   await settle(page);
-  const folded = await page.evaluate(() => ({ state: window.__spike.frame().leftRail.state, stamina: window.__spike.frame().stamina.value, visible: !!document.querySelector('[data-testid=stamina-value]') }));
+  const folded = await page.evaluate(() => ({ state: window.__lab.frame().leftRail.state, stamina: window.__lab.frame().stamina.value, visible: !!document.querySelector('[data-testid=stamina-value]') }));
   check('stamina 90 at 01:15 while folded', folded.state === 'Folded' && folded.stamina === 90 && !folded.visible, JSON.stringify(folded));
   await page.click('[data-testid=rail-Open]');
-  await page.evaluate(() => window.__spike.seek(75_000 + 450));
+  await page.evaluate(() => window.__lab.seek(75_000 + 450));
   await settle(page);
   const shown = await page.textContent('[data-testid=stamina-value]');
-  check('opening the rail at 01:15 shows the current value', shown?.startsWith('90') ?? false, `displayed "${shown}" at 01:15.45 (ramp continues: ${await page.evaluate(() => window.__spike.frame().stamina.value.toFixed(2))})`);
+  check('opening the rail at 01:15 shows the current value', shown?.startsWith('90') ?? false, `displayed "${shown}" at 01:15.45 (ramp continues: ${await page.evaluate(() => window.__lab.frame().stamina.value.toFixed(2))})`);
   await page.close();
 }
 
 // 3 · Radial hit areas: clicks inside each sector select exactly that sector; gaps and centre select nothing.
 {
   const page = await openPage();
-  await page.evaluate(() => window.__spike.seek(5_000));
+  await page.evaluate(() => window.__lab.seek(5_000));
   await settle(page);
   const point = (radius, deg) => page.evaluate(([radius, deg]) => {
     const svg = document.querySelector('[data-testid=gear-radial]');
@@ -159,7 +159,7 @@ const describe = (sameDom, diff) => `DOM ${sameDom ? 'identical' : 'DIFFERENT'} 
     const s = p.matrixTransform(svg.getScreenCTM());
     return { x: s.x, y: s.y };
   }, [radius, deg]);
-  const selectionAt5s = () => page.evaluate(() => window.__spike.doc().tracks['gear-radial.selection'].find(k => k.t === 5000)?.v ?? null);
+  const selectionAt5s = () => page.evaluate(() => window.__lab.doc().tracks['gear-radial.selection'].find(k => k.t === 5000)?.v ?? null);
   let ok = true;
   const log = [];
   for (let k = 0; k < 5; k++) {
@@ -184,10 +184,10 @@ const describe = (sameDom, diff) => `DOM ${sameDom ? 'identical' : 'DIFFERENT'} 
 // 4 · Performance of the render path while playing (container: CPU only, no GPU).
 {
   const page = await openPage();
-  await page.evaluate(() => { window.__spike.seek(64_000); window.__spike.resetStats(); window.__spike.play(); });
+  await page.evaluate(() => { window.__lab.seek(64_000); window.__lab.resetStats(); window.__lab.play(); });
   await page.waitForTimeout(8000);
-  await page.evaluate(() => window.__spike.pause());
-  const s = await page.evaluate(() => window.__spike.stats());
+  await page.evaluate(() => window.__lab.pause());
+  const s = await page.evaluate(() => window.__lab.stats());
   const fps = s.frameGapP50 ? 1000 / s.frameGapP50 : 0;
   check('HUD JS per frame (evaluate + React render) p95 < 8 ms while playing image background',
     s.renderP95 < 8,
@@ -200,18 +200,18 @@ const describe = (sameDom, diff) => `DOM ${sameDom ? 'identical' : 'DIFFERENT'} 
 {
   const page = await openPage('./test-media/sync-counter-1080p30.webm');
   const codecs = await page.evaluate(() => { const v = document.createElement('video'); return { h264: v.canPlayType('video/mp4; codecs="avc1.640028"'), vp9: v.canPlayType('video/webm; codecs="vp9"') }; });
-  await page.evaluate(() => { window.__spike.seek(2_000); window.__spike.resetStats(); });
+  await page.evaluate(() => { window.__lab.seek(2_000); window.__lab.resetStats(); });
   await page.waitForFunction(() => { const v = document.querySelector('video'); return v && !v.seeking && v.readyState >= 2; });
-  await page.evaluate(() => window.__spike.play());
+  await page.evaluate(() => window.__lab.play());
   await page.waitForTimeout(5000);
-  await page.evaluate(() => window.__spike.pause());
+  await page.evaluate(() => window.__lab.pause());
   await settle(page);
-  const sync = await page.evaluate(() => ({ hud: window.__spike.time(), video: Math.round(document.querySelector('video').currentTime * 1000), duration: window.__spike.doc().durationMs, stats: window.__spike.stats() }));
+  const sync = await page.evaluate(() => ({ hud: window.__lab.time(), video: Math.round(document.querySelector('video').currentTime * 1000), duration: window.__lab.doc().durationMs, stats: window.__lab.stats() }));
   const drift = Math.abs(sync.hud - sync.video);
   check('HUD time follows the video clock (paused drift ≤ 1 frame)', drift <= 34 && sync.hud > 6_000,
     `hud ${sync.hud} ms · video ${sync.video} ms · drift ${drift} ms · timeline duration ${sync.duration} ms from metadata · dropped frames ${sync.stats.droppedVideoFrames}`);
   check('codec support reported honestly', true, `this Chromium: H.264 "${codecs.h264 || 'no'}", VP9 "${codecs.vp9 || 'no'}"`);
-  await page.evaluate(() => window.__spike.seek(12_345));
+  await page.evaluate(() => window.__lab.seek(12_345));
   await page.waitForFunction(() => !document.querySelector('video').seeking);
   await settle(page);
   fs.writeFileSync(path.join(outDir, 'video-seek-12345.png'), await stageShot(page));
@@ -223,7 +223,7 @@ const describe = (sameDom, diff) => `DOM ${sameDom ? 'identical' : 'DIFFERENT'} 
   const page = await openPage();
   await page.setViewportSize({ width: 2400, height: 1500 });
   for (const [name, t] of [['open', 5_000], ['half-folded', 20_225], ['notification', 28_000], ['pinned-radial', 47_000], ['folded', 75_000], ['critical', 112_000]]) {
-    await page.evaluate(t => window.__spike.seek(t), t);
+    await page.evaluate(t => window.__lab.seek(t), t);
     await settle(page);
     fs.writeFileSync(path.join(outDir, `stage-${name}.png`), await stageShot(page));
   }

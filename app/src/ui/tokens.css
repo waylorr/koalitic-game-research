@@ -1,0 +1,110 @@
+/*
+ * KOALITIC authoring app look (menus and screens), taken from the menu designs:
+ * dark glass, cyan neon for idle controls, red neon for the selected one.
+ * Sizes are in pixels of the 1920×1080 stage. These screens are never exported,
+ * so CSS transitions and animations are fine here (unlike the HUD).
+ */
+:root {
+  --kg-bg: #02050a;
+  --kg-ink: #eef8ff;
+  --kg-ink-dim: #93adbf;
+  --kg-cyan: #3fd6ff;
+  --kg-cyan-soft: rgba(63, 214, 255, 0.45);
+  --kg-red: #ff2a45;
+  --kg-red-soft: rgba(255, 42, 69, 0.55);
+  --kg-off: #52606c;
+  --kg-display: 'Michroma', 'Rajdhani', system-ui, sans-serif;
+  --kg-ui: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { background: var(--kg-bg); color: var(--kg-ink); font-family: var(--kg-ui); -webkit-font-smoothing: antialiased; overflow: hidden; }
+button { font: inherit; color: inherit; }
+
+/* Viewport, stage and backgrounds */
+.kg-viewport { position: fixed; inset: 0; overflow: hidden; background: #000; }
+.kg-bleed { position: absolute; inset: -60px; background-size: cover; background-position: center; filter: blur(30px) brightness(0.4) saturate(1.1); }
+.kg-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; }
+.kg-backdrop { position: absolute; inset: 0; }
+.kg-backdrop img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.8s ease, filter 0.9s ease; }
+.kg-backdrop img.is-active { opacity: 1; }
+.kg-backdrop.is-dimmed img { filter: brightness(0.22) saturate(0.5); }
+.kg-backdrop::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 3px), radial-gradient(130% 100% at 50% 45%, transparent 60%, rgba(0, 0, 0, 0.55) 100%); }
+
+/* Brand */
+.kg-brand { position: absolute; display: flex; align-items: flex-start; gap: 24px; user-select: none; }
+.kg-brand__mark { width: 100px; height: 86px; flex: none; filter: drop-shadow(0 0 12px rgba(255, 42, 69, 0.6)); }
+.kg-brand__mark path { fill: var(--kg-red); }
+.kg-brand__words { padding-top: 2px; }
+.kg-brand__name { font: 400 48px / 1 var(--kg-display); letter-spacing: 0.02em; white-space: nowrap; color: #f2f7fb; text-shadow: 0 0 18px rgba(255, 255, 255, 0.25); }
+.kg-brand__game { color: #34c8ff; text-shadow: 0 0 18px rgba(52, 200, 255, 0.7); }
+.kg-brand__tag { display: flex; align-items: center; gap: 22px; margin-top: 24px; font: 400 15px / 1 var(--kg-display); letter-spacing: 1.05em; color: #c3d0da; white-space: nowrap; }
+.kg-brand__tag i { display: block; height: 2px; }
+.kg-brand__tag i:first-child { width: 46px; background: var(--kg-red); box-shadow: 0 0 8px var(--kg-red-soft); }
+.kg-brand__tag i:last-child { width: 115px; margin-left: -0.9em; background: var(--kg-cyan); box-shadow: 0 0 8px var(--kg-cyan-soft); }
+.kg-brand--small { gap: 16px; }
+.kg-brand--small .kg-brand__mark { width: 70px; height: 60px; }
+.kg-brand--small .kg-brand__name { font-size: 33px; }
+.kg-brand--small .kg-brand__tag { margin-top: 14px; font-size: 11px; gap: 16px; }
+.kg-brand--small .kg-brand__tag i:first-child { width: 0; }
+.kg-brand--small .kg-brand__tag i:last-child { width: 0; }
+
+/* Neon button */
+.nb {
+  --c: var(--kg-cyan);
+  --c-soft: var(--kg-cyan-soft);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 0 40px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  outline: none;
+  text-align: left;
+  transition: transform 0.14s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.nb--menu { width: 334px; height: 118px; }
+.nb--back { width: 278px; height: 74px; gap: 24px; padding: 0 34px; }
+.nb--catalog { width: 300px; height: 106px; gap: 24px; padding: 0 32px; }
+.nb.is-selected, .nb.is-pressed { --c: var(--kg-red); --c-soft: var(--kg-red-soft); }
+.nb.is-disabled { --c: var(--kg-off); --c-soft: transparent; cursor: default; }
+.nb__glass, .nb__sweep { position: absolute; inset: 0; clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut)); }
+.nb__glass { background: linear-gradient(180deg, rgba(8, 18, 30, 0.62), rgba(2, 6, 12, 0.8)); backdrop-filter: blur(10px) brightness(0.8); -webkit-backdrop-filter: blur(10px) brightness(0.8); transition: background 0.22s ease; }
+.nb.is-selected .nb__glass { background: radial-gradient(90% 70% at 50% 100%, rgba(255, 42, 69, 0.16), transparent 70%), linear-gradient(180deg, rgba(30, 5, 12, 0.62), rgba(6, 2, 6, 0.82)); box-shadow: inset 0 0 26px rgba(255, 42, 69, 0.3); }
+.nb.is-pressed .nb__glass { background: radial-gradient(80% 80% at 50% 50%, rgba(255, 80, 100, 0.45), rgba(40, 6, 14, 0.8)); }
+.nb.is-disabled .nb__glass { background: rgba(4, 7, 11, 0.7); }
+.nb__frame { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.nb__edge { fill: none; stroke: var(--c); stroke-width: 2.4; filter: drop-shadow(0 0 3px var(--c)) drop-shadow(0 0 10px var(--c-soft)) drop-shadow(0 0 22px var(--c-soft)); transition: stroke 0.2s ease; }
+.nb.is-disabled .nb__edge { filter: none; stroke-width: 1.6; }
+.nb__inner { fill: none; stroke: var(--c); stroke-width: 1.2; opacity: 0.32; transition: stroke 0.2s ease; }
+.nb__bracket { fill: none; stroke: var(--c); stroke-width: 2.4; filter: drop-shadow(0 0 4px var(--c-soft)); transition: stroke 0.2s ease; }
+.nb__icon { position: relative; flex: none; width: 48px; height: 48px; color: var(--c); filter: drop-shadow(0 0 4px var(--c)) drop-shadow(0 0 10px var(--c-soft)); transition: color 0.2s ease; }
+.nb--back .nb__icon { width: 34px; height: 34px; }
+.nb__icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.nb__label { position: relative; font: 700 27px / 1 var(--kg-ui); letter-spacing: 0.04em; color: #f4f9fc; white-space: nowrap; text-shadow: 0 0 10px rgba(255, 255, 255, 0.25); }
+.nb--back .nb__label { font-size: 24px; letter-spacing: 0.08em; }
+.nb.is-disabled .nb__label { color: #6f7c87; text-shadow: none; }
+.nb__sweep { pointer-events: none; overflow: hidden; }
+.nb__sweep::before { content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.14), transparent); transform: skewX(-20deg); }
+.nb.is-selected .nb__sweep::before { animation: nb-sweep 0.8s ease-out; }
+.nb.is-selected .nb__edge { animation: nb-flicker 0.32s steps(3, end) 1; }
+.nb:not(:disabled):active { transform: scale(0.975); }
+.nb:focus-visible .nb__inner { opacity: 0.85; }
+
+/* Entrance: the frame draws itself, then glass, icon and label appear. */
+.nb.is-entering { animation: nb-rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; animation-delay: var(--delay, 0s); }
+.nb.is-entering .nb__edge { stroke-dasharray: 1; stroke-dashoffset: 1; animation: nb-draw 0.75s ease-out forwards; animation-delay: calc(var(--delay, 0s) + 0.05s); }
+.nb.is-entering .nb__glass, .nb.is-entering .nb__inner, .nb.is-entering .nb__bracket, .nb.is-entering .nb__icon, .nb.is-entering .nb__label { animation: nb-fade 0.45s ease-out both; animation-delay: calc(var(--delay, 0s) + 0.4s); }
+@keyframes nb-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes nb-draw { to { stroke-dashoffset: 0; } }
+@keyframes nb-fade { from { opacity: 0; } }
+@keyframes nb-sweep { to { left: 130%; } }
+@keyframes nb-flicker { 0% { opacity: 0.35; } 40% { opacity: 1; } 70% { opacity: 0.55; } 100% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .nb, .nb *, .nb *::before { animation-duration: 0.01ms !important; animation-delay: 0s !important; transition-duration: 0.01ms !important; }
+}

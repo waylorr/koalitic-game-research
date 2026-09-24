@@ -9,6 +9,17 @@
 - **La decisión que más pesa no es el renderer**, sino `evaluateFrame(episodio, t)`: una función pura que devuelve el HUD completo en cualquier instante. De ella salen saltar en la timeline, reabrir, el futuro Record Mode y la exportación.
 - **H0 (prueba técnica) está hecha:** 18 tests del núcleo y 17/17 comprobaciones en Chromium real (§6). Página privada para probarla con tu vídeo: <https://claude.ai/artifact/JSUkfThkZw8gqPkdYRsvBL>. Código en `app/`.
 
+## 0. Actualización tras tu revisión (24/09/2026, tarde)
+
+Tus indicaciones cambian el orden y dos decisiones; prevalecen sobre lo que sigue en este documento:
+
+- **Empezamos la app de verdad.** Primer elemento: el **menú principal** de tu diseño con la navegación vigente (EPISODES, CONFIGURE HUD, ASSETS y QUIT GAME).
+- **Los fondos son tu arte (imágenes), no escenas 3D.** Probé una esfera en Three.js y la retiré. Mientras no me pases los fondos limpios, uso versiones de tus diseños a las que borré los botones dibujados (`app/public/backgrounds/`).
+- **Lienzo fijo de 1920×1080 escalado a la ventana, como un juego:** cada pantalla coincide con tu diseño de 16:9. Fuera del lienzo se prolonga el fondo desenfocado.
+- **Método de trabajo:** cada elemento de UI se construye y se aprueba primero en ASSETS → UI COMPONENTS (con todos sus estados) y después se usa en las pantallas. El primero es el botón neón: cian en reposo y rojo al seleccionarlo con ratón o teclado, como en tus imágenes.
+- **Tipografías (licencia OFL):** Michroma para logo y títulos anchos; Rajdhani para botones y textos.
+- Las fases de §5 pasan a este orden: botón y menú (hecho) → siguiente elemento de UI que elijas → pantallas de tu workflow con los elementos aprobados → motor de episodios (H0 ya probado) → exportación.
+
 ## 1. Auditoría
 
 ### 1.1 Decisiones cerradas
@@ -255,5 +266,8 @@ Supuestos mientras no respondas: **S1** referencia viva con aviso y archivo · *
 | D6 | Carpeta de proyecto en disco mediante servidor local; IndexedDB no es guardado principal | Propuesta (pregunta 2) |
 | D7 | Sin GSAP; sin librería de animación en el núcleo | Aplicada en H0 |
 | D8 | Radial y Location en H2; Configure HUD completo en H3 | Según CLAUDE.md |
+| D9 | App de autoría en un lienzo fijo de 1920×1080 escalado, con el arte del creador como fondo | Aplicada (menú principal) |
+| D10 | Cada elemento de UI se aprueba en ASSETS → UI COMPONENTS antes de usarse en pantallas | Aplicada (botón neón) |
+| D11 | Sin Three.js para fondos; solo se reconsidera si un componente HUD necesita efectos 3D | Aplicada |
 
 Fuentes consultadas: metadatos del registro npm (versiones y licencias); [licencia estándar de GSAP](https://gsap.com/community/standard-license/); [vídeo en Godot](https://docs.godotengine.org/en/stable/tutorials/animation/playing_videos.html); [soporte de `showDirectoryPicker`](https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker) y [permisos persistentes en Chrome 122](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api); [soporte de `requestVideoFrameCallback`](https://caniuse.com/mdn-api_htmlvideoelement_requestvideoframecallback); [PixiJS Layout v3](https://pixijs.com/blog/layout-v3). La política de red de esta sesión bloquea gsap.com, docs.godotengine.org y developer.chrome.com, así que esas fuentes se contrastaron mediante búsqueda y no leyendo la página completa.

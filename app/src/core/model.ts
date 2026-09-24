@@ -82,7 +82,7 @@ export interface EpisodeDoc {
   readonly name: string;
   readonly durationMs: Ms;
   readonly fps: number;
-  /** Episode copy of the template composition (spike: only the rail motion preset). */
+  /** Episode copy of the template composition (for now only the rail motion preset). */
   readonly hud: { readonly sourceTemplateId: string; readonly leftRailMotion: RailMotionId };
   /** Record ids, never record copies. */
   readonly bindings: { readonly player: string | null; readonly loadout: readonly (string | null)[] };

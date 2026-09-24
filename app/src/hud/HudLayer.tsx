@@ -110,7 +110,7 @@ export function ScaledStage({ children }: { children: ReactNode }) {
     return () => observer.disconnect();
   }, []);
   return (
-    <div ref={outer} className="spike-stage-outer">
+    <div ref={outer} className="k-stage-outer">
       <div style={{ width: STAGE_W * scale, height: STAGE_H * scale, position: 'relative' }}>
         <div className="k-stage" data-testid="hud-stage" style={{ transform: `scale(${scale})` }}>{children}</div>
       </div>
