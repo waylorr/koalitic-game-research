@@ -1,0 +1,128 @@
+/*
+ * Provisional THE SYSTEM look. Every colour, line and glow reads a token, so the
+ * design system can replace this file without touching data or timeline code.
+ * No CSS transitions or animations: motion is computed from episode time.
+ * No will-change either: a promoted layer is reused while it moves and its
+ * antialiasing then depends on the path taken (seek vs playback differed by
+ * up to 7/255 on diagonal edges). Rendering fresh keeps any instant identical.
+ */
+.k-stage {
+  --k-cyan: #54e4ff;
+  --k-cyan-soft: rgba(84, 228, 255, 0.55);
+  --k-cyan-faint: rgba(84, 228, 255, 0.18);
+  --k-red: #ff2d46;
+  --k-green: #58ff8e;
+  --k-amber: #ffc331;
+  --k-critical: #ff3b54;
+  --k-text: #eaf8ff;
+  --k-text-dim: #93b7c9;
+  --k-glass: rgba(6, 16, 27, 0.62);
+  --k-glass-deep: rgba(3, 9, 16, 0.78);
+  --k-line: rgba(118, 214, 245, 0.42);
+  --k-glow: drop-shadow(0 0 6px rgba(84, 228, 255, 0.55));
+  --k-blur: blur(9px) saturate(1.15);
+  --k-font: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: #02060b;
+  font-family: var(--k-font);
+  color: var(--k-text);
+  transform-origin: 0 0;
+  user-select: none;
+}
+.k-stage *, .k-stage *::before, .k-stage *::after { transition: none !important; animation: none !important; }
+.k-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.k-hud { position: absolute; inset: 0; pointer-events: none; }
+.k-hud .k-hit { pointer-events: auto; cursor: pointer; }
+
+/* Shell */
+.k-corner { position: absolute; width: 64px; height: 64px; }
+.k-corner path { fill: none; stroke: var(--k-cyan-soft); stroke-width: 2; }
+.k-corner .k-corner__tip { stroke: var(--k-red); stroke-width: 3; }
+.k-logo { position: absolute; left: 44px; top: 26px; display: flex; align-items: center; gap: 14px; }
+.k-logo__mark { width: 38px; height: 34px; }
+.k-logo__mark path { fill: var(--k-red); }
+.k-logo__word { font-size: 46px; font-weight: 700; letter-spacing: 0.08em; line-height: 1; text-shadow: 0 0 14px rgba(255, 255, 255, 0.25); }
+.k-logo__tag { font-size: 13px; letter-spacing: 0.32em; color: var(--k-text-dim); margin-top: 4px; }
+
+/* Panels */
+.k-panel { position: relative; }
+.k-panel__glass { position: absolute; inset: 0; background: linear-gradient(160deg, var(--k-glass) 0%, var(--k-glass-deep) 100%); backdrop-filter: var(--k-blur); -webkit-backdrop-filter: var(--k-blur); }
+.k-panel__frame { position: absolute; inset: 0; overflow: visible; }
+.k-panel__line { fill: none; stroke: var(--k-line); stroke-width: 1.5; }
+.k-panel__edge { fill: none; stroke: var(--k-cyan); stroke-width: 2; filter: var(--k-glow); }
+.k-panel__accent { fill: none; stroke: var(--k-red); stroke-width: 3; }
+.k-panel__title { position: absolute; left: 18px; top: 10px; display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 600; letter-spacing: 0.1em; color: var(--k-cyan); text-shadow: 0 0 10px rgba(84, 228, 255, 0.45); }
+.k-slash { width: 16px; height: 16px; }
+.k-slash path { fill: var(--k-red); }
+.k-panel__body { position: absolute; inset: 0; }
+
+/* Left rail */
+.k-rail { position: absolute; left: 36px; top: 112px; width: 430px; }
+.k-rail__module { position: relative; margin-bottom: 14px; }
+.k-rail__pin { position: absolute; right: -8px; top: -30px; font-size: 13px; letter-spacing: 0.2em; color: var(--k-red); display: flex; align-items: center; gap: 6px; }
+.k-rail__pin svg { width: 16px; height: 16px; }
+.k-rail__pin path { fill: var(--k-red); }
+.k-handle { position: absolute; left: 0; top: 112px; width: 46px; height: 230px; }
+.k-handle__glass { position: absolute; inset: 0; background: var(--k-glass-deep); clip-path: polygon(0 0, 100% 14px, 100% calc(100% - 14px), 0 100%); backdrop-filter: var(--k-blur); }
+.k-handle svg { position: absolute; inset: 0; overflow: visible; }
+.k-handle__label { position: absolute; left: 50%; top: 60%; transform: translate(-50%, -50%) rotate(-90deg); font-size: 15px; letter-spacing: 0.35em; color: var(--k-cyan); white-space: nowrap; }
+
+/* Player profile */
+.k-portrait { position: absolute; left: 18px; top: 48px; width: 108px; height: 108px; }
+.k-portrait svg { width: 100%; height: 100%; overflow: visible; }
+.k-portrait .k-bracket { fill: none; stroke: var(--k-cyan); stroke-width: 2; }
+.k-portrait .k-silhouette { fill: rgba(84, 228, 255, 0.16); stroke: var(--k-cyan-soft); stroke-width: 1.5; }
+.k-player__info { position: absolute; left: 146px; top: 50px; right: 20px; }
+.k-player__name { font-size: 29px; font-weight: 700; letter-spacing: 0.06em; line-height: 1; }
+.k-player__level { margin-top: 6px; font-size: 19px; font-weight: 600; letter-spacing: 0.08em; color: var(--k-text-dim); }
+.k-player__level b { font-size: 29px; color: var(--k-green); margin-left: 8px; text-shadow: 0 0 10px rgba(88, 255, 142, 0.5); }
+.k-bar { position: relative; height: 10px; margin-top: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14); }
+.k-bar__fill { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #1fcf63, var(--k-green)); box-shadow: 0 0 12px rgba(88, 255, 142, 0.6); }
+.k-player__xp { margin-top: 7px; font-size: 16px; font-weight: 600; letter-spacing: 0.06em; color: var(--k-text-dim); font-variant-numeric: tabular-nums; }
+.k-rank-glyph { position: absolute; right: 18px; top: 50px; width: 30px; height: 30px; }
+.k-rank-glyph path { fill: none; stroke: var(--k-text-dim); stroke-width: 2; }
+
+/* Gear radial */
+.k-radial { position: absolute; left: 45px; top: 44px; width: 340px; height: 340px; overflow: visible; }
+.k-sector { fill: rgba(9, 24, 38, 0.72); stroke: rgba(84, 228, 255, 0.6); stroke-width: 1.6; }
+.k-sector.is-hover { fill: rgba(30, 70, 95, 0.78); stroke: var(--k-cyan); }
+.k-sector__active { fill: url(#k-sector-active); pointer-events: none; }
+.k-sector__rim { fill: none; stroke: var(--k-cyan); stroke-width: 5; filter: var(--k-glow); pointer-events: none; }
+.k-glyph { fill: none; stroke: var(--k-text); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.k-glyph--dim { stroke: var(--k-text-dim); opacity: 0.55; }
+.k-radial__core { fill: var(--k-glass-deep); stroke: var(--k-cyan); stroke-width: 1.8; filter: var(--k-glow); }
+.k-radial__ring { fill: none; stroke: var(--k-cyan); stroke-width: 1.6; opacity: 0.75; filter: var(--k-glow); }
+.k-radial__ticks { fill: none; stroke: var(--k-cyan-faint); stroke-width: 2; stroke-dasharray: 2 9; }
+.k-radial__name { fill: var(--k-text); font-size: 18px; font-weight: 700; letter-spacing: 0.04em; text-anchor: middle; }
+.k-radial__spec { fill: var(--k-text-dim); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-anchor: middle; }
+.k-radial__count { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 17px; font-weight: 600; letter-spacing: 0.18em; color: var(--k-text-dim); font-variant-numeric: tabular-nums; }
+
+/* Stamina */
+.k-stamina__row { position: absolute; left: 20px; top: 20px; right: 20px; display: flex; align-items: center; gap: 12px; }
+.k-stamina__icon { width: 34px; height: 34px; }
+.k-stamina__icon path { fill: none; stroke: var(--k-text); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.k-stamina__label { font-size: 20px; font-weight: 600; letter-spacing: 0.14em; }
+.k-stamina__meter { position: absolute; left: 66px; right: 104px; top: 64px; height: 20px; display: flex; gap: 5px; }
+.k-seg { position: relative; flex: 1; transform: skewX(-24deg); background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+.k-seg__fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--k-amber); box-shadow: 0 0 8px rgba(255, 195, 49, 0.55); }
+.k-stamina__value { position: absolute; right: 22px; top: 52px; font-size: 38px; font-weight: 700; color: var(--k-amber); font-variant-numeric: tabular-nums; text-shadow: 0 0 12px rgba(255, 195, 49, 0.45); }
+.k-stamina__value small { font-size: 20px; margin-left: 2px; }
+.is-critical .k-seg__fill { background: var(--k-critical); box-shadow: 0 0 10px rgba(255, 59, 84, 0.7); }
+.is-critical .k-stamina__value { color: var(--k-critical); text-shadow: 0 0 14px rgba(255, 59, 84, 0.6); }
+
+/* POV overlay: system notification */
+.k-notice { position: absolute; width: 0; height: 0; }
+.k-notice svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.k-notice__line { fill: none; stroke: rgba(234, 248, 255, 0.85); stroke-width: 1.6; }
+.k-notice__ring { fill: none; stroke: var(--k-text); stroke-width: 2; }
+.k-notice__dot { fill: var(--k-text); }
+.k-notice__pulse { fill: none; stroke: var(--k-cyan); stroke-width: 2; }
+.k-notice__box { position: absolute; left: -84px; top: -206px; width: 440px; padding: 12px 18px 14px 74px; background: linear-gradient(90deg, rgba(4, 10, 16, 0.78), rgba(4, 10, 16, 0.35)); }
+.k-notice__warn { position: absolute; left: 16px; top: 16px; width: 44px; height: 40px; }
+.k-notice__warn path { fill: none; stroke: var(--k-amber); stroke-width: 3; stroke-linejoin: round; }
+.k-notice__title { font-size: 21px; font-weight: 700; letter-spacing: 0.08em; color: var(--k-amber); }
+.k-notice__text { font-size: 19px; font-weight: 600; letter-spacing: 0.05em; line-height: 1.25; }
