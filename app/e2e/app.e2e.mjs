@@ -34,6 +34,24 @@ async function open(viewport = { width: 1920, height: 1080 }, hash = '') {
 }
 const state = (page, id) => page.getAttribute(`[data-testid=${id}]`, 'data-state');
 
+/** Largest channel delta (0-255) and pixels above 3/255 between two PNGs, decoded in the page. */
+const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
+  const decode = async data => {
+    const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${data}`)).blob());
+    const ctx = new OffscreenCanvas(bitmap.width, bitmap.height).getContext('2d');
+    ctx.drawImage(bitmap, 0, 0);
+    return ctx.getImageData(0, 0, bitmap.width, bitmap.height).data;
+  };
+  const [x, y] = await Promise.all([decode(a64), decode(b64)]);
+  let visible = 0, maxDelta = 0;
+  for (let i = 0; i < x.length; i += 4) {
+    const delta = Math.max(Math.abs(x[i] - y[i]), Math.abs(x[i + 1] - y[i + 1]), Math.abs(x[i + 2] - y[i + 2]));
+    maxDelta = Math.max(maxDelta, delta);
+    if (delta > 3) visible++;
+  }
+  return { visible, maxDelta };
+}, [a.toString('base64'), b.toString('base64')]);
+
 // Main menu: look, selection with keyboard and mouse
 {
   const { page, problems } = await open();
@@ -64,6 +82,24 @@ const state = (page, id) => page.getAttribute(`[data-testid=${id}]`, 'data-state
   await page.waitForSelector('[data-testid=screen-assets]');
   await page.waitForTimeout(1400);
   fs.writeFileSync(path.join(outDir, 'app-assets.png'), await page.screenshot());
+  const phaseAt = async ms => { await page.evaluate(value => window.__kgPlayer.seek(value), ms); await page.waitForTimeout(60); return page.getAttribute('[data-testid=player-module]', 'data-phase'); };
+  const phases = [await phaseAt(100), await phaseAt(500), await phaseAt(2000), await phaseAt(4900), await phaseAt(7200), await phaseAt(7800)];
+  check('PLAYER module follows its script at any instant', phases.join(',') === 'hidden,enter,open,folded,exit,hidden', phases.join(', '));
+  const shot = () => page.locator('[data-testid=player-preview]').screenshot();
+  await phaseAt(3100);
+  const first = await shot();
+  const domBefore = await page.$eval('[data-testid=player-module]', node => node.outerHTML);
+  await phaseAt(6000);
+  await phaseAt(3100);
+  const moduleDom = () => page.$eval('[data-testid=player-module]', node => node.outerHTML);
+  const firstDom = domBefore;
+  const again = await shot();
+  const diff = await pixelDiff(page, first, again);
+  // Same rule as the lab: identical DOM, and backdrop blur may move a few levels (≤100 px above 3/255, none above 32/255).
+  check('seeking back to the same instant draws the same PLAYER frame', firstDom === (await moduleDom()) && diff.visible <= 100 && diff.maxDelta <= 32, `DOM identical · ${diff.visible} pixels above 3/255 · max delta ${diff.maxDelta}/255`);
+  fs.writeFileSync(path.join(outDir, 'app-player.png'), first);
+  await page.click('[data-testid=catalog-item-button]');
+  await page.waitForSelector('[data-testid=specimen-idle]');
   const specimens = await page.$$eval('[data-testid^=specimen-]', nodes => nodes.map(node => `${node.dataset.state}${node.disabled ? ':disabled' : ''}`));
   check('catalog shows the button in every state', specimens.join(',') === 'idle,selected,pressed,disabled:disabled', specimens.join(', '));
   check('screen URL uses a plain anchor', (await page.evaluate(() => location.hash)) === '#assets');

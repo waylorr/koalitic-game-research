@@ -1,0 +1,59 @@
+/*
+ * HUD v2 PLAYER module: dark glass, red accents, cyan data, green XP.
+ * Every moving value is set inline from episode time; no transitions,
+ * animations or will-change here (see hud.css).
+ */
+.pm {
+  --pm-red: #ff2d46;
+  --pm-cyan: #54e4ff;
+  --pm-green: #58ff8e;
+  --pm-text: #eef6ff;
+  --pm-dim: #8fa6b8;
+  --pm-edge: rgba(150, 190, 220, 0.55);
+  position: relative;
+  width: 360px;
+  font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+  color: var(--pm-text);
+  user-select: none;
+  pointer-events: none;
+}
+.pm__glass { position: absolute; left: 0; top: 0; width: 100%; overflow: hidden; background: linear-gradient(160deg, rgba(14, 22, 36, 0.78), rgba(4, 8, 15, 0.86)); backdrop-filter: blur(10px) saturate(1.2); -webkit-backdrop-filter: blur(10px) saturate(1.2); box-shadow: inset 0 0 30px rgba(84, 228, 255, 0.06); }
+.pm__sheen { position: absolute; top: -20%; bottom: -20%; width: 22%; background: linear-gradient(100deg, transparent, rgba(190, 230, 255, 0.10) 45%, rgba(255, 255, 255, 0.16) 50%, rgba(190, 230, 255, 0.10) 55%, transparent); transform: skewX(-24deg); }
+.pm__frame { position: absolute; left: 0; top: 0; overflow: visible; }
+.pm__frame path { fill: none; stroke: var(--pm-edge); stroke-width: 1.2; filter: drop-shadow(0 0 3px rgba(84, 228, 255, 0.35)); }
+.pm__redtick { stroke: var(--pm-red); stroke-width: 2.4; filter: drop-shadow(0 0 4px var(--pm-red)); }
+.pm__line { position: absolute; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, rgba(84, 228, 255, 0.4), #fff 50%, rgba(84, 228, 255, 0.4)); box-shadow: 0 0 6px #fff, 0 0 14px var(--pm-cyan); }
+.pm__line::before, .pm__line::after { content: ''; position: absolute; top: -4px; width: 2px; height: 10px; background: #fff; box-shadow: 0 0 6px var(--pm-cyan); }
+.pm__line::before { left: 0; }
+.pm__line::after { right: 0; }
+.pm__spark { position: absolute; top: -3px; width: 26px; height: 8px; margin-left: -13px; border-radius: 50%; background: radial-gradient(closest-side, #fff, rgba(84, 228, 255, 0.6), transparent); }
+.pm__corner { position: absolute; width: 16px; height: 16px; border-style: solid; }
+.pm__corner--tl { left: -6px; top: -6px; border-width: 2px 0 0 2px; border-color: var(--pm-red); filter: drop-shadow(0 0 4px var(--pm-red)); }
+.pm__corner--br { right: -6px; border-width: 0 2px 2px 0; border-color: var(--pm-cyan); filter: drop-shadow(0 0 4px var(--pm-cyan)); }
+
+.pm__content { position: absolute; inset: 0; }
+.pm__header { position: absolute; left: 12px; top: 5px; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; letter-spacing: 0.18em; color: var(--pm-red); text-shadow: 0 0 10px rgba(255, 45, 70, 0.6); white-space: nowrap; }
+.pm__slash { display: block; width: 5px; height: 14px; background: var(--pm-red); box-shadow: 0 0 8px var(--pm-red); transform-origin: 50% 100%; }
+
+.pm__open { position: absolute; inset: 0; }
+.pm__portrait { position: absolute; left: 14px; top: 28px; width: 96px; height: 108px; overflow: hidden; background: #050a12; }
+.pm__portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pm__flash { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(160, 240, 255, 0.9), rgba(84, 228, 255, 0.5)); mix-blend-mode: screen; }
+.pm__bracket { position: absolute; width: 12px; height: 12px; border-style: solid; border-color: var(--pm-cyan); filter: drop-shadow(0 0 3px var(--pm-cyan)); }
+.pm__bracket--tl { left: 0; top: 0; border-width: 1.5px 0 0 1.5px; }
+.pm__bracket--br { right: 0; bottom: 0; border-width: 0 1.5px 1.5px 0; }
+.pm__name { position: absolute; left: 128px; top: 36px; font-weight: 600; font-size: 25px; letter-spacing: 0.06em; line-height: 1; white-space: nowrap; text-shadow: 0 0 12px rgba(200, 235, 255, 0.35); }
+.pm__level { position: absolute; left: 128px; top: 70px; font-weight: 600; font-size: 15px; letter-spacing: 0.14em; color: var(--pm-dim); white-space: nowrap; }
+.pm__level b { margin-left: 4px; font-size: 22px; letter-spacing: 0.02em; color: var(--pm-green); text-shadow: 0 0 10px rgba(88, 255, 142, 0.55); }
+.pm__emblem { position: absolute; right: 16px; top: 34px; width: 26px; height: 24px; }
+.pm__emblem path { fill: none; stroke: var(--pm-dim); stroke-width: 1.4; fill-rule: evenodd; }
+.pm__track { position: absolute; left: 128px; top: 102px; width: 214px; height: 7px; background: rgba(170, 200, 225, 0.14); box-shadow: inset 0 0 0 1px rgba(170, 200, 225, 0.12); transform-origin: 0 50%; }
+.pm__fill { position: relative; height: 100%; background: linear-gradient(90deg, #178a4a, #3fdc78 70%, var(--pm-green)); box-shadow: 0 0 10px rgba(88, 255, 142, 0.45); }
+.pm__head { position: absolute; right: -2px; top: -3px; width: 5px; height: calc(100% + 6px); background: #fff; }
+.pm__xp { position: absolute; left: 128px; top: 118px; font-weight: 600; font-size: 13px; letter-spacing: 0.1em; color: var(--pm-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pm__gain { position: absolute; left: 262px; top: 66px; font-weight: 700; font-size: 20px; letter-spacing: 0.04em; transform-origin: 0 50%; white-space: nowrap; }
+
+.pm__folded { position: absolute; left: 0; right: 0; top: 0; height: 50px; }
+.pm__folded-level { position: absolute; right: 90px; top: 4px; font-weight: 600; font-size: 14px; letter-spacing: 0.14em; color: var(--pm-dim); }
+.pm__folded-level b { font-size: 17px; color: var(--pm-green); text-shadow: 0 0 8px rgba(88, 255, 142, 0.55); }
+.pm__folded-track { position: absolute; left: 14px; right: 14px; top: 32px; height: 5px; background: rgba(170, 200, 225, 0.14); }

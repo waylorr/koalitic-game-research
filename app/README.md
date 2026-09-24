@@ -1,6 +1,6 @@
 # KOALITIC app
 
-Aplicación de autoría de KOALITIC GAME. Estado actual: **menú principal** con los botones de UI definitivos sobre el arte de fondo, **catálogo ASSETS → UI COMPONENTS** con el botón neón en todos sus estados, y pantallas EPISODES / CONFIGURE HUD en construcción. El **laboratorio del motor** (H0: evaluador temporal, HUD provisional, timeline mínima) sigue en `lab.html`. Plan y decisiones: [`../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md`](../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md).
+Aplicación de autoría de KOALITIC GAME. Estado actual: **menú principal** con los botones de UI definitivos sobre el arte de fondo, **catálogo ASSETS → UI COMPONENTS** con el módulo PLAYER del HUD v2 (movimiento del v1, `src/hud/v2/`, controlable con una barra de tiempo) y el botón neón en todos sus estados, y pantallas EPISODES / CONFIGURE HUD en construcción. El **laboratorio del motor** (H0: evaluador temporal, HUD provisional, timeline mínima) sigue en `lab.html`. Plan y decisiones: [`../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md`](../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md).
 
 ## Abrir
 
