@@ -1,6 +1,6 @@
 # KOALITIC app
 
-Aplicación de autoría de KOALITIC GAME. Estado actual: **menú principal** con los botones de UI definitivos sobre el arte de fondo, **catálogo ASSETS → UI COMPONENTS** con el módulo PLAYER del HUD v2 (movimiento del v1, `src/hud/v2/`, controlable con una barra de tiempo) y el botón neón en todos sus estados, y pantallas EPISODES / CONFIGURE HUD en construcción. El **laboratorio del motor** (H0: evaluador temporal, HUD provisional, timeline mínima) sigue en `lab.html`. Plan y decisiones: [`../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md`](../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md).
+Aplicación de autoría de KOALITIC GAME. Estado actual: **menú principal** con los botones de UI definitivos sobre el arte de fondo, **catálogo ASSETS → UI COMPONENTS** con el módulo PLAYER del HUD v2 dibujado con PixiJS (glitch, artefactos y bloom; movimiento del v1; valores editables y demo con barra de tiempo, `src/hud/v2/`) y el botón neón en todos sus estados, y pantallas EPISODES / CONFIGURE HUD en construcción. El **laboratorio del motor** (H0: evaluador temporal, HUD provisional, timeline mínima) sigue en `lab.html`. Plan y decisiones: [`../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md`](../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md).
 
 ## Abrir
 
@@ -28,7 +28,7 @@ npm run build && npm run e2e  # Chromium real (Playwright); la primera vez: npx 
 | `src/ui/` | kit visual: escenario 1920×1080, logo, botón neón, sonidos y variables (`tokens.css`) |
 | `public/backgrounds/` | fondos provisionales derivados de tus diseños (se sustituyen por el arte limpio) |
 | `src/core/` | modelo, pistas, motion y `evaluateFrame` (TypeScript puro) |
-| `src/hud/` | componentes HUD provisionales (THE SYSTEM) del laboratorio |
+| `src/hud/` | `v2/`: componentes HUD definitivos (cálculo puro + dibujo PixiJS); `fx.ts`: azar con semilla y efectos; el resto, HUD provisional del laboratorio |
 | `src/lab/` | laboratorio del motor (`lab.html`) |
 
-Reglas: la app se maqueta en píxeles de un escenario fijo de 1920×1080 escalado a la ventana, como un juego. Cada componente de UI se aprueba primero en ASSETS → UI COMPONENTS. El HUD (THE SYSTEM) no usa transiciones ni animaciones CSS ni `will-change`: su movimiento se calcula desde el tiempo del episodio.
+Reglas: la app se maqueta en píxeles de un escenario fijo de 1920×1080 escalado a la ventana, como un juego. Cada componente de UI se aprueba primero en ASSETS → UI COMPONENTS. El HUD (THE SYSTEM) se dibuja con PixiJS sin ticker propio: cada fotograma se calcula desde el tiempo del episodio y los efectos usan azar con semilla, así que el mismo instante da los mismos píxeles. Cada componente trae aspecto y movimiento fijos; solo sus valores son editables.

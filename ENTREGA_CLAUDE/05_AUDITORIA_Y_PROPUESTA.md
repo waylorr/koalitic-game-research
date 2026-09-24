@@ -9,7 +9,14 @@
 - **La decisión que más pesa no es el renderer**, sino `evaluateFrame(episodio, t)`: una función pura que devuelve el HUD completo en cualquier instante. De ella salen saltar en la timeline, reabrir, el futuro Record Mode y la exportación.
 - **H0 (prueba técnica) está hecha:** 18 tests del núcleo y 17/17 comprobaciones en Chromium real (§6). Página privada para probarla con tu vídeo: <https://claude.ai/artifact/JSUkfThkZw8gqPkdYRsvBL>. Código en `app/`.
 
-## 0. Actualización tras tu revisión (24/09/2026, tarde)
+## 0. Actualización tras tu revisión (25/09/2026)
+
+- **El HUD se dibuja con PixiJS 8 (MIT) y pixi-filters 6 (MIT):** glitch con separación RGB, artefactos y bloom. CSS y SVG no llegaban al nivel del v1. El motor de tiempo no cambia: cada fotograma se calcula del tiempo y los efectos usan azar con semilla, así que el mismo instante da los mismos píxeles (comprobado en Chromium, glitch incluido). Primer componente: PLAYER del Left Rail (`app/src/hud/v2/`).
+- **Cada UI Component trae su aspecto y su movimiento por defecto, fijos.** El creador edita solo los valores: foto, nombre, nivel, XP y estado. En el catálogo, cada cambio crea un keyframe; en el editor, esos valores vendrán de la Data Library y de las pistas del timeline. Una apertura distinta sería una variante nueva programada, no un ajuste del usuario.
+- **Motores de juego (Unreal, Unity, Godot) descartados por ahora:** habría que rehacer el editor, el timeline y la Data Library, el vídeo no es exacto al fotograma y la UI 2D no tiene bloom real. Se reconsideran solo si PixiJS no llega al nivel en los componentes siguientes.
+- **After Effects y Higgsfield** sirven como referencias de movimiento, no como librería: Lottie descarta los efectos y un vídeo generado no admite valores editables.
+
+## 0.1 Actualización (24/09/2026, tarde)
 
 Tus indicaciones cambian el orden y dos decisiones; prevalecen sobre lo que sigue en este documento:
 
@@ -269,5 +276,7 @@ Supuestos mientras no respondas: **S1** referencia viva con aviso y archivo · *
 | D9 | App de autoría en un lienzo fijo de 1920×1080 escalado, con el arte del creador como fondo | Aplicada (menú principal) |
 | D10 | Cada elemento de UI se aprueba en ASSETS → UI COMPONENTS antes de usarse en pantallas | Aplicada (botón neón) |
 | D11 | Sin Three.js para fondos; solo se reconsidera si un componente HUD necesita efectos 3D | Aplicada |
+| D12 | HUD dibujado con PixiJS + pixi-filters; cálculo puro por componente (`evaluatePlayer`) y un dibujante sin lógica de tiempo; efectos con semilla. Sustituye la parte «HUD en DOM/SVG/CSS» de D1 | Aplicada (PLAYER) |
+| D13 | Aspecto y movimiento del componente fijos por defecto; solo los valores son editables (catálogo: cada cambio es un keyframe) | Aplicada (PLAYER) |
 
 Fuentes consultadas: metadatos del registro npm (versiones y licencias); [licencia estándar de GSAP](https://gsap.com/community/standard-license/); [vídeo en Godot](https://docs.godotengine.org/en/stable/tutorials/animation/playing_videos.html); [soporte de `showDirectoryPicker`](https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker) y [permisos persistentes en Chrome 122](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api); [soporte de `requestVideoFrameCallback`](https://caniuse.com/mdn-api_htmlvideoelement_requestvideoframecallback); [PixiJS Layout v3](https://pixijs.com/blog/layout-v3). La política de red de esta sesión bloquea gsap.com, docs.godotengine.org y developer.chrome.com, así que esas fuentes se contrastaron mediante búsqueda y no leyendo la página completa.

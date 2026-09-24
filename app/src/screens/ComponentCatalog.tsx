@@ -4,7 +4,7 @@ import { PlayerPreview } from './PlayerPreview';
 
 const STATES: readonly NeonState[] = ['idle', 'selected', 'pressed', 'disabled'];
 const COMPONENTS = [
-  { id: 'player', name: 'PLAYER · LEFT RAIL', note: 'HUD v2 look with the v1 motion: born from a line, XP gain, fold, exit.' },
+  { id: 'player', name: 'PLAYER · LEFT RAIL', note: 'Drawn with PixiJS: glitch, artifacts and bloom. Edit its values; each change becomes a keyframe.' },
   { id: 'button', name: 'NEON BUTTON', note: 'Menu and navigation actions. Cyan when idle, red when selected.' },
 ] as const;
 type ComponentId = (typeof COMPONENTS)[number]['id'];
@@ -33,7 +33,7 @@ export function ComponentCatalog() {
           </div>
           {current === 'player' ? (
             <div className="kg-catalog__stage">
-              <div className="kg-catalog__heading">MOTION · SCRUB ANY INSTANT</div>
+              <div className="kg-catalog__heading">PLAYER · LEFT RAIL</div>
               <PlayerPreview />
             </div>
           ) : (

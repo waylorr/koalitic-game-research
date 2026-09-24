@@ -82,22 +82,37 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   await page.waitForSelector('[data-testid=screen-assets]');
   await page.waitForTimeout(1400);
   fs.writeFileSync(path.join(outDir, 'app-assets.png'), await page.screenshot());
-  const phaseAt = async ms => { await page.evaluate(value => window.__kgPlayer.seek(value), ms); await page.waitForTimeout(60); return page.getAttribute('[data-testid=player-module]', 'data-phase'); };
+  await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
+  await page.waitForTimeout(800);
+  // Edit mode: every value change becomes a keyframe on the preview clock.
+  await page.fill('[data-testid=prop-xp]', '3400');
+  await page.press('[data-testid=prop-xp]', 'Enter');
+  await page.waitForTimeout(1300);
+  const xpShown = await page.getAttribute('[data-testid=player-module]', 'data-xp');
+  await page.click('[data-testid=prop-folded]');
+  await page.waitForTimeout(700);
+  const foldedPhase = await page.getAttribute('[data-testid=player-module]', 'data-phase');
+  const log = await page.$$eval('[data-testid=prop-log] li', items => items.map(item => item.textContent));
+  check('editing XP and state animates the PLAYER and records keyframes', xpShown === '3400' && foldedPhase === 'folded' && log.length === 2, `xp ${xpShown} · ${foldedPhase} · ${log.join(' | ')}`);
+  fs.writeFileSync(path.join(outDir, 'app-player-edit.png'), await page.screenshot());
+
+  const phaseAt = async ms => { await page.evaluate(value => window.__kgPlayer.seek(value), ms); await page.waitForTimeout(120); return page.getAttribute('[data-testid=player-module]', 'data-phase'); };
   const phases = [await phaseAt(100), await phaseAt(500), await phaseAt(2000), await phaseAt(4900), await phaseAt(7200), await phaseAt(7800)];
   check('PLAYER module follows its script at any instant', phases.join(',') === 'hidden,enter,open,folded,exit,hidden', phases.join(', '));
   const shot = () => page.locator('[data-testid=player-preview]').screenshot();
-  await phaseAt(3100);
-  const first = await shot();
-  const domBefore = await page.$eval('[data-testid=player-module]', node => node.outerHTML);
-  await phaseAt(6000);
-  await phaseAt(3100);
-  const moduleDom = () => page.$eval('[data-testid=player-module]', node => node.outerHTML);
-  const firstDom = domBefore;
-  const again = await shot();
-  const diff = await pixelDiff(page, first, again);
-  // Same rule as the lab: identical DOM, and backdrop blur may move a few levels (≤100 px above 3/255, none above 32/255).
-  check('seeking back to the same instant draws the same PLAYER frame', firstDom === (await moduleDom()) && diff.visible <= 100 && diff.maxDelta <= 32, `DOM identical · ${diff.visible} pixels above 3/255 · max delta ${diff.maxDelta}/255`);
-  fs.writeFileSync(path.join(outDir, 'app-player.png'), first);
+  const same = async ms => {
+    await phaseAt(ms);
+    const first = await shot();
+    await phaseAt(6000);
+    await phaseAt(ms);
+    const diff = await pixelDiff(page, first, await shot());
+    return { first, diff };
+  };
+  const calm = await same(3100);
+  const glitching = await same(2760);
+  // WebGL output: the same instant must give the same pixels, glitch included (a level or two of blur rounding allowed).
+  check('seeking back to the same instant draws the same PLAYER frame, glitch included', calm.diff.visible <= 100 && glitching.diff.visible <= 100 && calm.diff.maxDelta <= 32 && glitching.diff.maxDelta <= 32, `calm ${calm.diff.visible}px/${calm.diff.maxDelta} · glitch ${glitching.diff.visible}px/${glitching.diff.maxDelta}`);
+  fs.writeFileSync(path.join(outDir, 'app-player.png'), glitching.first);
   await page.click('[data-testid=catalog-item-button]');
   await page.waitForSelector('[data-testid=specimen-idle]');
   const specimens = await page.$$eval('[data-testid^=specimen-]', nodes => nodes.map(node => `${node.dataset.state}${node.disabled ? ':disabled' : ''}`));
