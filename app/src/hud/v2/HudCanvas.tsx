@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Application, Sprite, Texture } from 'pixi.js';
 import { createDrawn, type Drawn, type HudItem } from '../registry';
 import { DEFAULT_MOTION, THEME, type MotionKnobs, type Theme } from '../kit/theme';
+import { useStageScale } from '../../ui/Stage';
 
 async function loadTexture(url: string): Promise<Texture> {
   const image = new Image();
@@ -31,13 +32,16 @@ export function HudCanvas({ width, height, background, items, theme = THEME, mot
   /** Bumps each time a new Pixi scene is ready (the canvas is recreated when its size changes). */
   const [sceneId, setSceneId] = useState(0);
   const [info, setInfo] = useState<{ phases: string; value: string }>({ phases: '', value: '' });
+  // Render at the canvas's real size on screen: stage scale × device pixels (never below 2× for small text).
+  const stageScale = useStageScale();
+  const resolution = Math.max(2, Math.ceil((window.devicePixelRatio || 1) * stageScale * 4) / 4);
 
   useEffect(() => {
     let cancelled = false;
     setInfo({ phases: '', value: '' });
     const app = new Application();
     (async () => {
-      await app.init({ width, height, backgroundAlpha: 0, antialias: true, autoStart: false, resolution: Math.max(2, window.devicePixelRatio || 1), autoDensity: true, preference: 'webgl', useBackBuffer: true, preserveDrawingBuffer: true });
+      await app.init({ width, height, backgroundAlpha: 0, antialias: true, autoStart: false, resolution, autoDensity: true, preference: 'webgl', useBackBuffer: true, preserveDrawingBuffer: true });
       await Promise.all(['500', '600', '700'].map(weight => document.fonts.load(`${weight} 20px Rajdhani`)));
       if (cancelled) {
         app.destroy(true);
@@ -74,6 +78,13 @@ export function HudCanvas({ width, height, background, items, theme = THEME, mot
     });
     return () => { alive = false; };
   }, [background, sceneId, width, height]);
+
+  useEffect(() => {
+    const current = scene.current;
+    if (!current || current.app.renderer.resolution === resolution) return;
+    current.app.renderer.resize(width, height, resolution);
+    setReady(r => r + 1);
+  }, [resolution, sceneId]);
 
   // One drawn element per item key (rebuilt on theme change); photos load as they change.
   const signature = items.map(item => `${item.key}:${item.kind}`).join('|');

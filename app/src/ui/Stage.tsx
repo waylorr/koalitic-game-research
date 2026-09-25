@@ -1,7 +1,11 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
 export const STAGE_W = 1920;
 export const STAGE_H = 1080;
+
+/** How much the 1920×1080 stage is scaled on screen, so canvases can render at their real on-screen size. */
+const StageScale = createContext(1);
+export const useStageScale = () => useContext(StageScale);
 
 /**
  * The authoring app is laid out like a game menu: a fixed 1920×1080 canvas scaled
@@ -28,7 +32,7 @@ export function Stage({ background, children }: { background: string; children: 
     <div ref={viewport} className="kg-viewport">
       <div className="kg-bleed" style={{ backgroundImage: `url(${background})` }} />
       <div className="kg-stage" data-testid="stage" style={{ transform: `translate(${fit.x}px, ${fit.y}px) scale(${fit.scale})` }}>
-        {children}
+        <StageScale.Provider value={fit.scale}>{children}</StageScale.Provider>
       </div>
     </div>
   );

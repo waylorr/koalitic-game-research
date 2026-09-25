@@ -17,6 +17,8 @@ Acordado con el creador el 25-09-2026. Referencias:
 - El comportamiento común de un módulo de rail (presencia, los cinco estados, pulsos y ambiente) está en `kit/module.ts` (`moduleShell`). Cada módulo solo añade su contenido.
 - `kit/sample.ts` es un panel hecho solo con piezas del kit (barra ámbar tipo STAMINA): demuestra el kit y es la plantilla de partida de un módulo nuevo.
 - `app/src/hud/registry.ts` es el registro de elementos: cómo se crea, evalúa y dibuja cada tipo. Los lienzos, el catálogo y el editor solo hablan con él.
+- En el catálogo, `screens/catalog/ElementPage.tsx` es la ficha común (EDIT, DEMO, ALL STATES). Cada componente solo aporta sus valores, sus reacciones, su demo y su colocación: por ejemplo, `PlayerPage.tsx` o `GearPage.tsx`.
+- **Nitidez:** el lienzo se dibuja al tamaño real que ocupa en pantalla (escala del escenario × píxeles del dispositivo). Los filtros (glitch, bloom, desenfoque) heredan esa resolución. Si no, el texto del HUD sale blando.
 
 - El tema y las perillas se guardarán en la **HUD Template** (preset, variante visual, preset de movimiento).
 - Cada componente trae aspecto y movimiento **fijos**; el creador solo edita valores.
@@ -58,7 +60,7 @@ Acordado con el creador el 25-09-2026. Referencias:
 - **Cascada:** el rail entra con sus módulos de arriba abajo y sale al revés.
 - **FOLDED** es el modo del rail y **COMPACT**, la presentación de cada módulo.
 - **El mismo componente** va dentro de un rail o suelto; solo cambia quién lo coloca.
-- **Selecciones internas** (por ejemplo, el gajo del Gear Radial, pista `gear-radial.selection`): el radial gira paso a paso entre gajos, con «ping» y destello en cada uno.
+- **Selecciones internas** (por ejemplo, el gajo del Gear Radial, pista `gear-radial.selection`): el radial gira paso a paso entre gajos, con «ping» y destello en cada uno. ✅ Hecho en `hud/v2/gear.ts`: va por el camino corto y, si lo interrumpen, sigue desde donde estaba.
 
 ## 5. El catálogo (ASSETS → UI COMPONENTS)
 

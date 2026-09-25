@@ -2,6 +2,8 @@ import type { Container, Texture } from 'pixi.js';
 import { PiecesBoard } from './kit/board';
 import { SamplePixi, evaluateSample, type SampleInput } from './kit/sample';
 import type { MotionKnobs, Theme } from './kit/theme';
+import { GearPixi } from './v2/GearPixi';
+import { evaluateGear, type GearInput } from './v2/gear';
 import { PlayerPixi } from './v2/PlayerPixi';
 import { evaluatePlayer, type PlayerInput } from './v2/player';
 
@@ -13,6 +15,7 @@ import { evaluatePlayer, type PlayerInput } from './v2/player';
 export type HudItem = { readonly key: string; readonly x: number; readonly y: number; readonly scale: number; readonly t: number } & (
   | { readonly kind: 'player'; readonly input: PlayerInput }
   | { readonly kind: 'sample'; readonly input: SampleInput }
+  | { readonly kind: 'gear'; readonly input: GearInput }
   | { readonly kind: 'board'; readonly photo: string }
 );
 
@@ -40,6 +43,20 @@ export function createDrawn(kind: HudItem['kind'], theme: Theme): Drawn {
       photoUrl: item => (item.kind === 'player' ? item.input.record.photo : null),
       get photo() { return player.photo; },
       setPhoto: (url, texture) => player.setPhoto(url, texture),
+    };
+  }
+  if (kind === 'gear') {
+    const gear = new GearPixi(theme);
+    return {
+      root: gear.root,
+      draw(item, k) {
+        if (item.kind !== 'gear') return { phase: 'hidden', value: null };
+        const frame = evaluateGear(item.t, item.input, k);
+        gear.setPlacement(item.x, item.y, item.scale);
+        gear.update(frame, item.input, k);
+        return { phase: frame?.phase ?? 'hidden', value: frame ? frame.selected : null };
+      },
+      photoUrl: () => null,
     };
   }
   if (kind === 'sample') {

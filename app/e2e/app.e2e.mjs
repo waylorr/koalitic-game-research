@@ -125,6 +125,28 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   // WebGL output: the same instant must give the same pixels, glitch included (a level or two of blur rounding allowed).
   check('seeking back to the same instant draws the same PLAYER frame, glitch included', calm.diff.visible <= 100 && glitching.diff.visible <= 100 && calm.diff.maxDelta <= 32 && glitching.diff.maxDelta <= 32, `calm ${calm.diff.visible}px/${calm.diff.maxDelta} · glitch ${glitching.diff.visible}px/${glitching.diff.maxDelta}`);
   fs.writeFileSync(path.join(outDir, 'app-player.png'), glitching.first);
+  // GEAR RADIAL: a selection turns the ring step by step and lands on the item.
+  await page.click('[data-testid=catalog-item-gear]');
+  await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
+  await page.waitForTimeout(1500);
+  await page.click('[data-testid=prop-jump]');
+  await page.waitForTimeout(1200);
+  const landed = await page.getAttribute('[data-testid=player-module]', 'data-xp');
+  fs.writeFileSync(path.join(outDir, 'app-gear.png'), await page.screenshot());
+  // DEMO keys a jump of three sectors at 3.3 s: scrubbing shows each step (2, 3, then 4).
+  const selectedAt = async ms => { await page.evaluate(value => window.__kgPlayer.seek(value), ms); await page.waitForTimeout(150); return page.getAttribute('[data-testid=player-module]', 'data-xp'); };
+  await selectedAt(3000);
+  await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
+  await page.waitForTimeout(300);
+  const steps = [await selectedAt(3300 + 100), await selectedAt(3300 + 350), await selectedAt(4200)];
+  check('GEAR RADIAL turns step by step to the selected item', landed === '3' && steps.join(',') === '2,3,4', `edit landed ${landed} · demo steps ${steps.join(', ')}`);
+  await page.click('[data-testid=player-mode-states]');
+  await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
+  await page.waitForTimeout(600);
+  const gearStates = await page.getAttribute('[data-testid=player-module]', 'data-phases');
+  fs.writeFileSync(path.join(outDir, 'app-gear-states.png'), await page.locator('[data-testid=player-preview]').screenshot());
+  check('GEAR RADIAL has the same states as every rail module', gearStates === 'compact,open,pinned,compact+hover,open+hover,open+disabled', gearStates);
+
   // HUD KIT: theme changes restyle every element; motion and pieces render.
   await page.click('[data-testid=catalog-section-kit]');
   await page.waitForSelector('[data-testid=kit-theme-view] [data-testid=player-module][data-ready=yes]');

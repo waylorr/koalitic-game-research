@@ -25,7 +25,7 @@ export function label(theme: Theme, value: string, size: number, weight: '500' |
       letterSpacing,
       dropShadow: glow === undefined ? false : { color: glow, alpha: 0.7, blur: 6, distance: 0, angle: 0 },
     }),
-    resolution: 3,
+    resolution: 4,
   });
   node.position.set(x, y);
   return node;
@@ -69,7 +69,7 @@ export class PanelFrame {
   private readonly line = new Graphics();
 
   constructor(private readonly theme: Theme, { backdropBlur }: { backdropBlur: boolean }) {
-    if (backdropBlur) this.glass.filters = [new BackdropBlurFilter({ strength: 7, quality: 3 })];
+    if (backdropBlur) this.glass.filters = [new BackdropBlurFilter({ strength: 7, quality: 3, resolution: 'inherit' })];
     this.sheen.mask = this.sheenMask;
     this.back.addChild(this.glass, this.sheenMask, this.sheen);
     this.front.addChild(this.lines, this.corners, this.line);
@@ -140,6 +140,9 @@ export class Effects {
   private seed = -1;
 
   constructor(private readonly target: Container) {
+    // Filters render the element into an intermediate texture: keep it at the canvas resolution, or text goes soft.
+    this.glitchFilter.resolution = 'inherit';
+    this.bloomFilter.resolution = 'inherit';
     target.filters = [this.glitchFilter, this.bloomFilter];
   }
 
