@@ -25,7 +25,7 @@ Este documento es el **punto de entrada para retomar el trabajo sin contexto**, 
    npm test
    npm run build && npm run e2e
    ```
-5. Trabaja en la rama indicada por el creador; la de esta etapa fue `claude/great-tesla-dopjs9`. Cada entrega: pruebas en verde, commit y push.
+5. Trabaja en `koalitic-game-0.1`, o en la rama que indique el creador, y pasa a `main` lo aprobado. Cada entrega: pruebas en verde, commit y push. El `main` antiguo (la primera prueba técnica) está archivado en `archive/main-h0`.
 
 ---
 
@@ -67,7 +67,7 @@ Este documento es el **punto de entrada para retomar el trabajo sin contexto**, 
   - Godot: solo reproduce Ogg Theora;
   - Unreal: su vídeo no es exacto al fotograma.
 - **H0 superado:** saltar a un instante da lo mismo que llegar reproduciendo; es rápido y el vídeo funciona como reloj (medidas en §5).
-- Se publicó y se subió a `main` (commit `84573ce`), a petición del creador.
+- Se publicó y se subió a `main` (commit `84573ce`), a petición del creador. Esa versión se conserva en la rama `archive/main-h0`.
 
 ### 24-09-2026 (tarde): la app de verdad
 - El creador vio la primera prueba «cutre» y sin conexión con su `workflow.html`. Se cambió de enfoque:

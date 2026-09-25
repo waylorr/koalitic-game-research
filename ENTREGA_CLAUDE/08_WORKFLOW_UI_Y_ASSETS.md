@@ -299,7 +299,7 @@ Fuentes: [Arwes](https://github.com/arwes/arwes) · [augmented-ui](https://augme
 
 ## 11. Continuar en Claude Code CLI
 
-- **Repositorio:** `waylorr/koalitic-game-research`, rama de trabajo de esta sesión `claude/great-tesla-dopjs9`.
+- **Repositorio:** `waylorr/koalitic-game-research`. Ramas: `main` (estable), `koalitic-game-0.1` (trabajo) y `archive/main-h0` (el `main` antiguo).
 - **Leer en este orden:** `README.md` → `CLAUDE.md` → `09_ESTADO_Y_BITACORA.md` → `07_FRAMEWORK_HUD.md` → este documento → `06_MOVIMIENTO_HUD.md` → `05_AUDITORIA_Y_PROPUESTA.md` §0 y §9.
 - **Arrancar:**
   ```

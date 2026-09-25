@@ -30,7 +30,10 @@ No es un juego 3D ni un editor de montaje de vídeo.
   - guardar proyectos;
   - exportación.
 - **Motor de tiempo probado:** cada fotograma se calcula a partir del tiempo, así que se puede saltar a cualquier instante con el mismo resultado exacto.
-- **Rama de trabajo:** `claude/great-tesla-dopjs9`.
+- **Ramas:**
+  - `main`: versión estable, con todo lo hecho hasta el 25-09-2026;
+  - `koalitic-game-0.1`: rama de trabajo;
+  - `archive/main-h0`: el `main` antiguo (primera prueba técnica), archivado.
 
 ## Mapa del repositorio
 
