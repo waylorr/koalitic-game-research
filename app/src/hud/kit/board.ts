@@ -1,6 +1,7 @@
 import { Container, Graphics, type Texture } from 'pixi.js';
 import { phase } from '../../core/motion';
-import { Effects, PanelFrame, Portrait, drawArtifacts, drawBar, type PanelState } from './pixi';
+import { GEAR_ICONS, drawIcon } from './icons';
+import { Effects, PanelFrame, Portrait, drawArtifacts, drawBar, mix, type PanelState } from './pixi';
 import { DEFAULT_MOTION, THEME, type MotionKnobs, type Theme } from './theme';
 
 /**
@@ -19,6 +20,8 @@ export const BOARD_LAYOUT = [
   { id: 'portrait', label: 'PORTRAIT', x: 20, y: 208 },
   { id: 'glitch', label: 'GLITCH + ARTIFACTS', x: 196, y: 208 },
   { id: 'line', label: 'BIRTH LINE', x: 460, y: 208 },
+  { id: 'icons', label: 'ICONS', x: 20, y: 312 },
+  { id: 'tiles', label: 'RAIL TILE · IDLE / SELECTED', x: 520, y: 312 },
 ] as const;
 
 const FRAME = { w: 150, h: 70 };
@@ -33,6 +36,7 @@ export class PiecesBoard {
   private readonly artifacts = new Graphics();
   private readonly effects: Effects;
   private readonly linePanel: PanelFrame;
+  private readonly icons = new Graphics();
 
   constructor(private readonly theme: Theme = THEME) {
     for (let i = 0; i < 4; i++) {
@@ -50,7 +54,7 @@ export class PiecesBoard {
     this.effects.setArea(FRAME.w, FRAME.h);
     this.linePanel = new PanelFrame(theme, { backdropBlur: false });
     this.linePanel.front.position.set(470, 240);
-    this.root.addChild(this.bars, this.portrait.root, this.glitchPanel.back, this.glitchLayer, this.linePanel.front);
+    this.root.addChild(this.bars, this.portrait.root, this.glitchPanel.back, this.glitchLayer, this.linePanel.front, this.icons);
   }
 
   get photo() {
@@ -88,5 +92,18 @@ export class PiecesBoard {
     const lp = phase(t, 2000);
     const scale = lp < 0.3 ? lp / 0.3 : lp < 0.7 ? 1 : 1 - (lp - 0.7) / 0.3;
     this.linePanel.update({ ...base, w: 220, h: 4, glass: 0, corners: 0, line: { scale, opacity: 1, fromRight: lp >= 0.7, spark: lp >= 0.7 ? (lp - 0.7) / 0.3 : null } });
+
+    // Icons and rail tiles.
+    const { color } = this.theme;
+    const ic = this.icons.clear();
+    GEAR_ICONS.forEach((icon, i) => drawIcon(ic, icon, 36 + i * 38, 350, 26, color.cyan, 1));
+    [0, 1].forEach(sel => {
+      const x = 540 + sel * 70, y = 326, s = 48, c = 7;
+      ic.poly([x + c, y, x + s, y, x + s, y + s - c, x + s - c, y + s, x, y + s, x, y + c])
+        .fill({ color: mix(0x07131f, 0x2a0610, sel), alpha: 0.85 })
+        .stroke({ width: 1.6 + sel * 1.2, color: mix(color.cyan, color.red, sel) });
+      if (sel) ic.rect(x - 9, y + 6, 3, s - 12).fill({ color: color.red });
+      drawIcon(ic, 'tools', x + s / 2, y + s / 2, 24, mix(color.cyan, color.white, sel), 1);
+    });
   }
 }

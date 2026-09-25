@@ -88,7 +88,7 @@ export function HudCanvas({ width, height, background, items, theme = THEME, mot
 
   // One drawn element per item key (rebuilt on theme change); photos load as they change.
   const signature = items.map(item => `${item.key}:${item.kind}`).join('|');
-  const photos = items.map(item => `${item.key}=${item.kind === 'player' ? item.input.record.photo : item.kind === 'board' ? item.photo : ''}`).join('|');
+  const photos = items.map(item => `${item.key}=${item.kind === 'player' ? item.input.record.photo : item.kind === 'rail' ? item.input.player.record.photo : item.kind === 'board' ? item.photo : ''}`).join('|');
   useEffect(() => {
     const current = scene.current;
     if (!current) return;

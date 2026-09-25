@@ -157,3 +157,7 @@
 .kg-props__slots button { padding: 6px 8px; border: 1px solid rgba(63, 214, 255, 0.3); background: rgba(2, 8, 14, 0.7); cursor: pointer; text-align: left; font: 700 12px / 1.1 var(--kg-ui); letter-spacing: 0.08em; color: var(--kg-ink-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kg-props__slots button:hover { color: var(--kg-ink); border-color: var(--kg-cyan); }
 .kg-props__slots button.is-on { border-color: var(--kg-red); color: var(--kg-ink); background: rgba(255, 42, 69, 0.12); }
+
+.kg-knobs--theme { width: 220px; }
+.kg-knobs__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 8px; }
+.kg-props__hint { margin: 2px 0 0; font: 500 12px / 1.3 var(--kg-ui); letter-spacing: 0.02em; color: #6b7c89; }

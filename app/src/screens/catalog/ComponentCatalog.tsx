@@ -4,17 +4,18 @@ import { KitMotionPage, KitPiecesPage, KitThemePage } from './KitPages';
 import { KitProvider } from './kitState';
 import { GearPage } from './GearPage';
 import { PlayerPage } from './PlayerPage';
+import { RailPage } from './RailPage';
 
 const STATES: readonly NeonState[] = ['idle', 'selected', 'pressed', 'disabled'];
 
-type PageId = 'button' | 'theme' | 'motion' | 'pieces' | 'player' | 'gear';
+type PageId = 'button' | 'theme' | 'motion' | 'pieces' | 'player' | 'gear' | 'rail';
 type SectionId = 'system' | 'kit' | 'hud';
 
 interface Entry { readonly name: string; readonly page?: PageId }
 
 /** HUD elements by zone (WORKFLOW/catalog/components.json); built ones open, the rest show as pending. */
 const ZONES: readonly { id: string; zone: string; items: readonly Entry[] }[] = [
-  { id: 'left', zone: 'LEFT RAIL', items: [{ name: 'PLAYER PROFILE', page: 'player' }, { name: 'INVENTORY / LOADOUT' }, { name: 'GEAR RADIAL', page: 'gear' }, { name: 'STAMINA' }, { name: 'TIME LEFT' }] },
+  { id: 'left', zone: 'LEFT RAIL', items: [{ name: 'RAIL · DOCK', page: 'rail' }, { name: 'PLAYER PROFILE', page: 'player' }, { name: 'INVENTORY / LOADOUT' }, { name: 'GEAR RADIAL', page: 'gear' }, { name: 'STAMINA' }, { name: 'TIME LEFT' }] },
   { id: 'top', zone: 'TOP BAR', items: [{ name: 'SYSTEM ONLINE' }, { name: 'NAVIGATION TABS' }, { name: 'LOCATION HEADER' }] },
   { id: 'right', zone: 'RIGHT RAIL', items: [{ name: 'ACTIVE MISSION' }, { name: 'PHOTO OPPORTUNITIES' }, { name: 'LOCATION / MINI MAP' }, { name: 'CODEX COMPACT' }] },
   { id: 'pov', zone: 'POV OVERLAYS', items: [{ name: 'WEATHER / LOCATION' }, { name: 'PERSON IDENTIFICATION' }, { name: 'SYSTEM NOTIFICATION' }, { name: 'PHOTO RESULT' }, { name: 'QUEST REVEAL' }, { name: 'LEVEL UP' }] },
@@ -26,7 +27,7 @@ const SECTIONS: readonly { id: SectionId; title: string; hint: string; first: Pa
   { id: 'hud', title: 'HUD ELEMENTS', hint: 'What goes on the video, by zone', first: 'player' },
 ];
 
-const SECTION_OF: Record<PageId, SectionId> = { button: 'system', theme: 'kit', motion: 'kit', pieces: 'kit', player: 'hud', gear: 'hud' };
+const SECTION_OF: Record<PageId, SectionId> = { button: 'system', theme: 'kit', motion: 'kit', pieces: 'kit', player: 'hud', gear: 'hud', rail: 'hud' };
 const TITLES: Record<PageId, string> = {
   button: 'SYSTEM UI · NEON BUTTON',
   theme: 'HUD KIT · THEME',
@@ -34,6 +35,7 @@ const TITLES: Record<PageId, string> = {
   pieces: 'HUD KIT · PIECES',
   player: 'HUD ELEMENTS · LEFT RAIL · PLAYER PROFILE',
   gear: 'HUD ELEMENTS · LEFT RAIL · GEAR RADIAL',
+  rail: 'HUD ELEMENTS · LEFT RAIL · RAIL (DOCK)',
 };
 
 /**
@@ -100,6 +102,7 @@ function Page({ id }: { id: PageId }): ReactNode {
   if (id === 'pieces') return <KitPiecesPage />;
   if (id === 'player') return <PlayerPage />;
   if (id === 'gear') return <GearPage key="gear" />;
+  if (id === 'rail') return <RailPage />;
   return <ButtonPage />;
 }
 

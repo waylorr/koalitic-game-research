@@ -1,16 +1,7 @@
-import type { GearInput, GearSlot } from '../../hud/v2/gear';
+import type { GearInput } from '../../hud/v2/gear';
 import { ElementPage, type EditContext, type ElementDef } from './ElementPage';
 import { key } from './kitState';
-
-/** Demo loadout (the Data Library will provide it): the six items of the HUD v2 designs. */
-const SLOTS: readonly GearSlot[] = [
-  { name: 'NIKON Z5 II', spec: 'MIRRORLESS · 24MP FULL FRAME', icon: 'camera' },
-  { name: '24-70MM', spec: 'F/2.8 S · STANDARD ZOOM', icon: 'lens' },
-  { name: 'INSTA360 X6', spec: '8K 360° · ACTION CAM', icon: 'cam360' },
-  { name: 'XIAOMI 17 ULTRA', spec: '1" SENSOR · TELEPHOTO', icon: 'phone' },
-  { name: 'SKATES', spec: 'URBAN FREERIDE · ALL TERRAIN', icon: 'skates' },
-  { name: 'TRIPOD', spec: 'CARBON FIBER · LIGHTWEIGHT', icon: 'tripod' },
-];
+import { GEAR_SLOTS as SLOTS } from './samples';
 
 const BASE: GearInput = { slots: SLOTS, enterAt: 0, exitAt: null, layout: [key(0, 'Open')], hover: [], disabled: [], selection: [key(0, 0)], pulses: [] };
 

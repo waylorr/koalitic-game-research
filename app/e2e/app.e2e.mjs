@@ -147,6 +147,22 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   fs.writeFileSync(path.join(outDir, 'app-gear-states.png'), await page.locator('[data-testid=player-preview]').screenshot());
   check('GEAR RADIAL has the same states as every rail module', gearStates === 'compact,open,pinned,compact+hover,open+hover,open+disabled', gearStates);
 
+  // LEFT RAIL · DOCK: one module opens beside its icon; switching closes the other.
+  await page.click('[data-testid=catalog-item-rail]');
+  await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
+  await page.waitForTimeout(1500);
+  await page.click('[data-testid=rail-open-gear]');
+  await page.waitForTimeout(1500);
+  const railGear = await page.getAttribute('[data-testid=player-module]', 'data-phase');
+  fs.writeFileSync(path.join(outDir, 'app-rail-gear.png'), await page.locator('[data-testid=player-preview]').screenshot());
+  await page.click('[data-testid=rail-open-stamina]');
+  await page.waitForTimeout(1500);
+  const railStamina = await page.getAttribute('[data-testid=player-module]', 'data-phase');
+  await page.click('[data-testid=rail-close]');
+  await page.waitForTimeout(900);
+  const railClosed = await page.getAttribute('[data-testid=player-module]', 'data-phase');
+  check('LEFT RAIL DOCK opens one module beside its icon at a time', railGear === 'dock:gear' && railStamina === 'dock:stamina' && railClosed === 'dock', `${railGear} → ${railStamina} → ${railClosed}`);
+
   // HUD KIT: theme changes restyle every element; motion and pieces render.
   await page.click('[data-testid=catalog-section-kit]');
   await page.waitForSelector('[data-testid=kit-theme-view] [data-testid=player-module][data-ready=yes]');

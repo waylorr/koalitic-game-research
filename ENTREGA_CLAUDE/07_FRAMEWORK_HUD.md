@@ -59,6 +59,11 @@ Acordado con el creador el 25-09-2026. Referencias:
   - PINNED es OPEN fijo.
 - **Cascada:** el rail entra con sus módulos de arriba abajo y sale al revés.
 - **FOLDED** es el modo del rail y **COMPACT**, la presentación de cada módulo.
+- ✅ **DOCK hecho** en `hud/v2/rail.ts` y `RailPixi.ts`:
+  - mini-tarjeta del jugador y columna de iconos en el orden de la plantilla;
+  - la pista `selected` abre un solo módulo al lado de su icono, con conector y arco rojos. Al cambiar, el anterior se cierra mientras el nuevo se abre;
+  - el Gear Radial usa su forma «suelta» (solo el radial, sin tarjeta);
+  - INVENTORY, CAMERA y TIME LEFT usan de momento el panel del kit como sustituto.
 - **El mismo componente** va dentro de un rail o suelto; solo cambia quién lo coloca.
 - **Selecciones internas** (por ejemplo, el gajo del Gear Radial, pista `gear-radial.selection`): el radial gira paso a paso entre gajos, con «ping» y destello en cada uno. ✅ Hecho en `hud/v2/gear.ts`: va por el camino corto y, si lo interrumpen, sigue desde donde estaba.
 
@@ -68,9 +73,9 @@ Se navega como un menú de juego: tres secciones grandes y solo se despliega la 
 
 - **SYSTEM UI:** la interfaz de la app, como el botón neón. No se exporta.
 - **HUD KIT:**
-  - **THEME:** colores, barras de XP y Stamina, cristal y línea. Cambian en vivo en todos los elementos.
+  - **THEME:** colores, barras de XP y Stamina, cristal y línea, sobre **todos** los elementos a la vez (galería en `screens/catalog/samples.ts`; un componente nuevo se añade ahí y aparece solo).
   - **MOTION:** las animaciones del kit, clasificadas en entrada y salida, estados, reacciones y ambiente, probadas sobre el panel de muestra. Incluye las perillas globales.
-  - **PIECES:** las piezas en reposo. La carta es la de por defecto; un componente puede traer su variante.
+  - **PIECES:** las piezas en reposo, incluidos los iconos y las casillas del rail. La carta es la de por defecto; un componente puede traer su variante.
 - Tema y perillas se guardan en este navegador mientras llega la HUD Template.
 - **HUD ELEMENTS:** cada zona se despliega con todos sus elementos; los pendientes salen en gris. Cada elemento tiene tres pestañas:
   - **EDIT** (primera): valores, estado (forma más HOVER y DISABLED), entrada y salida, y reacciones. Cada cambio es un keyframe.

@@ -10,19 +10,25 @@ import { GEAR_H_OPEN, GEAR_W, type GearFrame, type GearInput } from './gear';
  * the selected one at the top in red, the selected item large in the centre.
  * No timing logic here.
  */
-const C = { x: GEAR_W / 2, y: 168, rOut: 116, rIn: 50, gap: 0.045 };
+/** Radial geometry in the module's own coordinates (the bare flyout uses the same centre). */
+export const RADIAL = { x: GEAR_W / 2, y: 168, rOut: 118, rIn: 58, gap: 0.16, core: 46 };
+const C = RADIAL;
 
-function sector(g: Graphics, a0: number, a1: number, rIn: number, rOut: number) {
+/** A hex-like petal: a ring segment with chamfered outer corners (as in the CONFIGURE HUD design). */
+function petal(g: Graphics, mid: number, span: number, rIn: number, rOut: number, gap: number) {
+  const a0 = mid - span / 2 + gap / 2;
+  const a1 = mid + span / 2 - gap / 2;
+  const ch = Math.min(14, (rOut - rIn) * 0.3);
+  const at = (a: number, r: number) => [C.x + Math.cos(a) * r, C.y + Math.sin(a) * r];
   const pts: number[] = [];
-  const steps = 14;
-  for (let i = 0; i <= steps; i++) {
-    const a = a0 + ((a1 - a0) * i) / steps;
-    pts.push(C.x + Math.cos(a) * rOut, C.y + Math.sin(a) * rOut);
-  }
-  for (let i = steps; i >= 0; i--) {
-    const a = a0 + ((a1 - a0) * i) / steps;
-    pts.push(C.x + Math.cos(a) * rIn, C.y + Math.sin(a) * rIn);
-  }
+  pts.push(...at(a0 + gap * 0.2, rIn));
+  pts.push(...at(a0, rOut - ch));
+  const dA = ch / rOut;
+  const steps = 8;
+  for (let i = 0; i <= steps; i++) pts.push(...at(a0 + dA + ((a1 - a0 - 2 * dA) * i) / steps, rOut));
+  pts.push(...at(a1, rOut - ch));
+  pts.push(...at(a1 - gap * 0.2, rIn));
+  for (let i = steps; i >= 0; i--) pts.push(...at(a0 + gap * 0.2 + ((a1 - a0 - gap * 0.4) * i) / steps, rIn));
   return g.poly(pts);
 }
 
@@ -48,9 +54,13 @@ export class GearPixi {
   private readonly compactCounter: Text;
   private readonly artifacts = new Graphics();
 
-  constructor(private readonly theme: Theme = THEME) {
+  private readonly bare: boolean;
+
+  /** bare: only the radial, no card (the flyout form used when it opens beside the rail). */
+  constructor(private readonly theme: Theme = THEME, { bare = false }: { bare?: boolean } = {}) {
     const { color } = theme;
-    this.panel = new PanelFrame(theme, { backdropBlur: true });
+    this.bare = bare;
+    this.panel = new PanelFrame(theme, { backdropBlur: !bare });
     this.header = label(theme, '', 15, '700', color.red, 2.7, 26, 3, color.red);
     this.counter = label(theme, '', 14, '700', color.dim, 1.5, 0, 22);
     this.name = label(theme, '', 20, '700', color.text, 1.2, C.x, 296);
@@ -65,6 +75,13 @@ export class GearPixi {
     this.content.addChild(this.slash, this.header, this.counter, this.open, this.compact);
     this.fx.addChild(this.panel.front, this.mask, this.content, this.artifacts);
     this.root.addChild(this.panel.back, this.fx);
+    if (bare) {
+      this.panel.back.visible = false;
+      this.panel.front.visible = false;
+      this.content.mask = null;
+      this.mask.visible = false;
+      for (const node of [this.slash, this.header, this.counter, this.name, this.spec, this.compact]) node.visible = false;
+    }
     this.effects = new Effects(this.fx);
     this.effects.setArea(GEAR_W, GEAR_H_OPEN);
   }
@@ -83,8 +100,10 @@ export class GearPixi {
     const accent = mix(color.red, color.disabled, frame.disabled);
     const data = mix(color.cyan, color.disabled, frame.disabled);
     this.root.tint = mix(0xffffff, 0x9aa4ae, frame.disabled);
-    this.panel.update(frame.panel);
-    this.mask.clear().rect(-2, -2, GEAR_W + 4, h + 2).fill({ color: 0xffffff });
+    if (!this.bare) {
+      this.panel.update(frame.panel);
+      this.mask.clear().rect(-2, -2, GEAR_W + 4, h + 2).fill({ color: 0xffffff });
+    }
     this.content.alpha = frame.content * (1 - 0.45 * frame.disabled);
     this.slash.clear().poly([14, 19, 17, 5, 21, 5, 18, 19]).fill({ color: accent });
     this.header.text = frame.header;
@@ -94,8 +113,8 @@ export class GearPixi {
     this.counter.alpha = frame.openContent;
 
     // OPEN: the ring. Sector i sits at (i - pos) steps from the top; the one at the top is selected.
-    this.open.alpha = frame.openContent;
-    this.open.visible = frame.openContent > 0.001;
+    this.open.alpha = this.bare ? frame.content : frame.openContent;
+    this.open.visible = this.open.alpha > 0.001;
     const ring = this.ring.clear();
     const icons = this.icons.clear();
     const span = (Math.PI * 2) / n;
@@ -106,23 +125,27 @@ export class GearPixi {
       if (d > n / 2) d -= n;
       const top = clamp01(1 - Math.abs(d));
       const mid = -Math.PI / 2 + d * span;
-      const rOut = C.rIn + (C.rOut - C.rIn) * grow;
-      sector(ring, mid - span / 2 + C.gap, mid + span / 2 - C.gap, C.rIn, rOut)
-        .fill({ color: mix(0x0b1522, 0x3a0a14, top), alpha: 0.78 })
-        .stroke({ width: 1.2 + top * 1.4, color: mix(data, accent, top), alpha: 0.55 + 0.45 * top });
+      const rIn = C.rIn * (0.7 + 0.3 * grow);
+      const rOut = rIn + (C.rOut - C.rIn) * grow;
+      petal(ring, mid, span, rIn, rOut, C.gap)
+        .fill({ color: mix(0x071524, 0x1a0710, top * 0.6), alpha: 0.82 })
+        .stroke({ width: 2.2, color: mix(data, accent, top * 0.75), alpha: 0.75 + 0.25 * top });
       const slot = input.slots[i];
       if (slot) {
-        const r = (C.rIn + rOut) / 2;
-        drawIcon(icons, slot.icon, C.x + Math.cos(mid) * r, C.y + Math.sin(mid) * r, 26 + top * 6, mix(mix(data, color.white, top), color.white, frame.ping * top), 0.55 + 0.45 * top);
+        const r = (rIn + rOut) / 2;
+        drawIcon(icons, slot.icon, C.x + Math.cos(mid) * r, C.y + Math.sin(mid) * r, 30, mix(color.white, accent, top * 0.35), grow);
       }
     }
-    // Centre: selected item large, ping ring when a step lands.
+    // Centre: the selected item in a red core; a ping ring when a step lands.
     const c = this.center.clear();
-    const inner = C.rIn - 6;
-    c.circle(C.x, C.y, inner * frame.centerIn).fill({ color: 0x050b14, alpha: 0.85 }).stroke({ width: 1.6, color: mix(data, accent, frame.ping), alpha: frame.centerIn });
-    if (frame.ping > 0.02) c.circle(C.x, C.y, inner + 26 * (1 - frame.ping)).stroke({ width: 2, color: accent, alpha: frame.ping });
+    const core = C.core * frame.centerIn;
+    if (core > 1) {
+      c.circle(C.x, C.y, core + 8).stroke({ width: 2, color: accent, alpha: 0.35 + 0.4 * frame.ping });
+      c.circle(C.x, C.y, core).fill({ color: mix(0x2a0610, 0x5a0c1c, frame.ping), alpha: 0.92 }).stroke({ width: 4, color: accent, alpha: 1 });
+    }
+    if (frame.ping > 0.02) c.circle(C.x, C.y, core + 12 + 26 * (1 - frame.ping)).stroke({ width: 2, color: accent, alpha: frame.ping });
     const chosen = input.slots[frame.selected];
-    if (chosen && frame.centerIn > 0.2) drawIcon(c, chosen.icon, C.x, C.y, 44, mix(color.white, accent, 0.25 + 0.5 * frame.ping), frame.centerIn);
+    if (chosen && frame.centerIn > 0.2) drawIcon(c, chosen.icon, C.x, C.y, 40, mix(color.white, 0xffd0d6, 0.3 + 0.4 * frame.ping), frame.centerIn);
     this.name.text = frame.name;
     this.spec.text = frame.spec;
     this.spec.alpha = frame.openContent;

@@ -4,8 +4,8 @@ import type { Graphics } from 'pixi.js';
  * HUD kit: line icons drawn as vectors, so they take the theme colours and
  * stay sharp at any scale. Each fits a 24×24 box centred on (cx, cy).
  */
-export type GearIcon = 'camera' | 'lens' | 'cam360' | 'phone' | 'skates' | 'tripod' | 'drone';
-export const GEAR_ICONS: readonly GearIcon[] = ['camera', 'lens', 'cam360', 'phone', 'skates', 'tripod', 'drone'];
+export type GearIcon = 'camera' | 'lens' | 'cam360' | 'phone' | 'skates' | 'tripod' | 'drone' | 'bag' | 'tools' | 'bolt' | 'clock' | 'user';
+export const GEAR_ICONS: readonly GearIcon[] = ['camera', 'lens', 'cam360', 'phone', 'skates', 'tripod', 'drone', 'bag', 'tools', 'bolt', 'clock', 'user'];
 
 export function drawIcon(g: Graphics, icon: GearIcon, cx: number, cy: number, size: number, color: number, alpha = 1) {
   const s = size / 24;
@@ -53,6 +53,28 @@ export function drawIcon(g: Graphics, icon: GearIcon, cx: number, cy: number, si
         g.moveTo(X(dx * 3), Y(dy * 2.5)).lineTo(X(dx * 8), Y(dy * 7)).stroke(stroke);
         g.ellipse(X(dx * 8), Y(dy * 7), 4 * s, 1.6 * s).stroke(stroke);
       }
+      break;
+    case 'bag':
+      g.roundRect(X(-8), Y(-5), 16 * s, 16 * s, 3 * s).stroke(stroke);
+      g.moveTo(X(-4), Y(-5)).lineTo(X(-4), Y(-9)).lineTo(X(4), Y(-9)).lineTo(X(4), Y(-5)).stroke(stroke);
+      g.rect(X(-4), Y(2), 8 * s, 5 * s).stroke(stroke);
+      break;
+    case 'tools':
+      g.moveTo(X(-9), Y(9)).lineTo(X(5), Y(-5)).stroke({ ...stroke, width: stroke.width * 1.3 });
+      g.circle(X(7), Y(-7), 3.5 * s).stroke(stroke);
+      g.moveTo(X(-9), Y(-9)).lineTo(X(9), Y(9)).stroke({ ...stroke, width: stroke.width * 1.3 });
+      g.rect(X(-10.5), Y(-10.5), 4 * s, 4 * s).stroke(stroke);
+      break;
+    case 'bolt':
+      g.poly([X(2), Y(-11), X(-7), Y(2), X(-1), Y(2), X(-3), Y(11), X(7), Y(-3), X(1), Y(-3)]).stroke(stroke);
+      break;
+    case 'clock':
+      g.circle(X(0), Y(0), 10 * s).stroke(stroke);
+      g.moveTo(X(0), Y(-6)).lineTo(X(0), Y(0)).lineTo(X(5), Y(3)).stroke(stroke);
+      break;
+    case 'user':
+      g.circle(X(0), Y(-4), 5 * s).stroke(stroke);
+      g.moveTo(X(-9), Y(10)).quadraticCurveTo(X(0), Y(-1), X(9), Y(10)).stroke(stroke);
       break;
   }
 }

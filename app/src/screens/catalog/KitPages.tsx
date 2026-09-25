@@ -6,38 +6,36 @@ import type { SampleInput } from '../../hud/kit/sample';
 import type { MotionKnobs, Theme } from '../../hud/kit/theme';
 import type { HudItem } from '../../hud/registry';
 import { HudCanvas } from '../../hud/v2/HudCanvas';
-import type { PlayerInput } from '../../hud/v2/player';
 import { BACKGROUND, PORTRAIT, fromHex, hex, key, keyId, useClock, useKit } from './kitState';
+import { GALLERY_LABELS, gallery } from './samples';
 
-const PLAYER: PlayerInput = { record: { name: 'KOALITIC', level: 12, nextLevelXp: 5000, photo: PORTRAIT }, enterAt: 0, exitAt: null, layout: [key(0, 'Open')], hover: [], disabled: [], xp: [key(0, 3250)], pulses: [] };
 const SAMPLE: SampleInput = { title: 'STAMINA', enterAt: 0, exitAt: null, layout: [key(0, 'Open')], hover: [], disabled: [], value: [key(0, 72)], pulses: [] };
 const LAYOUT_LABEL: Record<ModuleLayout, string> = { Compact: 'COMPACT', Open: 'OPEN', Pinned: 'PINNED' };
 
-/** THEME: the colours and lines every HUD element takes. Changes show on every element at once. */
+/** THEME: the colours and lines every HUD element takes, shown on all elements at once. */
 export function KitThemePage() {
   const { theme, motion, setTheme, reset } = useKit();
   const { t } = useClock(true);
   const setColor = (name: keyof Theme['color'], value: string) => setTheme({ ...theme, color: { ...theme.color, [name]: fromHex(value) } });
   const setBar = (bar: keyof Theme['bars'], end: 'from' | 'to', value: string) => setTheme({ ...theme, bars: { ...theme.bars, [bar]: { ...theme.bars[bar], [end]: fromHex(value) } } });
-  const colors: [keyof Theme['color'], string][] = [['red', 'ACCENT · RED'], ['cyan', 'DATA · CYAN'], ['text', 'TEXT'], ['dim', 'LABELS'], ['edge', 'FRAME EDGE'], ['glass', 'GLASS'], ['white', 'HOT WHITE'], ['disabled', 'DISABLED']];
-  const items: HudItem[] = [
-    { key: 'theme-player', kind: 'player', t: 4000 + t, input: PLAYER, x: 20, y: 34, scale: 1 },
-    { key: 'theme-sample', kind: 'sample', t: 4000 + t, input: SAMPLE, x: 20, y: 200, scale: 1 },
-  ];
+  const colors: [keyof Theme['color'], string][] = [['red', 'ACCENT'], ['cyan', 'DATA'], ['text', 'TEXT'], ['dim', 'LABELS'], ['edge', 'EDGE'], ['glass', 'GLASS'], ['white', 'HOT'], ['disabled', 'DISABLED']];
   return (
     <div className="kg-page">
-      <p className="kg-page__intro">Layer 1 of the kit. Every HUD element reads these values, so changing one restyles all of them.</p>
+      <p className="kg-page__intro">Layer 1 of the kit, on every HUD element at once. Each new component joins this screen automatically.</p>
       <div className="kg-page__row">
-        <div className="kg-page__view" style={{ width: 600, height: 300 }} data-testid="kit-theme-view">
-          <HudCanvas width={600} height={300} background={BACKGROUND} items={items} theme={theme} motion={motion} />
+        <div className="kg-page__view" style={{ width: 720, height: 360 }} data-testid="kit-theme-view">
+          <HudCanvas width={720} height={360} background={BACKGROUND} items={gallery(4000 + t)} theme={theme} motion={motion} />
+          <div className="kg-page__labels">{GALLERY_LABELS.map(l => <span key={l.text} style={{ left: l.x, top: l.y }}>{l.text}</span>)}</div>
         </div>
-        <div className="kg-knobs" data-testid="kit-theme-controls">
-          {colors.map(([name, text]) => (
-            <label key={name} className="kg-knobs__color">
-              <input type="color" value={hex(theme.color[name])} onChange={e => setColor(name, e.target.value)} data-testid={`theme-${name}`} />
-              {text}
-            </label>
-          ))}
+        <div className="kg-knobs kg-knobs--theme" data-testid="kit-theme-controls">
+          <div className="kg-knobs__grid">
+            {colors.map(([name, text]) => (
+              <label key={name} className="kg-knobs__color">
+                <input type="color" value={hex(theme.color[name])} onChange={e => setColor(name, e.target.value)} data-testid={`theme-${name}`} />
+                {text}
+              </label>
+            ))}
+          </div>
           {(['xp', 'stamina'] as const).map(bar => (
             <div key={bar} className="kg-knobs__color">
               <input type="color" value={hex(theme.bars[bar].from)} onChange={e => setBar(bar, 'from', e.target.value)} data-testid={`theme-bar-${bar}-from`} />
@@ -45,8 +43,8 @@ export function KitThemePage() {
               {bar === 'xp' ? 'XP BAR' : 'STAMINA BAR'}
             </div>
           ))}
-          <label className="kg-knobs__range">GLASS OPACITY<input type="range" min={0.3} max={0.95} step={0.01} value={theme.glassAlpha} onChange={e => setTheme({ ...theme, glassAlpha: Number(e.target.value) })} /></label>
-          <label className="kg-knobs__range">FRAME LINE<input type="range" min={0.6} max={3} step={0.1} value={theme.line} onChange={e => setTheme({ ...theme, line: Number(e.target.value) })} /></label>
+          <label className="kg-knobs__range"><span>GLASS OPACITY</span><input type="range" min={0.3} max={0.95} step={0.01} value={theme.glassAlpha} onChange={e => setTheme({ ...theme, glassAlpha: Number(e.target.value) })} /></label>
+          <label className="kg-knobs__range"><span>FRAME LINE</span><input type="range" min={0.6} max={3} step={0.1} value={theme.line} onChange={e => setTheme({ ...theme, line: Number(e.target.value) })} /></label>
           <button type="button" className="kg-chip" onClick={reset} data-testid="kit-reset">RESET KIT</button>
         </div>
       </div>
@@ -148,8 +146,8 @@ export function KitPiecesPage() {
   return (
     <div className="kg-page">
       <p className="kg-page__intro">Layer 3 of the kit. Components are assembled from these pieces; restyle a piece and every component using it changes. The panel frame is the default card: a component can bring its own card variant.</p>
-      <div className="kg-page__view" style={{ width: 960, height: 310 }} data-testid="kit-pieces-view">
-        <HudCanvas width={960} height={310} background={BACKGROUND} items={items} theme={theme} motion={motion} />
+      <div className="kg-page__view" style={{ width: 960, height: 380 }} data-testid="kit-pieces-view">
+        <HudCanvas width={960} height={380} background={BACKGROUND} items={items} theme={theme} motion={motion} />
         <div className="kg-page__labels">
           {BOARD_LAYOUT.map(piece => <span key={piece.id} style={{ left: offset.x + piece.x, top: offset.y + piece.y - 22 }}>{piece.label}</span>)}
         </div>
