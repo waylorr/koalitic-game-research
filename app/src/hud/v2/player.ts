@@ -1,45 +1,56 @@
-import { easeInOutCubic, easeOutCubic, phase as loopPhase } from '../../core/motion';
-import { clamp01, decode, lerp, seg } from '../fx';
+import type { Track } from '../../core/tracks';
+import { clamp01, decode } from '../kit/fx';
+import { ambient, popup, presence, pulseGlitch, reactiveNumber, stateWeights } from '../kit/motion';
+import { DEFAULT_MOTION, type MotionKnobs } from '../kit/theme';
 
 /**
- * PLAYER module (Left Rail, HUD v2 look, HUD v1 motion) as a pure function of time.
- * The script is what an episode decides: values and *when* things happen.
- * evaluatePlayer decides *how* the module looks at instant t; a renderer
- * (PixiJS, see PlayerPixi.ts) only draws the resulting frame.
- * Timings follow ENTREGA_CLAUDE/06_MOVIMIENTO_HUD.md.
+ * PLAYER PROFILE (Left Rail module, HUD v2 look, HUD v1 motion) as a pure
+ * function of time. The input is what an episode holds: the Data Library
+ * record, when the module is on screen, and keyframed tracks for its state
+ * and XP. evaluatePlayer decides *how* it looks at t using the shared kit; the
+ * PixiJS renderer (PlayerPixi.ts) only draws the frame.
  */
-export interface PlayerScript {
+export type ModuleState = 'Compact' | 'Open' | 'Pinned' | 'Hover' | 'Disabled';
+export const MODULE_STATES: readonly ModuleState[] = ['Compact', 'Open', 'Pinned', 'Hover', 'Disabled'];
+
+export interface PlayerRecordView {
   readonly name: string;
   readonly level: number;
-  readonly baseXp: number;
   readonly nextLevelXp: number;
   readonly photo: string;
+}
+
+export interface PlayerInput {
+  readonly record: PlayerRecordView;
   readonly enterAt: number;
   readonly exitAt: number | null;
-  readonly xpGains: readonly { at: number; amount: number }[];
-  readonly folds: readonly { at: number; folded: boolean }[];
-  /** Instants when a displayed value was changed, so it re-reveals (decode, flash). */
-  readonly edits: readonly { at: number; field: 'name' | 'level' | 'photo' }[];
+  readonly state: Track<ModuleState>;
+  /** XP keys: the value jumps on each key and the module animates the jump. */
+  readonly xp: Track<number>;
+  /** Instants when a record value was replaced, so it reveals again. */
+  readonly pulses: readonly { readonly at: number; readonly field: 'name' | 'level' | 'photo' }[];
 }
 
 export const PLAYER_W = 360;
 export const PLAYER_H_OPEN = 150;
-export const PLAYER_H_FOLDED = 50;
+export const PLAYER_H_COMPACT = 58;
+export const PLAYER_TAB_X = 146;
 
-export type PlayerPhase = 'hidden' | 'enter' | 'open' | 'folded' | 'exit';
+export type PlayerPhase = 'hidden' | 'enter' | 'exit' | 'compact' | 'open' | 'pinned' | 'hover' | 'disabled';
 
 export interface PlayerFrame {
   readonly phase: PlayerPhase;
-  /** Panel height (px), line birth/burn-out, corners. */
   readonly h: number;
-  readonly line: { readonly scale: number; readonly opacity: number; readonly y: number; readonly fromRight: boolean; readonly spark: number | null } | null;
+  readonly line: { readonly scale: number; readonly opacity: number; readonly fromRight: boolean; readonly spark: number | null } | null;
   readonly glass: number;
   readonly corners: number;
   readonly cornersIn: number;
-  /** Content visibility: all, open layout, folded layout. */
   readonly content: number;
   readonly openContent: number;
-  readonly foldedContent: number;
+  readonly compactContent: number;
+  readonly hover: number;
+  readonly pinned: number;
+  readonly disabled: number;
   readonly header: string;
   readonly slash: number;
   readonly portraitReveal: number;
@@ -55,131 +66,83 @@ export interface PlayerFrame {
   readonly xpTextIn: number;
   readonly gains: readonly { readonly key: number; readonly text: string; readonly opacity: number; readonly dy: number; readonly scale: number; readonly cool: number }[];
   readonly sheen: number | null;
-  /** Effects: glitch strength 0..1 with its random seed, bloom boost, artifacts. */
   readonly glitch: number;
   readonly seed: number;
   readonly bloom: number;
 }
 
-function foldAmount(t: number, folds: PlayerScript['folds']): number {
-  let f = 0;
-  for (const change of folds) {
-    if (change.at > t) break;
-    f += ((change.folded ? 1 : 0) - f) * easeInOutCubic(seg(t, change.at, 380));
-  }
-  return f;
-}
+/** Visual axes of a module state: [open, pinned, hover, disabled]. */
+const stateAxes = (s: ModuleState): readonly number[] =>
+  s === 'Compact' ? [0, 0, 0, 0] : s === 'Open' ? [1, 0, 0, 0] : s === 'Pinned' ? [1, 1, 0, 0] : s === 'Hover' ? [1, 0, 1, 0] : [1, 0, 0, 1];
 
-const lastEdit = (script: PlayerScript, field: PlayerScript['edits'][number]['field'], t: number) => {
+const lastPulse = (input: PlayerInput, field: PlayerInput['pulses'][number]['field'], t: number) => {
   let at: number | null = null;
-  for (const edit of script.edits) if (edit.field === field && edit.at <= t) at = edit.at;
+  for (const pulse of input.pulses) if (pulse.field === field && pulse.at <= t) at = pulse.at;
   return at;
 };
 
-/** A quick rise and a slower fall: the shape of every glitch burst. */
-const burst = (l: number, rise: number, fall: number) => (l < 0 ? 0 : l < rise ? l / rise : clamp01(1 - (l - rise) / fall));
+export function evaluatePlayer(t: number, input: PlayerInput, k: MotionKnobs = DEFAULT_MOTION): PlayerFrame | null {
+  const p = presence(t, input.enterAt, input.exitAt, k);
+  if (!p) return null;
+  const state = stateWeights(input.state, t, 'Open', stateAxes, k);
+  const [open = 1, pinned = 0, hover = 0, disabled = 0] = state.visual;
+  const h = p.height(PLAYER_H_COMPACT + (PLAYER_H_OPEN - PLAYER_H_COMPACT) * open);
 
-export function evaluatePlayer(t: number, script: PlayerScript): PlayerFrame | null {
-  const e = t - script.enterAt;
-  const x = script.exitAt === null ? -1 : t - script.exitAt;
-  if (e < 0 || x >= 620) return null;
+  const calm = 1 - disabled;
+  const idle = ambient(t, { ...k, ambient: k.ambient * calm });
+  const xp = reactiveNumber(input.xp, t, 0, k);
+  const introFill = p.reveal(900, 700);
+  const introEase = 1 - (1 - introFill) ** 3;
 
-  // Birth: line → bar → panel → corners.
-  const lineP = easeOutCubic(seg(e, 0, 140));
-  const barP = easeOutCubic(seg(e, 140, 160));
-  const growP = easeOutCubic(seg(e, 300, 320));
-  const cornersIn = easeOutCubic(seg(e, 560, 160));
-  const fold = foldAmount(t, script.folds);
-  const target = lerp(PLAYER_H_OPEN, PLAYER_H_FOLDED, fold);
-  let h = e < 140 ? 2 : e < 300 ? lerp(2, 14, barP) : lerp(14, target, growP);
+  const namePulse = lastPulse(input, 'name', t);
+  const levelPulse = lastPulse(input, 'level', t);
+  const photoPulse = lastPulse(input, 'photo', t);
+  const pulses = input.pulses.reduce((g, pulse) => Math.max(g, pulseGlitch(t, pulse.at, k)), 0);
+  const photoStart = photoPulse ?? input.enterAt + 480 / k.speed;
+  const photoL = (t - photoStart) * k.speed;
+  const nameP = namePulse === null ? p.reveal(600, 360) : clamp01(((t - namePulse) * k.speed) / 360);
 
-  // Exit: glitch burst, content and corners go, collapse to a line that burns out.
-  const cornersOut = x >= 0 ? seg(x, 0, 100) : 0;
-  const contentOut = x >= 0 ? seg(x, 60, 140) : 0;
-  const shrinkP = x >= 0 ? easeInOutCubic(seg(x, 120, 240)) : 0;
-  const lineOut = x >= 0 ? seg(x, 360, 260) : 0;
-  h = lerp(h, 2, shrinkP);
+  const glitch = Math.max(p.glitch, xp.glitch, pulses, idle.glitch) * (1 - disabled * 0.8);
+  const heat = introFill > 0 && introFill < 1 ? 1 : xp.heat;
+  const value = xp.value * introEase;
+  const content = p.content;
 
-  const burning = x >= 340;
-  const line = e < 320 || burning
-    ? {
-        scale: burning ? 1 - easeInOutCubic(lineOut) : lineP,
-        opacity: burning ? 1 - lineOut * 0.6 : 1 - seg(e, 260, 60),
-        y: burning ? h / 2 - 1 : 0,
-        fromRight: burning,
-        spark: burning ? lerp(0.1, 0.9, lineOut) : null,
-      }
-    : null;
-
-  const corners = cornersIn * (1 - cornersOut);
-  const content = 1 - contentOut;
-
-  // Content reveals in reading order; an edited value reveals again.
-  const nameEdit = lastEdit(script, 'name', t);
-  const levelEdit = lastEdit(script, 'level', t);
-  const photoEdit = lastEdit(script, 'photo', t);
-  const ambientGlitchText = loopPhase(t + 3100, 9000) < 0.014;
-  const nameP = nameEdit === null ? seg(e, 600, 360) : seg(t, nameEdit, 360);
-  const photoStart = photoEdit === null ? script.enterAt + 480 : photoEdit;
-  const introFill = easeOutCubic(seg(e, 900, 700));
-
-  let xp = script.baseXp * introFill;
-  let heat = introFill > 0 && introFill < 1 ? 1 : 0;
-  let glitch = 0;
-  const gains = [];
-  for (const gain of script.xpGains) {
-    const l = t - gain.at;
-    if (l < 0) continue;
-    const p = seg(l, 150, 650);
-    xp += gain.amount * easeOutCubic(p);
-    heat = Math.max(heat, p < 1 ? (l < 150 ? 0 : 1) : Math.exp(-(l - 800) / 260));
-    glitch = Math.max(glitch, 0.55 * burst(l, 40, 220));
-    if (l < 1400) {
-      const pop = easeOutCubic(seg(l, 0, 120));
-      gains.push({
-        key: gain.at,
-        text: `${gain.amount >= 0 ? '+' : ''}${gain.amount} XP`,
-        opacity: pop * (1 - seg(l, 1000, 400)),
-        dy: -14 * easeOutCubic(seg(l, 300, 1100)),
-        scale: lerp(1.35, 1, pop),
-        cool: seg(l, 120, 330),
-      });
-    }
-  }
-  for (const edit of script.edits) glitch = Math.max(glitch, 0.45 * burst(t - edit.at, 30, 200));
-  glitch = Math.max(glitch, burst(e - 250, 60, 420));
-  if (x >= 0) glitch = Math.max(glitch, burst(x, 40, 300));
-  if (loopPhase(t + 1700, 6000) < 0.016) glitch = Math.max(glitch, 0.3);
-
-  const sheenP = loopPhase(t, 7000);
-  const lineGlow = e < 320 ? 1 - seg(e, 200, 120) : 0;
+  let phase: PlayerPhase;
+  if (p.phase !== 'shown') phase = p.phase;
+  else phase = state.value.toLowerCase() as PlayerPhase;
 
   return {
-    phase: x >= 0 ? 'exit' : e < 720 ? 'enter' : fold > 0.5 ? 'folded' : 'open',
+    phase,
     h,
-    line,
-    glass: e < 140 || burning ? 0 : 1,
-    corners,
-    cornersIn,
+    line: p.line,
+    glass: p.glass,
+    corners: p.corners,
+    cornersIn: p.cornersIn,
     content,
-    openContent: content * (1 - clamp01(fold * 2.2)),
-    foldedContent: content * clamp01((fold - 0.55) / 0.45),
-    header: decode('PLAYER', seg(e, 420, 260), t, 1),
-    slash: seg(e, 400, 120),
-    portraitReveal: seg(t, photoStart, 200),
-    portraitFlash: 1 - easeOutCubic(seg(t, photoStart, 460)),
-    name: decode(script.name, ambientGlitchText ? 0.55 : nameP, t, 2),
-    levelIn: easeOutCubic(seg(e, 720, 260)),
-    levelHeat: levelEdit === null ? 0 : 1 - seg(t, levelEdit + 80, 420),
-    trackIn: easeOutCubic(seg(e, 780, 220)),
-    xp,
-    ratio: clamp01(xp / script.nextLevelXp),
+    openContent: content * clamp01((open - 0.45) / 0.55),
+    compactContent: content * clamp01((0.55 - open) / 0.55),
+    hover,
+    pinned,
+    disabled,
+    header: decode('PLAYER', p.reveal(420, 260), t, 1),
+    slash: p.reveal(400, 120),
+    portraitReveal: clamp01(photoL / 200),
+    portraitFlash: (1 - clamp01(photoL / 460)) ** 3,
+    name: decode(input.record.name, idle.textFlicker ? 0.55 : nameP, t, 2),
+    levelIn: p.reveal(720, 260),
+    levelHeat: levelPulse === null ? 0 : 1 - clamp01(((t - levelPulse) * k.speed - 80) / 420),
+    trackIn: p.reveal(780, 220),
+    xp: value,
+    ratio: clamp01(value / input.record.nextLevelXp),
     heat,
-    xpTextIn: seg(e, 900, 200),
-    gains,
-    sheen: sheenP < 0.16 ? sheenP / 0.16 : null,
+    xpTextIn: p.reveal(900, 200),
+    gains: xp.changes.map(change => {
+      const pop = popup(change.l);
+      return { key: change.at, text: `${change.delta > 0 ? '+' : ''}${change.delta} XP`, ...pop };
+    }),
+    sheen: idle.sheen,
     glitch,
     seed: Math.floor(t / 45),
-    bloom: Math.max(glitch, heat * 0.6, lineGlow),
+    bloom: Math.max(glitch, heat * 0.6, p.lineGlow, hover * 0.35),
   };
 }

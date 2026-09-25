@@ -1,31 +1,42 @@
 import { describe, expect, it } from 'vitest';
-import { evaluatePlayer, type PlayerScript } from './player';
+import { evaluatePlayer, type ModuleState, type PlayerInput } from './player';
 
-const script: PlayerScript = {
-  name: 'KOALITIC', level: 12, baseXp: 3250, nextLevelXp: 5000, photo: 'p.jpg',
-  enterAt: 300, exitAt: 7000,
-  xpGains: [{ at: 2700, amount: 150 }],
-  folds: [{ at: 4300, folded: true }, { at: 5500, folded: false }],
-  edits: [],
+const k = <V,>(t: number, v: V) => ({ id: `k${t}`, t, v });
+const input: PlayerInput = {
+  record: { name: 'KOALITIC', level: 12, nextLevelXp: 5000, photo: 'p.jpg' },
+  enterAt: 300,
+  exitAt: 7000,
+  state: [k<ModuleState>(0, 'Open'), k<ModuleState>(4300, 'Compact'), k<ModuleState>(5500, 'Open')],
+  xp: [k(0, 3250), k(2700, 3400)],
+  pulses: [],
 };
 
-describe('PLAYER module', () => {
+describe('PLAYER PROFILE', () => {
   it('is absent before it enters and after its exit burns out', () => {
-    expect(evaluatePlayer(299, script)).toBeNull();
-    expect(evaluatePlayer(7620, script)).toBeNull();
+    expect(evaluatePlayer(299, input)).toBeNull();
+    expect(evaluatePlayer(7620, input)).toBeNull();
   });
-  it('shows one XP value that reaches base plus gains', () => {
-    const settled = evaluatePlayer(4000, script)!;
+  it('shows one XP value that jumps to the keyed value with its reaction', () => {
+    expect(Math.round(evaluatePlayer(2600, input)!.xp)).toBe(3250);
+    const settled = evaluatePlayer(4000, input)!;
     expect(Math.round(settled.xp)).toBe(3400);
     expect(settled.ratio).toBeCloseTo(3400 / 5000);
+    expect(evaluatePlayer(2800, input)!.gains[0]!.text).toBe('+150 XP');
+  });
+  it('follows the state track, with each state readable at rest', () => {
+    expect(evaluatePlayer(2000, input)!.phase).toBe('open');
+    expect(evaluatePlayer(4900, input)!.phase).toBe('compact');
+    const pinned = evaluatePlayer(2000, { ...input, state: [k<ModuleState>(0, 'Pinned')] })!;
+    expect(pinned.pinned).toBe(1);
+    const disabled = evaluatePlayer(2000, { ...input, state: [k<ModuleState>(0, 'Disabled')] })!;
+    expect(disabled.disabled).toBe(1);
   });
   it('glitches on events and stays clean at rest', () => {
-    expect(evaluatePlayer(2000, script)!.glitch).toBe(0);
-    expect(evaluatePlayer(2740, script)!.glitch).toBeGreaterThan(0.4);
-    expect(evaluatePlayer(7040, script)!.glitch).toBeGreaterThan(0.8);
+    expect(evaluatePlayer(2000, input)!.glitch).toBe(0);
+    expect(evaluatePlayer(2740, input)!.glitch).toBeGreaterThan(0.4);
+    expect(evaluatePlayer(7040, input)!.glitch).toBeGreaterThan(0.8);
   });
   it('is a pure function of time', () => {
-    expect(evaluatePlayer(2760, script)).toEqual(evaluatePlayer(2760, script));
-    expect(evaluatePlayer(4900, script)!.phase).toBe('folded');
+    expect(evaluatePlayer(2760, input)).toEqual(evaluatePlayer(2760, input));
   });
 });

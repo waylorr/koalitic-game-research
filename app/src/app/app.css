@@ -72,7 +72,7 @@
 .kg-player-preview__row { display: flex; gap: 16px; }
 .kg-player-preview .kg-player-preview__view { width: 440px; height: 300px; margin-top: 12px; }
 .kg-pixi-host canvas { display: block; }
-.kg-props { width: 260px; margin-top: 12px; display: flex; flex-direction: column; gap: 7px; font: 700 12px / 1 var(--kg-ui); letter-spacing: 0.16em; color: var(--kg-ink-dim); }
+.kg-props { width: 260px; margin-top: 12px; display: flex; flex-direction: column; gap: 6px; font: 700 12px / 1 var(--kg-ui); letter-spacing: 0.16em; color: var(--kg-ink-dim); }
 .kg-props label { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .kg-props input { padding: 5px 8px; border: 1px solid rgba(63, 214, 255, 0.28); background: rgba(2, 8, 14, 0.75); font: 600 16px / 1.2 var(--kg-ui); letter-spacing: 0.06em; color: var(--kg-ink); min-width: 0; width: 100%; }
 .kg-props input:focus { outline: none; border-color: var(--kg-cyan); }
@@ -85,6 +85,14 @@
 .kg-props__seg button.is-on { border-color: var(--kg-red); color: var(--kg-ink); background: rgba(255, 42, 69, 0.12); }
 .kg-props__log { margin: 0; padding: 0; list-style: none; font: 600 12px / 1.35 var(--kg-ui); letter-spacing: 0.06em; color: var(--kg-ink); height: 56px; overflow: hidden; }
 .kg-props__log .is-empty { color: #5d6f7d; }
+
+.kg-player-preview .kg-player-preview__view.is-wide { width: 716px; }
+.kg-player-preview__view { position: relative; }
+.kg-player-preview__labels span { position: absolute; font: 700 12px / 1 var(--kg-ui); letter-spacing: 0.22em; color: var(--kg-ink); text-shadow: 0 0 6px #000; pointer-events: none; }
+.kg-props__states { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.kg-props__states button { padding: 6px 0; border: 1px solid rgba(63, 214, 255, 0.3); background: rgba(2, 8, 14, 0.7); cursor: pointer; font: 700 12px / 1 var(--kg-ui); letter-spacing: 0.12em; color: var(--kg-ink-dim); }
+.kg-props__states button:hover { color: var(--kg-ink); border-color: var(--kg-cyan); }
+.kg-props__states button.is-on { border-color: var(--kg-red); color: var(--kg-ink); background: rgba(255, 42, 69, 0.12); }
 
 /* System offline */
 .kg-offline { position: absolute; inset: 0; display: grid; place-content: center; gap: 30px; text-align: center; animation: kg-fade-in 0.8s ease-out 0.25s both; cursor: pointer; }

@@ -89,16 +89,23 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   await page.press('[data-testid=prop-xp]', 'Enter');
   await page.waitForTimeout(1300);
   const xpShown = await page.getAttribute('[data-testid=player-module]', 'data-xp');
-  await page.click('[data-testid=prop-folded]');
+  await page.click('[data-testid=prop-state-compact]');
   await page.waitForTimeout(700);
   const foldedPhase = await page.getAttribute('[data-testid=player-module]', 'data-phase');
   const log = await page.$$eval('[data-testid=prop-log] li', items => items.map(item => item.textContent));
-  check('editing XP and state animates the PLAYER and records keyframes', xpShown === '3400' && foldedPhase === 'folded' && log.length === 2, `xp ${xpShown} · ${foldedPhase} · ${log.join(' | ')}`);
+  check('editing XP and state animates the PLAYER and records keyframes', xpShown === '3400' && foldedPhase === 'compact' && log.length === 2, `xp ${xpShown} · ${foldedPhase} · ${log.join(' | ')}`);
   fs.writeFileSync(path.join(outDir, 'app-player-edit.png'), await page.screenshot());
+
+  await page.click('[data-testid=player-mode-states]');
+  await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
+  await page.waitForTimeout(600);
+  const statePhases = await page.getAttribute('[data-testid=player-module]', 'data-phases');
+  check('ALL STATES shows every PLAYER state at rest', statePhases === 'compact,open,pinned,hover,disabled', statePhases);
+  fs.writeFileSync(path.join(outDir, 'app-player-states.png'), await page.locator('[data-testid=player-preview]').screenshot());
 
   const phaseAt = async ms => { await page.evaluate(value => window.__kgPlayer.seek(value), ms); await page.waitForTimeout(120); return page.getAttribute('[data-testid=player-module]', 'data-phase'); };
   const phases = [await phaseAt(100), await phaseAt(500), await phaseAt(2000), await phaseAt(4900), await phaseAt(7200), await phaseAt(7800)];
-  check('PLAYER module follows its script at any instant', phases.join(',') === 'hidden,enter,open,folded,exit,hidden', phases.join(', '));
+  check('PLAYER module follows its script at any instant', phases.join(',') === 'hidden,enter,open,compact,exit,hidden', phases.join(', '));
   const shot = () => page.locator('[data-testid=player-preview]').screenshot();
   const same = async ms => {
     await phaseAt(ms);

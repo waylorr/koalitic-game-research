@@ -28,7 +28,7 @@ npm run build && npm run e2e  # Chromium real (Playwright); la primera vez: npx 
 | `src/ui/` | kit visual: escenario 1920×1080, logo, botón neón, sonidos y variables (`tokens.css`) |
 | `public/backgrounds/` | fondos provisionales derivados de tus diseños (se sustituyen por el arte limpio) |
 | `src/core/` | modelo, pistas, motion y `evaluateFrame` (TypeScript puro) |
-| `src/hud/` | `v2/`: componentes HUD definitivos (cálculo puro + dibujo PixiJS); `fx.ts`: azar con semilla y efectos; el resto, HUD provisional del laboratorio |
+| `src/hud/` | `kit/`: tema, kit de movimiento y piezas PixiJS comunes; `v2/`: elementos del HUD definitivos (cálculo puro + dibujo); el resto, HUD provisional del laboratorio. Marco: `ENTREGA_CLAUDE/07_FRAMEWORK_HUD.md` |
 | `src/lab/` | laboratorio del motor (`lab.html`) |
 
 Reglas: la app se maqueta en píxeles de un escenario fijo de 1920×1080 escalado a la ventana, como un juego. Cada componente de UI se aprueba primero en ASSETS → UI COMPONENTS. El HUD (THE SYSTEM) se dibuja con PixiJS sin ticker propio: cada fotograma se calcula desde el tiempo del episodio y los efectos usan azar con semilla, así que el mismo instante da los mismos píxeles. Cada componente trae aspecto y movimiento fijos; solo sus valores son editables.
