@@ -1,7 +1,7 @@
 import { Container, Graphics, type Text, type Texture } from 'pixi.js';
 import { Effects, PanelFrame, Portrait, drawArtifacts, drawBar, label, mix } from '../kit/pixi';
 import { DEFAULT_MOTION, THEME, type MotionKnobs, type Theme } from '../kit/theme';
-import { PLAYER_H_OPEN, PLAYER_TAB_X, PLAYER_W, type PlayerFrame, type PlayerInput } from './player';
+import { PLAYER_H_OPEN, PLAYER_W, type PlayerFrame, type PlayerInput } from './player';
 
 /**
  * Draws a PlayerFrame with the kit pieces. No timing logic here: every
@@ -78,11 +78,12 @@ export class PlayerPixi {
     this.root.visible = frame !== null;
     if (!frame) return;
     const { color } = this.theme;
-    const { h, disabled } = frame;
+    const { disabled } = frame;
+    const h = frame.panel.h;
     const record = input.record;
     this.root.tint = mix(0xffffff, 0x9aa4ae, disabled);
 
-    this.panel.update({ w: PLAYER_W, h, tabX: PLAYER_TAB_X, glass: frame.glass, glitch: frame.glitch, sheen: frame.sheen, corners: frame.corners, cornersIn: frame.cornersIn, line: frame.line, hover: frame.hover, pinned: frame.pinned, disabled });
+    this.panel.update(frame.panel);
 
     this.contentMask.clear().rect(-2, -2, PLAYER_W + 4, h + 2).fill({ color: 0xffffff });
     this.content.alpha = frame.content * (1 - 0.45 * disabled);
@@ -102,10 +103,10 @@ export class PlayerPixi {
     this.levelValue.text = String(record.level);
     this.levelValue.alpha = frame.levelIn;
     this.levelValue.x = 186 - 10 * (1 - frame.levelIn);
-    this.levelValue.tint = mix(color.green, color.white, frame.levelHeat);
+    this.levelValue.tint = mix(this.theme.bars.xp.to, color.white, frame.levelHeat);
     this.emblem.alpha = frame.levelIn * 0.85;
     this.bar.clear();
-    if (frame.trackIn > 0) drawBar(this.bar, this.theme, TRACK.x, TRACK.y, TRACK.w, TRACK.h, frame.ratio, frame.trackIn, frame.heat, { from: 0x178a4a, to: color.green });
+    if (frame.trackIn > 0) drawBar(this.bar, this.theme, TRACK.x, TRACK.y, TRACK.w, TRACK.h, frame.ratio, frame.trackIn, frame.heat, this.theme.bars.xp);
     this.xpText.text = `${Math.round(frame.xp).toLocaleString('en-US')} / ${record.nextLevelXp.toLocaleString('en-US')} XP`;
     this.xpText.alpha = frame.xpTextIn;
     this.gains.forEach((node, i) => {
@@ -116,7 +117,7 @@ export class PlayerPixi {
       node.alpha = gain.opacity;
       node.y = 66 + gain.dy;
       node.scale.set(gain.scale);
-      node.tint = mix(color.white, color.green, gain.cool);
+      node.tint = mix(color.white, this.theme.bars.xp.to, gain.cool);
     });
 
     // COMPACT layout: name and level on one row, slim XP bar under it.
@@ -125,9 +126,9 @@ export class PlayerPixi {
     this.compactName.text = frame.name;
     this.compactLevel.text = `LVL ${record.level}`;
     this.compactLevel.x = PLAYER_W - 16 - this.compactLevel.width;
-    this.compactLevel.tint = mix(color.green, color.white, frame.levelHeat);
+    this.compactLevel.tint = mix(this.theme.bars.xp.to, color.white, frame.levelHeat);
     this.compactBar.clear();
-    drawBar(this.compactBar, this.theme, 14, 46, PLAYER_W - 28, 4, frame.ratio, 1, frame.heat, { from: 0x178a4a, to: color.green });
+    drawBar(this.compactBar, this.theme, 14, 46, PLAYER_W - 28, 4, frame.ratio, 1, frame.heat, this.theme.bars.xp);
 
     drawArtifacts(this.artifacts, this.theme, frame.seed, frame.glitch, PLAYER_W, h, k);
     this.effects.apply(frame.glitch, frame.seed, frame.bloom, k);

@@ -14,6 +14,10 @@ Acordado con el creador el 25-09-2026. Referencias:
 | Piezas | `kit/pixi.ts` | Marco de panel, efectos (glitch con semilla y bloom), artefactos, barra con punta incandescente, retrato, textos | …cambia cada pieza en todos los elementos que la usan |
 | Componentes | `app/src/hud/v2/` | Un cálculo puro (`evaluateX(t, input)`) y un dibujante PixiJS sin lógica de tiempo | …cambia solo ese elemento |
 
+- El comportamiento común de un módulo de rail (presencia, los cinco estados, pulsos y ambiente) está en `kit/module.ts` (`moduleShell`). Cada módulo solo añade su contenido.
+- `kit/sample.ts` es un panel hecho solo con piezas del kit (barra ámbar tipo STAMINA): demuestra el kit y es la plantilla de partida de un módulo nuevo.
+- `app/src/hud/registry.ts` es el registro de elementos: cómo se crea, evalúa y dibuja cada tipo. Los lienzos, el catálogo y el editor solo hablan con él.
+
 - El tema y las perillas se guardarán en la **HUD Template** (preset, variante visual, preset de movimiento).
 - Cada componente trae aspecto y movimiento **fijos**; el creador solo edita valores.
 
@@ -56,14 +60,27 @@ Acordado con el creador el 25-09-2026. Referencias:
 - **El mismo componente** va dentro de un rail o suelto; solo cambia quién lo coloca.
 - **Selecciones internas** (por ejemplo, el gajo del Gear Radial, pista `gear-radial.selection`): el radial gira paso a paso entre gajos, con «ping» y destello en cada uno.
 
-## 5. Editar sin animar a mano
+## 5. El catálogo (ASSETS → UI COMPONENTS)
+
+- **SYSTEM UI:** la interfaz de la app, como el botón neón. No se exporta.
+- **HUD KIT:**
+  - **THEME:** colores, barras de XP y Stamina, cristal y línea. Cambian en vivo en todos los elementos.
+  - **MOTION:** perillas globales y prueba de cada animación del kit sobre el panel de muestra.
+  - **PIECES:** todas las piezas en reposo.
+- Tema y perillas se guardan en este navegador mientras llega la HUD Template.
+- **HUD ELEMENTS:** por zonas, con cuántos hay hechos. Cada elemento tiene estas pestañas:
+  - **STATES:** todos los estados en reposo, cada uno con su bucle de ambiente.
+  - **ANIMATIONS:** ENTER, EXIT, cada transición de estado, reacción y demo completa, con barra de tiempo.
+  - **EDIT VALUES:** cada cambio es un keyframe.
+
+## 6. Editar sin animar a mano
 
 En el catálogo, y después en el editor de episodio, lo que el creador cambia en la vista previa crea un keyframe en el instante del cabezal. El componente hace su coreografía; los keyframes se arrastran para cambiar el ritmo.
 
-## 6. Orden de trabajo
+## 7. Orden de trabajo
 
 1. ✅ Tema, kit y piezas sacados del PLAYER. Estados COMPACT, OPEN, PINNED, HOVER y DISABLED, más vista ALL STATES.
 2. Left Rail completo: PLAYER, STAMINA y TIME LEFT en el rail, con cascada, modo FOLDED (DOCK con iconos), despliegue lateral y recolocación.
 3. Pantalla de tema y movimiento con vista previa de todos los elementos.
 4. Resto del Left Rail, Right Rail, Top Bar, etiquetas POV y tarjetas de evento.
-5. Catálogo reorganizado: SYSTEM UI (interfaz de la app, no se exporta) y HUD ELEMENTS por zonas.
+5. ✅ (adelantado) Catálogo reorganizado en SYSTEM UI, HUD KIT y HUD ELEMENTS. El paso 3 queda cubierto en parte por HUD KIT → THEME y MOTION.

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Application, Sprite, Texture } from 'pixi.js';
-import { DEFAULT_MOTION, type MotionKnobs } from '../kit/theme';
-import { evaluatePlayer, type PlayerInput } from './player';
-import { PlayerPixi } from './PlayerPixi';
+import { createDrawn, type Drawn, type HudItem } from '../registry';
+import { DEFAULT_MOTION, THEME, type MotionKnobs, type Theme } from '../kit/theme';
 
 async function loadTexture(url: string): Promise<Texture> {
   const image = new Image();
@@ -11,34 +10,27 @@ async function loadTexture(url: string): Promise<Texture> {
   return Texture.from(image);
 }
 
-/** One HUD element placed on the canvas at its own time t. */
-export interface HudItem {
-  readonly key: string;
-  readonly t: number;
-  readonly input: PlayerInput;
-  readonly x: number;
-  readonly y: number;
-  readonly scale: number;
-}
-
 interface Props {
   readonly width: number;
   readonly height: number;
   readonly background?: string;
   readonly items: readonly HudItem[];
+  readonly theme?: Theme;
   readonly motion?: MotionKnobs;
 }
 
 /**
  * Hosts HUD elements in one PixiJS canvas. Rendering is manual (no ticker):
  * the canvas is redrawn only when the items change, from their evaluators.
+ * A theme change rebuilds the elements so every piece takes the new look.
  */
-export function HudCanvas({ width, height, background, items, motion = DEFAULT_MOTION }: Props) {
+export function HudCanvas({ width, height, background, items, theme = THEME, motion = DEFAULT_MOTION }: Props) {
   const host = useRef<HTMLDivElement>(null);
-  const scene = useRef<{ app: Application; bg: Sprite; players: Map<string, PlayerPixi> } | null>(null);
+  const scene = useRef<{ app: Application; bg: Sprite; drawn: Map<string, Drawn>; theme: Theme } | null>(null);
   const [ready, setReady] = useState(0);
   /** Bumps each time a new Pixi scene is ready (the canvas is recreated when its size changes). */
   const [sceneId, setSceneId] = useState(0);
+  const [info, setInfo] = useState<{ phases: string; value: string }>({ phases: '', value: '' });
 
   useEffect(() => {
     let cancelled = false;
@@ -54,7 +46,7 @@ export function HudCanvas({ width, height, background, items, motion = DEFAULT_M
       const bg = new Sprite(Texture.EMPTY);
       app.stage.addChild(bg);
       host.current?.appendChild(app.canvas);
-      scene.current = { app, bg, players: new Map() };
+      scene.current = { app, bg, drawn: new Map(), theme };
       setSceneId(n => n + 1);
       setReady(r => r + 1);
     })();
@@ -82,64 +74,66 @@ export function HudCanvas({ width, height, background, items, motion = DEFAULT_M
     return () => { alive = false; };
   }, [background, sceneId, width, height]);
 
-  // Keep one PlayerPixi per item key; load photos as they change.
-  const photos = items.map(item => `${item.key}=${item.input.record.photo}`).join('|');
+  // One drawn element per item key (rebuilt on theme change); photos load as they change.
+  const signature = items.map(item => `${item.key}:${item.kind}`).join('|');
+  const photos = items.map(item => `${item.key}=${item.kind === 'player' ? item.input.record.photo : item.kind === 'board' ? item.photo : ''}`).join('|');
   useEffect(() => {
     const current = scene.current;
     if (!current) return;
+    const rebuild = current.theme !== theme;
+    current.theme = theme;
     const keys = new Set(items.map(item => item.key));
-    for (const [key, player] of current.players) {
-      if (!keys.has(key)) {
-        current.app.stage.removeChild(player.root);
-        player.root.destroy({ children: true });
-        current.players.delete(key);
+    for (const [key, drawn] of current.drawn) {
+      if (rebuild || !keys.has(key)) {
+        current.app.stage.removeChild(drawn.root);
+        drawn.root.destroy({ children: true });
+        current.drawn.delete(key);
       }
     }
     let alive = true;
     for (const item of items) {
-      let player = current.players.get(item.key);
-      if (!player) {
-        player = new PlayerPixi();
-        current.players.set(item.key, player);
-        current.app.stage.addChild(player.root);
+      let drawn = current.drawn.get(item.key);
+      if (!drawn) {
+        drawn = createDrawn(item.kind, theme);
+        current.drawn.set(item.key, drawn);
+        current.app.stage.addChild(drawn.root);
       }
-      const url = item.input.record.photo;
-      if (player.photo !== url) {
-        const target = player;
+      const url = drawn.photoUrl(item);
+      if (url && drawn.photo !== url && drawn.setPhoto) {
+        const target = drawn;
         loadTexture(url).then(texture => {
           if (!alive) return;
-          target.setPhoto(url, texture);
+          target.setPhoto?.(url, texture);
           setReady(r => r + 1);
         });
       }
     }
     return () => { alive = false; };
-  }, [photos, sceneId]);
+  }, [signature, photos, sceneId, theme]);
 
-  const frames = items.map(item => evaluatePlayer(item.t, item.input, motion));
   useEffect(() => {
     const current = scene.current;
     if (!current) return;
-    items.forEach((item, i) => {
-      const player = current.players.get(item.key);
-      if (!player) return;
-      player.setPlacement(item.x, item.y, item.scale);
-      player.update(frames[i]!, item.input, motion);
-    });
+    const results = items.map(item => current.drawn.get(item.key)?.draw(item, motion) ?? { phase: 'hidden', value: null });
     current.app.render();
+    const next = { phases: results.map(r => r.phase).join(','), value: results[0]?.value === null || results[0] === undefined ? '' : String(results[0].value) };
+    if (next.phases !== info.phases || next.value !== info.value) setInfo(next);
   });
 
-  const first = frames[0];
-  const photosLoaded = scene.current !== null && items.every(item => scene.current!.players.get(item.key)?.photo === item.input.record.photo);
+  const photosLoaded = scene.current !== null && items.every(item => {
+    const drawn = scene.current!.drawn.get(item.key);
+    const url = drawn?.photoUrl(item);
+    return drawn !== undefined && (!url || drawn.photo === url);
+  });
   return (
     <div
       ref={host}
       className="kg-pixi-host"
       style={{ width, height }}
       data-testid="player-module"
-      data-phase={first?.phase ?? 'hidden'}
-      data-phases={frames.map(frame => frame?.phase ?? 'hidden').join(',')}
-      data-xp={first ? Math.round(first.xp) : ''}
+      data-phase={info.phases.split(',')[0] || 'hidden'}
+      data-phases={info.phases}
+      data-xp={info.value}
       data-ready={ready > 0 && photosLoaded ? 'yes' : 'no'}
     />
   );

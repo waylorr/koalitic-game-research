@@ -27,7 +27,7 @@ describe('PLAYER PROFILE', () => {
     expect(evaluatePlayer(2000, input)!.phase).toBe('open');
     expect(evaluatePlayer(4900, input)!.phase).toBe('compact');
     const pinned = evaluatePlayer(2000, { ...input, state: [k<ModuleState>(0, 'Pinned')] })!;
-    expect(pinned.pinned).toBe(1);
+    expect(pinned.panel.pinned).toBe(1);
     const disabled = evaluatePlayer(2000, { ...input, state: [k<ModuleState>(0, 'Disabled')] })!;
     expect(disabled.disabled).toBe(1);
   });

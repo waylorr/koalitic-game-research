@@ -84,6 +84,12 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   fs.writeFileSync(path.join(outDir, 'app-assets.png'), await page.screenshot());
   await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
   await page.waitForTimeout(800);
+  const defaultStates = await page.getAttribute('[data-testid=player-module]', 'data-phases');
+  check('PLAYER PROFILE opens on STATES with every state at rest', defaultStates === 'compact,open,pinned,hover,disabled', defaultStates);
+  fs.writeFileSync(path.join(outDir, 'app-player-states.png'), await page.locator('[data-testid=player-preview]').screenshot());
+  await page.click('[data-testid=player-mode-edit]');
+  await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
+  await page.waitForTimeout(800);
   // Edit mode: every value change becomes a keyframe on the preview clock.
   await page.fill('[data-testid=prop-xp]', '3400');
   await page.press('[data-testid=prop-xp]', 'Enter');
@@ -95,13 +101,6 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   const log = await page.$$eval('[data-testid=prop-log] li', items => items.map(item => item.textContent));
   check('editing XP and state animates the PLAYER and records keyframes', xpShown === '3400' && foldedPhase === 'compact' && log.length === 2, `xp ${xpShown} · ${foldedPhase} · ${log.join(' | ')}`);
   fs.writeFileSync(path.join(outDir, 'app-player-edit.png'), await page.screenshot());
-
-  await page.click('[data-testid=player-mode-states]');
-  await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
-  await page.waitForTimeout(600);
-  const statePhases = await page.getAttribute('[data-testid=player-module]', 'data-phases');
-  check('ALL STATES shows every PLAYER state at rest', statePhases === 'compact,open,pinned,hover,disabled', statePhases);
-  fs.writeFileSync(path.join(outDir, 'app-player-states.png'), await page.locator('[data-testid=player-preview]').screenshot());
 
   const phaseAt = async ms => { await page.evaluate(value => window.__kgPlayer.seek(value), ms); await page.waitForTimeout(120); return page.getAttribute('[data-testid=player-module]', 'data-phase'); };
   const phases = [await phaseAt(100), await phaseAt(500), await phaseAt(2000), await phaseAt(4900), await phaseAt(7200), await phaseAt(7800)];
@@ -120,6 +119,32 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   // WebGL output: the same instant must give the same pixels, glitch included (a level or two of blur rounding allowed).
   check('seeking back to the same instant draws the same PLAYER frame, glitch included', calm.diff.visible <= 100 && glitching.diff.visible <= 100 && calm.diff.maxDelta <= 32 && glitching.diff.maxDelta <= 32, `calm ${calm.diff.visible}px/${calm.diff.maxDelta} · glitch ${glitching.diff.visible}px/${glitching.diff.maxDelta}`);
   fs.writeFileSync(path.join(outDir, 'app-player.png'), glitching.first);
+  // HUD KIT: theme changes restyle every element; motion and pieces render.
+  await page.click('[data-testid=catalog-item-theme]');
+  await page.waitForSelector('[data-testid=kit-theme-view] [data-testid=player-module][data-ready=yes]');
+  await page.waitForTimeout(700);
+  const themeView = page.locator('[data-testid=kit-theme-view]');
+  const before = await themeView.screenshot();
+  await page.fill('[data-testid=theme-bar-stamina-to]', '#ff00ff');
+  await page.fill('[data-testid=theme-red]', '#00ff66');
+  await page.waitForTimeout(900);
+  const after = await themeView.screenshot();
+  const themeDiff = await pixelDiff(page, before, after);
+  fs.writeFileSync(path.join(outDir, 'app-kit-theme.png'), await page.screenshot());
+  check('changing the theme restyles the HUD elements', themeDiff.visible > 400, `${themeDiff.visible} pixels changed`);
+  await page.click('[data-testid=kit-reset]');
+  await page.click('[data-testid=catalog-item-motion]');
+  await page.waitForSelector('[data-testid=kit-motion-view] [data-testid=player-module][data-ready=yes]');
+  await page.click('[data-testid=kit-plus]');
+  await page.waitForTimeout(1200);
+  const sampleValue = await page.getAttribute('[data-testid=kit-motion-view] [data-testid=player-module]', 'data-xp');
+  fs.writeFileSync(path.join(outDir, 'app-kit-motion.png'), await page.screenshot());
+  await page.click('[data-testid=catalog-item-pieces]');
+  await page.waitForSelector('[data-testid=kit-pieces-view] [data-testid=player-module][data-ready=yes]');
+  await page.waitForTimeout(600);
+  fs.writeFileSync(path.join(outDir, 'app-kit-pieces.png'), await page.screenshot());
+  check('HUD KIT motion sample reacts to a value key and PIECES render', sampleValue === '87', `sample value ${sampleValue}`);
+
   await page.click('[data-testid=catalog-item-button]');
   await page.waitForSelector('[data-testid=specimen-idle]');
   const specimens = await page.$$eval('[data-testid^=specimen-]', nodes => nodes.map(node => `${node.dataset.state}${node.disabled ? ':disabled' : ''}`));

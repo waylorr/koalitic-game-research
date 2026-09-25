@@ -8,13 +8,17 @@ export interface Theme {
   readonly color: {
     readonly red: number;
     readonly cyan: number;
-    readonly green: number;
     readonly text: number;
     readonly dim: number;
     readonly edge: number;
     readonly white: number;
     readonly glass: number;
     readonly disabled: number;
+  };
+  /** Value bars: dark end → bright end of the fill. XP is green, Stamina amber. */
+  readonly bars: {
+    readonly xp: { readonly from: number; readonly to: number };
+    readonly stamina: { readonly from: number; readonly to: number };
   };
   readonly font: string;
   /** Frame stroke and accent stroke widths (px). */
@@ -30,13 +34,16 @@ export const THEME: Theme = {
   color: {
     red: 0xff2d46,
     cyan: 0x54e4ff,
-    green: 0x58ff8e,
     text: 0xeef6ff,
     dim: 0x8fa6b8,
     edge: 0x9cc4e2,
     white: 0xffffff,
     glass: 0x0a1220,
     disabled: 0x7d8792,
+  },
+  bars: {
+    xp: { from: 0x178a4a, to: 0x58ff8e },
+    stamina: { from: 0x9a6a00, to: 0xffc331 },
   },
   font: 'Rajdhani',
   line: 1.2,

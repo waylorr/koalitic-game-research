@@ -3,7 +3,7 @@ import { BrandLogo } from '../ui/BrandLogo';
 import { Icons, NeonButton } from '../ui/NeonButton';
 import { sfx } from '../ui/sfx';
 import type { Screen } from '../app/screens';
-import { ComponentCatalog } from './ComponentCatalog';
+import { ComponentCatalog } from './catalog/ComponentCatalog';
 
 const COPY: Record<Exclude<Screen, 'menu'>, { title: string; subtitle: string; next: string }> = {
   episodes: {

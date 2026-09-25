@@ -1,6 +1,6 @@
 # KOALITIC app
 
-Aplicación de autoría de KOALITIC GAME. Estado actual: **menú principal** con los botones de UI definitivos sobre el arte de fondo, **catálogo ASSETS → UI COMPONENTS** con el módulo PLAYER del HUD v2 dibujado con PixiJS (glitch, artefactos y bloom; movimiento del v1; valores editables y demo con barra de tiempo, `src/hud/v2/`) y el botón neón en todos sus estados, y pantallas EPISODES / CONFIGURE HUD en construcción. El **laboratorio del motor** (H0: evaluador temporal, HUD provisional, timeline mínima) sigue en `lab.html`. Plan y decisiones: [`../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md`](../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md).
+Aplicación de autoría de KOALITIC GAME. Estado actual: **menú principal** con los botones de UI definitivos sobre el arte de fondo, **catálogo ASSETS → UI COMPONENTS** organizado en SYSTEM UI (botón neón), HUD KIT (tema, movimiento y piezas, editables en vivo) y HUD ELEMENTS por zonas; el primero es PLAYER PROFILE con PixiJS (estados, animaciones y valores editables) y el botón neón en todos sus estados, y pantallas EPISODES / CONFIGURE HUD en construcción. El **laboratorio del motor** (H0: evaluador temporal, HUD provisional, timeline mínima) sigue en `lab.html`. Plan y decisiones: [`../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md`](../ENTREGA_CLAUDE/05_AUDITORIA_Y_PROPUESTA.md).
 
 ## Abrir
 
@@ -24,7 +24,7 @@ npm run build && npm run e2e  # Chromium real (Playwright); la primera vez: npx 
 | Carpeta | Contenido |
 |---|---|
 | `src/app/` | armazón: pantallas, navegación por anclas (`#episodes`, `#configure-hud`, `#assets`) y fondos |
-| `src/screens/` | menú principal, pantallas de destino, catálogo de componentes, SYSTEM OFFLINE |
+| `src/screens/` | menú principal, pantallas de destino, SYSTEM OFFLINE; `catalog/`: catálogo de componentes y páginas del kit |
 | `src/ui/` | kit visual: escenario 1920×1080, logo, botón neón, sonidos y variables (`tokens.css`) |
 | `public/backgrounds/` | fondos provisionales derivados de tus diseños (se sustituyen por el arte limpio) |
 | `src/core/` | modelo, pistas, motion y `evaluateFrame` (TypeScript puro) |
