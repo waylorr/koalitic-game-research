@@ -9,7 +9,7 @@ Acordado con el creador el 25-09-2026. Referencias:
 
 | Capa | Código | Qué contiene | Si cambia… |
 |---|---|---|---|
-| Tema | `app/src/hud/kit/theme.ts` (`THEME`) | Colores, tipografía, grosores, cristal, esquinas | …cambian todos los elementos |
+| Tokens (tema) | `app/src/design/tokens.ts` (`THEME`, compartido con los menús; `hud/kit/theme.ts` lo reexporta) | Colores, tipografía, grosores, cristal, esquinas | …cambian todos los elementos del HUD **y** los menús de la app |
 | Kit de movimiento | `kit/motion.ts` + perillas `MotionKnobs` | Presencia (entrar y salir), transiciones de estado, reacciones a valores, ambiente, ráfagas de glitch | …se retoca el movimiento de todo el HUD |
 | Piezas | `kit/pixi.ts` | Marco de panel, efectos (glitch con semilla y bloom), artefactos, barra con punta incandescente, retrato, textos | …cambia cada pieza en todos los elementos que la usan |
 | Componentes | `app/src/hud/v2/` | Un cálculo puro (`evaluateX(t, input)`) y un dibujante PixiJS sin lógica de tiempo | …cambia solo ese elemento |
@@ -22,7 +22,7 @@ Acordado con el creador el 25-09-2026. Referencias:
 - En el catálogo, `screens/catalog/ElementPage.tsx` es la ficha común (EDIT, DEMO, ALL STATES). Cada componente solo aporta sus valores, sus reacciones, su demo y su colocación: por ejemplo, `PlayerPage.tsx` o `GearPage.tsx`.
 - **Nitidez:** el lienzo se dibuja al tamaño real que ocupa en pantalla (escala del escenario × píxeles del dispositivo). Los filtros (glitch, bloom, desenfoque) heredan esa resolución. Si no, el texto del HUD sale blando.
 
-- El tema y las perillas se guardarán en la **HUD Template** (preset, variante visual, preset de movimiento).
+- Los tokens y las perillas se guardarán en la **HUD Template** (preset, variante visual, preset de movimiento). Hoy se guardan en el navegador (`TokensProvider`).
 - Cada componente trae aspecto y movimiento **fijos**; el creador solo edita valores.
 
 ## 2. Las cinco piezas de cada elemento

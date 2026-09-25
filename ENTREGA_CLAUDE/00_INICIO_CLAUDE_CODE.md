@@ -1,5 +1,7 @@
 # Inicio en Claude Code — KOALITIC GAME
 
+> **Histórico:** este fue el encargo inicial (24-09-2026) y ya se cumplió. Para retomar el proyecto hoy, lee [`../README.md`](../README.md) y [`09_ESTADO_Y_BITACORA.md`](09_ESTADO_Y_BITACORA.md).
+
 Abre Claude Code en la raíz de este proyecto y pega el siguiente mensaje. `CLAUDE.md` contiene las reglas persistentes; este mensaje solo encarga el primer trabajo. Los documentos son contexto sujeto a revisión, no una orden de copiar el HTML ni de adoptar el stack que se mencione en ellos.
 
 ---

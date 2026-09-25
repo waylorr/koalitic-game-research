@@ -22,7 +22,7 @@ Complementa a:
 - **Diseñar «a ojo» sin referencia de la pieza aislada.** Los primeros botones y pétalos quedaron pobres.
 - **Pantallas completas como única fuente.** En una escena con muchos elementos, cada pieza sale pequeña, en perspectiva y mezclada con el fondo, y no se ve su forma exacta, su grosor de línea ni su brillo.
 - **Comparar de memoria.** Sin poner la referencia encima del resultado, «se parece un poco» no se puede medir.
-- **Tokens duplicados.** El menú (SYSTEM UI) usa variables CSS propias y el HUD usa `THEME` en PixiJS. Por eso GLASS OPACITY del HUD KIT no cambia el menú. Ver §6.
+- **Tokens duplicados.** El menú (SYSTEM UI) usaba variables CSS propias y el HUD usaba `THEME` en PixiJS, así que GLASS OPACITY no cambiaba el menú. Resuelto en §6.
 
 ---
 
@@ -142,26 +142,26 @@ Peticiones típicas:
 
 ---
 
-## 6. Tokens globales (arreglo pendiente importante)
+## 6. Tokens globales ✅ (hecho el 25-09-2026)
 
-**Problema:** hoy hay dos fuentes de verdad:
-- `app/src/ui/tokens.css`, para SYSTEM UI (menús);
-- `app/src/hud/kit/theme.ts`, para el HUD en PixiJS.
+**Una sola fuente:** `app/src/design/tokens.ts`. De ella salen:
+- el `THEME` que dibuja el HUD en PixiJS;
+- las **variables CSS** de los menús (SYSTEM UI), que `TokensProvider` (`app/src/design/TokensProvider.tsx`, montado en la raíz de la app) escribe en el documento.
 
-**Decisión propuesta:** un único archivo de tokens (p. ej. `app/src/design/tokens.ts`) del que salgan:
-- las variables CSS del menú;
-- el `THEME` de PixiJS;
-- el panel HUD KIT → THEME, que pasaría a llamarse **KIT → THEME** y editaría a la vez el menú y el HUD.
+Por eso **HUD KIT → THEME** cambia a la vez los menús y el HUD: colores, opacidad del cristal y grosor de línea. Hay una prueba automática que lo comprueba. Los valores por defecto de CSS siguen en `app/src/ui/tokens.css`, para el primer pintado.
 
-Los tokens que se comparten:
-- colores;
+Tokens compartidos hoy:
+- colores: acento, datos, texto, etiquetas, borde, cristal, blanco incandescente y desactivado;
+- barras de XP y Stamina;
 - opacidad del cristal;
 - grosor de línea;
-- radios y esquinas;
-- intensidad del brillo;
-- tipografías.
+- tamaño de esquina;
+- tipografía;
+- perillas de movimiento (velocidad, glitch, artefactos, bloom y ambiente).
 
-Cada componente puede tener **variantes** (la caja de Stamina no es la del Player ni los pétalos del Gear), pero leen los mismos tokens.
+Para añadir un token: añadirlo en `tokens.ts`; si lo usa el CSS, añadirlo en `cssVariables()` y darle un valor por defecto en `ui/tokens.css`.
+
+Cada componente puede tener **variantes** (la caja de Stamina no es la del Player ni los pétalos del Gear), pero todas leen los mismos tokens.
 
 ---
 
@@ -181,23 +181,80 @@ Iconos: glifos sólidos (Material Symbols, ya en `kit/glyphs/`) o game-icons.net
 
 ## 8. Librerías investigadas
 
-| Librería | Qué aporta | Licencia | Recomendación |
-|---|---|---|---|
-| **PixiJS 8** | Motor de dibujo 2D WebGL del HUD | MIT | ✅ En uso |
-| **pixi-filters 6** | Glitch, bloom, desenfoque, CRT, RGB split, shockwave… | MIT | ✅ En uso (glitch, bloom, desenfoque de fondo) |
-| **NineSliceSprite** (incluido en PixiJS) | Marcos escalables a partir de un PNG | MIT | Usar en la ruta C |
-| **Material Symbols** | Iconos sólidos coherentes | Apache 2.0 | ✅ En uso (`kit/glyphs/`) |
-| [game-icons.net](https://game-icons.net/) | 4.000+ iconos de juego en SVG (pistola, mochila, dron…) | CC BY 3.0, **exige crédito** | Adoptar para objetos de juego, con créditos |
-| [vtracer](https://github.com/visioncortex/vtracer) | Convierte tu PNG en SVG vectorial | Open source (comprobar licencia en su repositorio antes de usarlo) | Herramienta de la ruta B, fuera de la app |
-| rembg | Quita el fondo de una imagen generada | MIT | Herramienta para preparar piezas, fuera de la app |
-| [pixi-v8-particle-emitter](https://github.com/spd789562/pixi-v8-particle-emitter) | Partículas (chispas, polvo de luz) en PixiJS v8 | MIT (comprobar) | Probar para chispas y artefactos más ricos |
-| [augmented-ui](https://augmented-ui.com/) | Formas sci-fi con esquinas cortadas en CSS puro | BSD-2 | Opcional para SYSTEM UI (menús HTML) |
-| [Arwes](https://github.com/arwes/arwes) | Framework de UI sci-fi (marcos animados, sonidos) | MIT, **sin mantenimiento** | Solo como inspiración; no depender de él |
-| Kenney UI packs | Piezas de UI de juego | CC0 | Solo si encaja el estilo (suelen ser más «cartoon») |
-| Theatre.js | Editor de animación web | Estudio AGPL | Evitar en la app |
-| Lottie / Rive | Animaciones de After Effects / editor visual | MIT / pago para exportar | No: Lottie pierde los efectos; Rive cuesta 9 $/mes |
+Versiones y licencias comprobadas en el registro npm el 25-09-2026.
+- **✅ En uso:** instalada.
+- **⭐ Seleccionada:** usar en los próximos pasos.
+- **○ Opcional:** si hace falta.
+- **✗ Descartada.**
 
-Fuentes: [Arwes](https://github.com/arwes/arwes) · [augmented-ui](https://augmented-ui.com/) · [vtracer](https://github.com/visioncortex/vtracer) · [game-icons.net](https://game-icons.net/about.html) · [pixi-v8-particle-emitter](https://github.com/spd789562/pixi-v8-particle-emitter).
+### 8.1 Dibujo, efectos y animación (HUD)
+
+| Librería | Versión · licencia | Qué aporta | Veredicto |
+|---|---|---|---|
+| **pixi.js** | 8.21 · MIT | Motor 2D WebGL del HUD; incluye `NineSliceSprite`, `FillGradient`, `ParticleContainer` | ✅ En uso |
+| **pixi-filters** | 6.1 · MIT | Glitch, bloom avanzado, desenfoque de fondo; también CRT, RGB split, shockwave, godrays, old film, glow, outline, zoom blur | ✅ En uso (3). ⭐ Probar CRT, shockwave y godrays para reacciones y nivel subido |
+| **@spd789562/particle-emitter** | 1.0 · MIT | Partículas para PixiJS v8 (chispas, polvo de luz, estelas) | ⭐ Para las chispas del kit (sustituir parte de los artefactos) |
+| @pixi/particle-emitter | 5.0 · MIT | El original; pensado para PixiJS v7 | ✗ Usar el anterior |
+| @pixi/ui | 2.3 · MIT | Botones, sliders y listas dentro de PixiJS | ○ Solo si alguna pieza interactiva del HUD lo necesita (hoy los controles son HTML) |
+| @pixi/layout | 3.2 · MIT | Maquetación tipo flexbox dentro de PixiJS | ○ Para el Rail OPEN si apilar a mano se complica |
+| @pixi/sound | 6.0 · MIT | Sonido en PixiJS | ○ Los SFX actuales usan WebAudio propio; considerar al exportar audio |
+| simplex-noise | 4.0 · MIT | Ruido suave con semilla (parpadeos y temblores orgánicos) | ⭐ Para un ambiente más vivo, sin perder el determinismo |
+| culori | 4.0 · MIT | Mezcla de colores perceptual (OKLCH) | ○ Para degradados de tokens más limpios |
+| spine-pixi-v8 | 4.3 · licencia Spine (pago del editor) | Animación esquelética | ✗ No hace falta |
+| motion (antes Framer Motion) | 13.4 · MIT | Animación de componentes React | ○ Solo para las pantallas de la app (SYSTEM UI), nunca para el HUD |
+| GSAP | Gratis, con restricción de licencia | Animación | ✗ Su licencia prohíbe herramientas de animación visual que compitan con Webflow (D7) |
+| Theatre.js | Estudio AGPL | Editor de animación | ✗ |
+| Lottie / dotLottie | MIT | Animaciones de After Effects | ✗ Pierde glow y efectos |
+| Rive | Motor MIT; exportar cuesta 9 $/mes | Editor visual de animación con estados | ✗ Por ahora (de pago, menos efectos) |
+
+### 8.2 Iconos
+
+| Librería | Licencia | Qué aporta | Veredicto |
+|---|---|---|---|
+| **Material Symbols** (`@material-symbols/svg-400`) | Apache 2.0 | Iconos sólidos redondeados y coherentes | ✅ En uso (`app/src/hud/kit/glyphs/`) |
+| **game-icons.net** | CC BY 3.0, **exige crédito** | 4.000+ iconos de juego (pistola, mochila, dron, mapa) | ⭐ Para objetos de juego; crédito en `glyphs/README.md` |
+| @tabler/icons | 3.48 · MIT | 5.000+ iconos de línea y relleno | ○ Alternativa de línea |
+| @phosphor-icons/core | 2.1 · MIT | Iconos con seis grosores | ○ |
+| remixicon | 4.9 · Apache 2.0 | Iconos de línea y relleno | ○ |
+| lucide-static | 1.48 · ISC | Iconos de línea | ○ |
+| @iconify/json | MIT (cada set con su licencia) | Acceso a más de 200 sets | ○ Solo para buscar; copiar el SVG elegido, sin dependencia en tiempo de ejecución |
+
+### 8.3 Interfaz de la app (SYSTEM UI, HTML)
+
+| Librería | Licencia | Qué aporta | Veredicto |
+|---|---|---|---|
+| augmented-ui | 2.0 · BSD-2 | Esquinas y cortes sci-fi en CSS puro | ○ Para paneles de Configure HUD y Editor |
+| @arwes/react / @arwes/frames | MIT, **sin mantenimiento** | Marcos animados sci-fi y sonidos | ✗ Como dependencia; sí como inspiración |
+| tweakpane / lil-gui / leva | MIT | Paneles de ajustes rápidos | ○ Solo para depurar; el creador usa el catálogo |
+
+### 8.4 Preparar assets (herramientas fuera de la app)
+
+| Herramienta | Licencia | Para qué | Veredicto |
+|---|---|---|---|
+| **vtracer** / `@neplex/vectorizer` (Node, basado en vtracer) | MIT (comprobar en su repositorio) | Convertir un PNG de referencia en SVG (ruta B) | ⭐ Como herramienta de preparación |
+| potrace / esm-potrace-wasm | GPL-2.0 | Vectorizar en blanco y negro | ✗ Por la licencia GPL |
+| **rembg** (Python) | MIT | Quitar el fondo a imágenes generadas | ⭐ Para aislar piezas |
+| OpenCV (Python) | Apache 2.0 | Medir vídeos fotograma a fotograma (usado para el v1) | ✅ Ya usado en el análisis de movimiento |
+
+### 8.5 Futuro (editor, datos, exportación, tracking)
+
+| Librería | Licencia | Para qué | Veredicto |
+|---|---|---|---|
+| zod | 4.6 · MIT | Validar y versionar el formato de proyecto | ⭐ Con el guardado (H1) |
+| idb | 8.0 · ISC | IndexedDB cómodo para borradores | ○ Como copia de seguridad; el guardado principal es una carpeta (05 D6) |
+| mediabunny | 1.59 · MPL-2.0 | Leer y escribir MP4/WebM en el navegador (WebCodecs) | ⭐ Para exportar el HUD con alfa |
+| mp4-muxer / webm-muxer | MIT | Empaquetar vídeo codificado | ○ Alternativa ligera a mediabunny |
+| @techstark/opencv-js | Apache 2.0 | Tracking de puntos en el navegador | ○ Para anclar overlays POV automáticamente (fuera de alcance por ahora) |
+
+**Selección para los próximos pasos:**
+- **HUD:** pixi-filters extra (CRT, shockwave, godrays), @spd789562/particle-emitter y simplex-noise.
+- **Iconos:** game-icons.net, con crédito.
+- **Preparar assets:** vtracer y rembg, como herramientas.
+- **Más adelante:** zod (guardado) y mediabunny (exportación).
+
+Cada una se instala cuando la necesite un componente concreto, con su licencia anotada aquí y en el commit.
+
+Fuentes: [Arwes](https://github.com/arwes/arwes) · [augmented-ui](https://augmented-ui.com/) · [vtracer](https://github.com/visioncortex/vtracer) · [game-icons.net](https://game-icons.net/about.html) · [pixi-v8-particle-emitter](https://github.com/spd789562/pixi-v8-particle-emitter) · [pixi-filters](https://github.com/pixijs/filters) · registro npm (versiones y licencias).
 
 ---
 
@@ -218,7 +275,7 @@ Fuentes: [Arwes](https://github.com/arwes/arwes) · [augmented-ui](https://augme
 
 | Zona | Componente | Estado |
 |---|---|---|
-| SYSTEM UI | Menú principal, botón neón | Hecho (v1). Pendiente: tokens compartidos (§6) |
+| SYSTEM UI | Menú principal, botón neón | Hecho (v1), con los tokens compartidos |
 | SYSTEM UI | Configure HUD, Episodes, Editor | Pendiente (referencia: `configure_hud.webp`, workflow.html) |
 | LEFT RAIL | Rail DOCK (perfil cerrado + iconos + despliegue) | Hecho (v2) |
 | LEFT RAIL | Rail OPEN/PINNED (módulos apilados) | Pendiente |
@@ -229,8 +286,8 @@ Fuentes: [Arwes](https://github.com/arwes/arwes) · [augmented-ui](https://augme
 | RIGHT RAIL | Active Mission, Photo Opportunities, Mini Map, Codex | Pendiente |
 | POV | Weather/Location, Person ID, System Notification, Photo Result, Quest Reveal, Level Up | Pendiente |
 
-**Orden recomendado:**
-1. Tokens compartidos y modo REFERENCIA.
+**Orden recomendado** (tokens compartidos: hecho):
+1. Modo REFERENCIA.
 2. Stamina y Time Left.
 3. Rail OPEN.
 4. Right Rail.
@@ -243,7 +300,7 @@ Fuentes: [Arwes](https://github.com/arwes/arwes) · [augmented-ui](https://augme
 ## 11. Continuar en Claude Code CLI
 
 - **Repositorio:** `waylorr/koalitic-game-research`, rama de trabajo de esta sesión `claude/great-tesla-dopjs9`.
-- **Leer en este orden:** `CLAUDE.md` → `05_AUDITORIA_Y_PROPUESTA.md` §0 → `06_MOVIMIENTO_HUD.md` → `07_FRAMEWORK_HUD.md` → este documento.
+- **Leer en este orden:** `README.md` → `CLAUDE.md` → `09_ESTADO_Y_BITACORA.md` → `07_FRAMEWORK_HUD.md` → este documento → `06_MOVIMIENTO_HUD.md` → `05_AUDITORIA_Y_PROPUESTA.md` §0 y §9.
 - **Arrancar:**
   ```
   cd app
@@ -259,6 +316,7 @@ Fuentes: [Arwes](https://github.com/arwes/arwes) · [augmented-ui](https://augme
   ```
   En tu PC, Playwright puede necesitar `npx playwright install chromium`.
 - **Dónde está cada cosa:**
+  - tokens de diseño: `app/src/design/`;
   - kit: `app/src/hud/kit/`;
   - componentes: `app/src/hud/v2/`;
   - registro: `app/src/hud/registry.ts`;

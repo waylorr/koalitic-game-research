@@ -1,6 +1,6 @@
 # 06 · Lenguaje de movimiento del HUD
 
-Referencia: grabación del HUD v1 (30,8 s, 30 fps) que el creador compartió el 25-09-2026. Solo está en la sesión; no se ha subido al repo. Se midió fotograma a fotograma. Objetivo: **aspecto del HUD v2** (cristal oscuro, rojo y cian, `hudv2_*.jpeg`) con **el movimiento del v1**.
+Referencia: grabación del HUD v1 (30,8 s, 30 fps) que el creador compartió el 25-09-2026. Guardada en `referencias/00-vision/hud-v1-movimiento.mp4`. Se midió fotograma a fotograma. Objetivo: **aspecto del HUD v2** (cristal oscuro, rojo y cian, `hudv2_*.jpeg`) con **el movimiento del v1**.
 
 ## Gramática medida en el v1
 

@@ -1,5 +1,7 @@
 # KOALITIC GAME — auditoría, decisión técnica y primer hito
 
+> **Estado actual del proyecto:** ver [`09_ESTADO_Y_BITACORA.md`](09_ESTADO_Y_BITACORA.md). Este documento conserva la auditoría, la arquitectura, los hitos y las medidas de H0; §0 y §9 recogen las decisiones posteriores.
+
 **Estado:** propuesta para tu revisión · 24/09/2026. No cambia el contrato de producto de 01–04 salvo donde se indica. Los supuestos de §7 se aplican mientras no digas lo contrario.
 
 **Resumen**
@@ -10,6 +12,9 @@
 - **H0 (prueba técnica) está hecha:** 18 tests del núcleo y 17/17 comprobaciones en Chromium real (§6). Página privada para probarla con tu vídeo: <https://claude.ai/artifact/JSUkfThkZw8gqPkdYRsvBL>. Código en `app/`.
 
 ## 0. Actualización tras tu revisión (25/09/2026)
+
+- **Tokens de diseño compartidos (D14):** `app/src/design/tokens.ts` es la única fuente de colores, cristal, líneas y perillas de movimiento para los menús (variables CSS) y el HUD (PixiJS). HUD KIT → THEME edita ambos a la vez.
+- **Framework y workflow:** capas, estados y rails en `07_FRAMEWORK_HUD.md`; referencias, rutas de fabricación y librerías en `08_WORKFLOW_UI_Y_ASSETS.md`.
 
 - **El HUD se dibuja con PixiJS 8 (MIT) y pixi-filters 6 (MIT):** glitch con separación RGB, artefactos y bloom. CSS y SVG no llegaban al nivel del v1. El motor de tiempo no cambia: cada fotograma se calcula del tiempo y los efectos usan azar con semilla, así que el mismo instante da los mismos píxeles (comprobado en Chromium, glitch incluido). Primer componente: PLAYER del Left Rail (`app/src/hud/v2/`).
 - **Cada UI Component trae su aspecto y su movimiento por defecto, fijos.** El creador edita solo los valores: foto, nombre, nivel, XP y estado. En el catálogo, cada cambio crea un keyframe; en el editor, esos valores vendrán de la Data Library y de las pistas del timeline. Una apertura distinta sería una variante nueva programada, no un ajuste del usuario.
@@ -265,7 +270,7 @@ Supuestos mientras no respondas: **S1** referencia viva con aviso y archivo · *
 
 | ID | Decisión | Estado |
 |---|---|---|
-| D1 | App web local con React + TS + Vite; HUD en DOM/SVG/CSS; PixiJS como alternativa | Propuesta; H0 superada en el entorno de prueba, pendiente de tu equipo |
+| D1 | App web local con React + TS + Vite; HUD en DOM/SVG/CSS; PixiJS como alternativa | Aplicada; el HUD pasó a PixiJS (D12). H0 superada en el entorno de prueba, pendiente de tu equipo |
 | D2 | Núcleo puro `evaluateFrame(episodio, t)` compartido por preview y exportación | Aplicada en H0 |
 | D3 | Transiciones y ambientales calculados desde el tiempo; sin animaciones CSS ni `will-change` en el HUD | Aplicada en H0 |
 | D4 | Tiempo en ms enteros con ajuste a fotograma; escenario lógico 1920×1080 | Aplicada en H0 |
@@ -277,6 +282,9 @@ Supuestos mientras no respondas: **S1** referencia viva con aviso y archivo · *
 | D10 | Cada elemento de UI se aprueba en ASSETS → UI COMPONENTS antes de usarse en pantallas | Aplicada (botón neón) |
 | D11 | Sin Three.js para fondos; solo se reconsidera si un componente HUD necesita efectos 3D | Aplicada |
 | D12 | HUD dibujado con PixiJS + pixi-filters; cálculo puro por componente (`evaluatePlayer`) y un dibujante sin lógica de tiempo; efectos con semilla. Sustituye la parte «HUD en DOM/SVG/CSS» de D1 | Aplicada (PLAYER) |
-| D13 | Aspecto y movimiento del componente fijos por defecto; solo los valores son editables (catálogo: cada cambio es un keyframe) | Aplicada (PLAYER) |
+| D13 | Aspecto y movimiento del componente fijos por defecto; solo los valores son editables (catálogo: cada cambio es un keyframe) | Aplicada (PLAYER, GEAR, RAIL) |
+| D14 | Una sola fuente de tokens de diseño (`app/src/design/tokens.ts`) para los menús (CSS) y el HUD (PixiJS) | Aplicada |
+| D15 | Estado de un módulo = forma (COMPACT/OPEN/PINNED) + HOVER y DISABLED independientes; PULSE es una reacción | Aplicada |
+| D16 | Left Rail en DOCK: un solo módulo desplegado al lado de su icono (pista `selected`); OPEN apila los módulos | DOCK aplicado; OPEN pendiente |
 
 Fuentes consultadas: metadatos del registro npm (versiones y licencias); [licencia estándar de GSAP](https://gsap.com/community/standard-license/); [vídeo en Godot](https://docs.godotengine.org/en/stable/tutorials/animation/playing_videos.html); [soporte de `showDirectoryPicker`](https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker) y [permisos persistentes en Chrome 122](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api); [soporte de `requestVideoFrameCallback`](https://caniuse.com/mdn-api_htmlvideoelement_requestvideoframecallback); [PixiJS Layout v3](https://pixijs.com/blog/layout-v3). La política de red de esta sesión bloquea gsap.com, docs.godotengine.org y developer.chrome.com, así que esas fuentes se contrastaron mediante búsqueda y no leyendo la página completa.
