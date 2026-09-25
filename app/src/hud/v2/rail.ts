@@ -32,8 +32,8 @@ export interface RailInput {
   readonly stamina: Track<number>;
 }
 
-export const RAIL_CARD = { w: 236, h: 92 };
-export const RAIL_TILE = { size: 48, gap: 8, top: 108 };
+export const RAIL_CARD = { w: 236, h: 70 };
+export const RAIL_TILE = { size: 46, gap: 9, top: 86 };
 export const tileY = (i: number) => RAIL_TILE.top + i * (RAIL_TILE.size + RAIL_TILE.gap);
 
 export interface RailFlyout {

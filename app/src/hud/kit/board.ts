@@ -1,6 +1,7 @@
 import { Container, Graphics, type Texture } from 'pixi.js';
 import { phase } from '../../core/motion';
-import { GEAR_ICONS, drawIcon } from './icons';
+import { IconLayer } from './glyphs';
+import { GEAR_ICONS } from './icons';
 import { Effects, PanelFrame, Portrait, drawArtifacts, drawBar, mix, type PanelState } from './pixi';
 import { DEFAULT_MOTION, THEME, type MotionKnobs, type Theme } from './theme';
 
@@ -37,6 +38,7 @@ export class PiecesBoard {
   private readonly effects: Effects;
   private readonly linePanel: PanelFrame;
   private readonly icons = new Graphics();
+  private readonly glyphs = new IconLayer();
 
   constructor(private readonly theme: Theme = THEME) {
     for (let i = 0; i < 4; i++) {
@@ -54,7 +56,7 @@ export class PiecesBoard {
     this.effects.setArea(FRAME.w, FRAME.h);
     this.linePanel = new PanelFrame(theme, { backdropBlur: false });
     this.linePanel.front.position.set(470, 240);
-    this.root.addChild(this.bars, this.portrait.root, this.glitchPanel.back, this.glitchLayer, this.linePanel.front, this.icons);
+    this.root.addChild(this.bars, this.portrait.root, this.glitchPanel.back, this.glitchLayer, this.linePanel.front, this.icons, this.glyphs.root);
   }
 
   get photo() {
@@ -96,14 +98,15 @@ export class PiecesBoard {
     // Icons and rail tiles.
     const { color } = this.theme;
     const ic = this.icons.clear();
-    GEAR_ICONS.forEach((icon, i) => drawIcon(ic, icon, 36 + i * 38, 350, 26, color.cyan, 1));
+    this.glyphs.begin();
+    GEAR_ICONS.forEach((icon, i) => this.glyphs.add(icon, 36 + i * 38, 350, 28, 0xeaf8ff, 1));
     [0, 1].forEach(sel => {
-      const x = 540 + sel * 70, y = 326, s = 48, c = 7;
-      ic.poly([x + c, y, x + s, y, x + s, y + s - c, x + s - c, y + s, x, y + s, x, y + c])
-        .fill({ color: mix(0x07131f, 0x2a0610, sel), alpha: 0.85 })
-        .stroke({ width: 1.6 + sel * 1.2, color: mix(color.cyan, color.red, sel) });
-      if (sel) ic.rect(x - 9, y + 6, 3, s - 12).fill({ color: color.red });
-      drawIcon(ic, 'tools', x + s / 2, y + s / 2, 24, mix(color.cyan, color.white, sel), 1);
+      const x = 540 + sel * 70, y = 326, s = 46;
+      const edge = mix(color.cyan, color.red, sel);
+      ic.roundRect(x, y, s, s, 7).stroke({ width: 8, color: edge, alpha: 0.15 });
+      ic.roundRect(x, y, s, s, 7).fill({ color: mix(0x081b2e, 0x2a0610, sel), alpha: 0.9 }).stroke({ width: 1.8, color: edge });
+      this.glyphs.add('tools', x + s / 2, y + s / 2, 26, 0xffffff, 1);
     });
+    this.glyphs.end();
   }
 }

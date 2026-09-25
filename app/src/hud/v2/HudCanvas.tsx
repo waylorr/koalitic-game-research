@@ -3,6 +3,7 @@ import { Application, Sprite, Texture } from 'pixi.js';
 import { createDrawn, type Drawn, type HudItem } from '../registry';
 import { DEFAULT_MOTION, THEME, type MotionKnobs, type Theme } from '../kit/theme';
 import { useStageScale } from '../../ui/Stage';
+import { loadGlyphs } from '../kit/glyphs';
 
 async function loadTexture(url: string): Promise<Texture> {
   const image = new Image();
@@ -42,7 +43,7 @@ export function HudCanvas({ width, height, background, items, theme = THEME, mot
     const app = new Application();
     (async () => {
       await app.init({ width, height, backgroundAlpha: 0, antialias: true, autoStart: false, resolution, autoDensity: true, preference: 'webgl', useBackBuffer: true, preserveDrawingBuffer: true });
-      await Promise.all(['500', '600', '700'].map(weight => document.fonts.load(`${weight} 20px Rajdhani`)));
+      await Promise.all([...['500', '600', '700'].map(weight => document.fonts.load(`${weight} 20px Rajdhani`)), loadGlyphs()]);
       if (cancelled) {
         app.destroy(true);
         return;

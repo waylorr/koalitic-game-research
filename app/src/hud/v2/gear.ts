@@ -46,6 +46,10 @@ export interface GearFrame {
   /** 1 right after each step lands, then fades: flash and ring ping. */
   readonly ping: number;
   readonly segmentsIn: readonly number[];
+  /** Flash of each petal as it lands during the opening. */
+  readonly petalFlash: readonly number[];
+  /** Extra rotation (rad) while the petals spin out on opening. */
+  readonly spin: number;
   readonly centerIn: number;
   readonly name: string;
   readonly spec: string;
@@ -56,6 +60,7 @@ export interface GearFrame {
 }
 
 const wrap = (x: number, n: number) => ((x % n) + n) % n;
+const easeOutBack = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : 1 + 2.4 * (x - 1) ** 3 + 1.4 * (x - 1) ** 2);
 
 /** Ring position at t: each new key walks the shortest way, one sector per step. */
 export function ringPosition(track: Track<number>, t: number, n: number, stepMs: number) {
@@ -110,8 +115,13 @@ export function evaluateGear(t: number, input: GearInput, k: MotionKnobs = DEFAU
     pos: ring.pos,
     selected,
     ping,
-    segmentsIn: input.slots.map((_, i) => easeOutCubic(p.reveal(480 + i * 70, 220))),
-    centerIn: easeOutCubic(p.reveal(440, 260)),
+    segmentsIn: input.slots.map((_, i) => easeOutCubic(p.reveal(480 + i * 60, 260))),
+    petalFlash: input.slots.map((_, i) => {
+      const landed = p.e - (480 + i * 60 + 260);
+      return landed < 0 ? 0 : Math.exp(-landed / 180) * (1 - (p.x >= 0 ? 1 : 0));
+    }),
+    spin: -0.7 * (1 - easeOutCubic(p.reveal(440, 700))),
+    centerIn: easeOutBack(p.reveal(400, 360)),
     name: decode(slot?.name ?? '', ping > 0.6 ? clamp01(1 - (ping - 0.6) * 2.5) : shell.idle.textFlicker ? 0.6 : nameP, t, 9 + selected),
     spec: slot?.spec ?? '',
     counter: `${String(selected + 1).padStart(2, '0')}/${String(n).padStart(2, '0')}`,

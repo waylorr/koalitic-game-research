@@ -17,6 +17,8 @@ Acordado con el creador el 25-09-2026. Referencias:
 - El comportamiento común de un módulo de rail (presencia, los cinco estados, pulsos y ambiente) está en `kit/module.ts` (`moduleShell`). Cada módulo solo añade su contenido.
 - `kit/sample.ts` es un panel hecho solo con piezas del kit (barra ámbar tipo STAMINA): demuestra el kit y es la plantilla de partida de un módulo nuevo.
 - `app/src/hud/registry.ts` es el registro de elementos: cómo se crea, evalúa y dibuja cada tipo. Los lienzos, el catálogo y el editor solo hablan con él.
+- **Iconos:** glifos sólidos de Material Symbols (Google, Apache 2.0) en `kit/glyphs/`. Se rasterizan una vez a alta resolución y se tiñen con el tema (`kit/glyphs.ts`, `IconLayer`). Para añadir uno se copia su SVG ahí; el README de la carpeta dice de dónde sale cada uno.
+- **Luz:** los pétalos y las casillas usan degradados (`FillGradient`), iluminados desde el borde exterior, con halo en capas y el borde exterior más brillante, como en `referencias/configure_hud.webp`.
 - En el catálogo, `screens/catalog/ElementPage.tsx` es la ficha común (EDIT, DEMO, ALL STATES). Cada componente solo aporta sus valores, sus reacciones, su demo y su colocación: por ejemplo, `PlayerPage.tsx` o `GearPage.tsx`.
 - **Nitidez:** el lienzo se dibuja al tamaño real que ocupa en pantalla (escala del escenario × píxeles del dispositivo). Los filtros (glitch, bloom, desenfoque) heredan esa resolución. Si no, el texto del HUD sale blando.
 
@@ -60,8 +62,8 @@ Acordado con el creador el 25-09-2026. Referencias:
 - **Cascada:** el rail entra con sus módulos de arriba abajo y sale al revés.
 - **FOLDED** es el modo del rail y **COMPACT**, la presentación de cada módulo.
 - ✅ **DOCK hecho** en `hud/v2/rail.ts` y `RailPixi.ts`:
-  - mini-tarjeta del jugador y columna de iconos en el orden de la plantilla;
-  - la pista `selected` abre un solo módulo al lado de su icono, con conector y arco rojos. Al cambiar, el anterior se cierra mientras el nuevo se abre;
+  - perfil cerrado (retrato en casilla, nombre, LV y barra cian, sin panel) y columna de casillas redondeadas con brillo, en el orden de la plantilla;
+  - la pista `selected` abre un solo módulo al lado de su icono, con barra y conector rojos; el Gear Radial se abre sobre la columna, con arcos rojos a ambos lados. Al cambiar, el anterior se cierra mientras el nuevo se abre;
   - el Gear Radial usa su forma «suelta» (solo el radial, sin tarjeta);
   - INVENTORY, CAMERA y TIME LEFT usan de momento el panel del kit como sustituto.
 - **El mismo componente** va dentro de un rail o suelto; solo cambia quién lo coloca.
