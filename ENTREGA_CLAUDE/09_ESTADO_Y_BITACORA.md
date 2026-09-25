@@ -12,7 +12,7 @@ Este documento es el **punto de entrada para retomar el trabajo sin contexto**, 
 2. Si vas a tocar componentes del HUD, lee además:
    - [`07_FRAMEWORK_HUD.md`](07_FRAMEWORK_HUD.md): capas del kit, estados y rails;
    - [`08_WORKFLOW_UI_Y_ASSETS.md`](08_WORKFLOW_UI_Y_ASSETS.md): referencias, rutas de fabricación y librerías.
-3. Arranca la app:
+3. Arranca la app (`#episodes` abre el editor):
    ```sh
    cd app
    npm install
@@ -46,13 +46,14 @@ Este documento es el **punto de entrada para retomar el trabajo sin contexto**, 
 | LEFT RAIL · DOCK (perfil cerrado + iconos + despliegue lateral) | `app/src/hud/v2/rail.ts`, `RailPixi.ts` | ✅ v2 |
 | Stamina, Time Left, Inventory | — | ⏳ Hoy usan el panel de muestra del kit |
 | Rail OPEN/PINNED, Right Rail, Top Bar, overlays POV | — | ⏳ |
-| Pantallas Episodes, Configure HUD, Episode Editor | `ScreenStub.tsx` | ⏳ Solo la cabecera |
+| **Episode Editor** (primera versión): imagen de fondo, Left Rail, timeline zona → componente → propiedad con keyframes (añadir, mover con ajuste a fotograma, borrar, deshacer), inspector, reproducir y buscar | `app/src/editor/` (se abre desde EPISODES) | ✅ Con una pista por propiedad del rail; borrador en el navegador |
+| Pantallas Episodes (lista), Configure HUD | `ScreenStub.tsx` | ⏳ Configure HUD solo tiene la cabecera; EPISODES abre directamente el editor con un episodio demo |
 | Data Library, Media, guardar/abrir proyecto | — | ⏳ Diseñado en 05 §3, no implementado |
 | Exportación (vídeo con alfa) | — | ⏳ Fuera de alcance hasta nueva decisión |
 
 **Pruebas actuales:**
-- lógica: 30 pruebas;
-- app en navegador: 30 comprobaciones;
+- lógica: 34 pruebas;
+- app en navegador: 35 comprobaciones;
 - laboratorio: 17 comprobaciones;
 - el prototipo `WORKFLOW` sigue en verde.
 
@@ -97,6 +98,13 @@ Este documento es el **punto de entrada para retomar el trabajo sin contexto**, 
 - **LEFT RAIL · DOCK** como la referencia: perfil cerrado, columna de casillas brillantes y un solo módulo desplegado al lado de su icono. El radial se abre sobre la columna con arcos rojos.
 - **Tokens compartidos:** un único `app/src/design/tokens.ts` alimenta las variables CSS de los menús y el tema de PixiJS. THEME cambia a la vez los menús y el HUD. Antes había dos fuentes y el cristal del menú no cambiaba.
 - **Workflow de referencias** (08): el creador preparará piezas aisladas sobre negro, hojas de estados y un clip por animación; Claude las convierte en presets.
+- Ramas: `main` estable, `koalitic-game-0.1` de trabajo, `archive/main-h0` con el `main` antiguo. A partir de aquí se trabaja en `main`, por indicación del creador.
+- **Episode Editor, primera versión** (`app/src/editor/`):
+  - fondo con cualquier imagen (LOAD IMAGE); el vídeo llega después, porque el motor ya lo soporta (laboratorio);
+  - el Left Rail en DOCK con el Gear Radial;
+  - un timeline con cinco pistas: rail en pantalla, módulo abierto, XP, objeto del radial y stamina.
+  - Cambiar un valor en el inspector crea un keyframe en el cabezal. Los keyframes se arrastran (se ajustan a fotogramas de 30 fps), se borran con Supr, se añaden con doble clic en su carril y todo se deshace con Ctrl+Z.
+  - El episodio (`EpisodeDoc`, en `episode.ts`) es solo datos: el HUD se calcula desde sus pistas en cualquier instante.
 
 ---
 
@@ -162,12 +170,13 @@ Además:
 
 ## 8. Siguientes pasos (orden recomendado)
 
-1. **Modo REFERENCIA** en el catálogo: la imagen del creador semitransparente encima del componente, para calcarlo (08 §7).
-2. **Fidelidad del GEAR RADIAL** con `configure_hud.webp`, usando ese modo y las referencias aisladas que prepare el creador (08 §3).
-3. **Stamina** (barra por segmentos ámbar), **Time Left** (reloj rojo) e **Inventory** reales, que sustituyen al panel de muestra.
-4. **Rail OPEN/PINNED:** módulos apilados, acordeón y cascada (07 §4).
-5. Right Rail, Top Bar y overlays POV (según 08 §10).
-6. Pantallas de la app (Configure HUD según `configure_hud.webp`, Episodes, Editor con timeline) y Data Library con guardado (H1 de 05 §5).
-7. Más adelante: tracking, exportación con alfa y empaquetado, solo con nueva decisión.
+1. **Editor:** fondo de vídeo (el reloj de vídeo ya está probado en el laboratorio), zoom del timeline, más componentes en el timeline (PLAYER PROFILE, overlays POV con posición anclada) y guardar/abrir el episodio como archivo (H1).
+2. **Modo REFERENCIA** en el catálogo: la imagen del creador semitransparente encima del componente, para calcarlo (08 §7).
+3. **Fidelidad del GEAR RADIAL** con `configure_hud.webp`, usando ese modo y las referencias aisladas que prepare el creador (08 §3).
+4. **Stamina** (barra por segmentos ámbar), **Time Left** (reloj rojo) e **Inventory** reales, que sustituyen al panel de muestra.
+5. **Rail OPEN/PINNED:** módulos apilados, acordeón y cascada (07 §4).
+6. Right Rail, Top Bar y overlays POV (según 08 §10).
+7. Pantallas de la app (Configure HUD según `configure_hud.webp`, Episodes, Editor con timeline) y Data Library con guardado (H1 de 05 §5).
+8. Más adelante: tracking, exportación con alfa y empaquetado, solo con nueva decisión.
 
 Librerías previstas para estos pasos: ver 08 §8 («Selección»).

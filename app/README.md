@@ -11,7 +11,13 @@ Aplicación de autoría de KOALITIC GAME. Estado general y siguientes pasos: [`.
     - MOTION: animaciones del kit y perillas;
     - PIECES: piezas, iconos y casillas.
   - **HUD ELEMENTS por zonas:** RAIL · DOCK, PLAYER PROFILE y GEAR RADIAL. Cada uno con EDIT, DEMO y ALL STATES.
-- **Pantallas EPISODES y CONFIGURE HUD:** en construcción.
+- **EPISODE EDITOR** (`#episodes`, `src/editor/`):
+  - imagen de fondo (LOAD IMAGE), Left Rail sobre ella, inspector y timeline con cinco pistas;
+  - cambiar un valor crea un keyframe en el cabezal; doble clic en un carril también;
+  - los keyframes se arrastran con ajuste a fotograma; Supr borra; Ctrl+Z / Ctrl+Y deshacen y rehacen;
+  - espacio reproduce y las flechas avanzan fotograma a fotograma;
+  - el borrador se guarda en el navegador.
+- **CONFIGURE HUD:** en construcción.
 - **Laboratorio del motor** (H0: evaluador temporal, HUD provisional DOM, timeline mínima): en `lab.html`.
 
 ## Abrir
@@ -40,6 +46,7 @@ npm run build && npm run e2e  # Chromium real (Playwright); la primera vez: npx 
 | `src/design/` | **tokens de diseño compartidos** (`tokens.ts`) y `TokensProvider` (los escribe como variables CSS y los pasa al HUD) |
 | `src/ui/` | interfaz de la app: escenario 1920×1080, logo, botón neón, sonidos y valores CSS por defecto (`tokens.css`) |
 | `public/backgrounds/` | fondos provisionales derivados de tus diseños (se sustituyen por el arte limpio) |
+| `src/editor/` | editor de episodio: documento (`episode.ts`, datos puros y operaciones de keyframes) y pantalla (`EpisodeEditor.tsx`) |
 | `src/core/` | modelo, pistas, motion y `evaluateFrame` (TypeScript puro) |
 | `src/hud/` | `kit/`: movimiento, piezas PixiJS, efectos, iconos (`glyphs/`, Material Symbols); `v2/`: elementos del HUD (cálculo puro + dibujo: player, gear, rail); `registry.ts`: registro de elementos; el resto, HUD provisional del laboratorio. Marco: `ENTREGA_CLAUDE/07_FRAMEWORK_HUD.md` |
 | `src/lab/` | laboratorio del motor (`lab.html`) |

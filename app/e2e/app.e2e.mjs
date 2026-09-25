@@ -208,7 +208,59 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   // Browser back button and Escape
   await page.click('[data-testid=menu-episodes]');
   await page.waitForSelector('[data-testid=screen-episodes]');
-  await page.waitForTimeout(700);
+  await page.waitForSelector('[data-testid=editor-viewer] [data-testid=player-module][data-ready=yes]');
+  await page.click('[data-testid=editor-reset]');
+
+  // EPISODE EDITOR: keyframes drive the HUD at any instant.
+  const editor = {
+    phase: () => page.getAttribute('[data-testid=editor-viewer] [data-testid=player-module]', 'data-phase'),
+    seek: async ms => { await page.evaluate(v => window.__kgEditor.seek(v), ms); await page.waitForTimeout(250); },
+    track: id => page.evaluate(t => window.__kgEditor.doc().tracks[t].map(k => [k.t, k.v]), id),
+  };
+  const phaseSoon = async expected => {
+    await page.waitForFunction(v => document.querySelector('[data-testid=editor-viewer] [data-testid=player-module]')?.dataset.phase === v, expected, { timeout: 4000 }).catch(() => {});
+    return editor.phase();
+  };
+  await editor.seek(5000);
+  const atGear = await phaseSoon('dock:gear');
+  await editor.seek(9500);
+  const atStamina = await phaseSoon('dock:stamina');
+  check('EDITOR: the rail follows its keyframes when scrubbing', atGear === 'dock:gear' && atStamina === 'dock:stamina', `${atGear} · ${atStamina}`);
+
+  await editor.seek(2000);
+  await page.click('[data-testid=insp-module-inventory]');
+  const afterAdd = await phaseSoon('dock:inventory');
+  const added = await editor.track('rail.selected');
+  check('EDITOR: an inspector change adds a key at the playhead', added.some(([t, v]) => t === 2000 && v === 'inventory') && afterAdd === 'dock:inventory', `${JSON.stringify(added)} · ${afterAdd}`);
+
+  // Drag the new key 2 s to the right on its lane.
+  const lane = await page.locator('[data-testid=lane-rail\\.selected]').boundingBox();
+  const keyBox = await page.locator('[data-testid=key-rail\\.selected-1]').boundingBox();
+  const pxPerMs = lane.width / 20000;
+  await page.mouse.move(keyBox.x + keyBox.width / 2, keyBox.y + keyBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(keyBox.x + keyBox.width / 2 + 2000 * pxPerMs, keyBox.y + keyBox.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+  const dragged = (await editor.track('rail.selected')).find(([, v]) => v === 'inventory');
+  check('EDITOR: dragging a key moves it in time, snapped to frames', dragged && Math.abs(dragged[0] - 4000) <= 100 && Math.round(dragged[0] * 30 / 1000) * 1000 / 30 - dragged[0] < 1, JSON.stringify(dragged));
+
+  await page.keyboard.press('Delete');
+  await page.waitForTimeout(200);
+  const deleted = (await editor.track('rail.selected')).some(([, v]) => v === 'inventory');
+  await page.keyboard.press('Control+z');
+  await page.waitForTimeout(200);
+  const restored = (await editor.track('rail.selected')).some(([, v]) => v === 'inventory');
+  check('EDITOR: Delete removes the selected key and Ctrl+Z brings it back', !deleted && restored, `deleted ${!deleted} · restored ${restored}`);
+
+  await editor.seek(0);
+  await page.click('[data-testid=editor-play]');
+  const advanced = await page.waitForFunction(() => window.__kgEditor.time() > 700, null, { timeout: 5000 }).then(() => true, () => false);
+  const played = await page.evaluate(() => window.__kgEditor.time());
+  await page.click('[data-testid=editor-play]');
+  check('EDITOR: PLAY advances the playhead', advanced, `${Math.round(played)} ms`);
+  await editor.seek(5000);
+  await page.waitForTimeout(800);
   fs.writeFileSync(path.join(outDir, 'app-episodes.png'), await page.screenshot());
   await page.goBack();
   await page.waitForSelector('[data-testid=main-menu]');

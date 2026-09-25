@@ -17,6 +17,7 @@ No es un juego 3D ni un editor de montaje de vídeo.
     - SYSTEM UI;
     - HUD KIT: tokens, movimiento y piezas;
     - HUD ELEMENTS por zonas.
+- **Editor de episodio (primera versión):** imagen de fondo, Left Rail y timeline con keyframes. Se añaden, mueven y borran; se reproduce y se busca cualquier instante. Se abre desde EPISODES.
 - **Hechos en el catálogo:**
   - botón neón;
   - PLAYER PROFILE;
@@ -26,7 +27,8 @@ No es un juego 3D ni un editor de montaje de vídeo.
   - Stamina y Time Left reales;
   - Rail OPEN;
   - Right Rail, Top Bar y overlays POV;
-  - las pantallas Episodes, Configure HUD y Editor;
+  - la lista de episodios y Configure HUD;
+  - vídeo de fondo en el editor;
   - guardar proyectos;
   - exportación.
 - **Motor de tiempo probado:** cada fotograma se calcula a partir del tiempo, así que se puede saltar a cualquier instante con el mismo resultado exacto.
@@ -69,7 +71,7 @@ npm install
 npm run dev
 ```
 
-Luego abre `http://localhost:5173` (catálogo: `http://localhost:5173/#assets`; laboratorio del motor: `http://localhost:5173/lab.html`).
+Luego abre `http://localhost:5173` (editor: `http://localhost:5173/#episodes`; catálogo: `http://localhost:5173/#assets`; laboratorio del motor: `http://localhost:5173/lab.html`).
 
 ## Pruebas
 
@@ -80,6 +82,6 @@ npm test
 npm run build && npm run e2e
 ```
 
-- `npm test` pasa las pruebas de lógica (30).
-- `npm run e2e` usa Chromium real: 30 comprobaciones de la app y 17 del laboratorio. La primera vez hace falta `npx playwright install chromium`.
+- `npm test` pasa las pruebas de lógica (34).
+- `npm run e2e` usa Chromium real: 35 comprobaciones de la app y 17 del laboratorio. La primera vez hace falta `npx playwright install chromium`.
 - El prototipo anterior se prueba con `node WORKFLOW/smoke.mjs` y `node WORKFLOW/store-smoke.mjs`.

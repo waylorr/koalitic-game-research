@@ -276,7 +276,8 @@ Fuentes: [Arwes](https://github.com/arwes/arwes) · [augmented-ui](https://augme
 | Zona | Componente | Estado |
 |---|---|---|
 | SYSTEM UI | Menú principal, botón neón | Hecho (v1), con los tokens compartidos |
-| SYSTEM UI | Configure HUD, Episodes, Editor | Pendiente (referencia: `configure_hud.webp`, workflow.html) |
+| SYSTEM UI | Episode Editor | Hecho (v1): imagen de fondo, Left Rail, timeline con keyframes. Pendiente: vídeo, más pistas y guardado |
+| SYSTEM UI | Configure HUD, lista de Episodes | Pendiente (referencia: `configure_hud.webp`, workflow.html) |
 | LEFT RAIL | Rail DOCK (perfil cerrado + iconos + despliegue) | Hecho (v2) |
 | LEFT RAIL | Rail OPEN/PINNED (módulos apilados) | Pendiente |
 | LEFT RAIL | Player Profile | Hecho |

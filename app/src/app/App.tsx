@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TokensProvider } from '../design/TokensProvider';
+import { EpisodeEditor } from '../editor/EpisodeEditor';
 import { MainMenu } from '../screens/MainMenu';
 import { ScreenStub } from '../screens/ScreenStub';
 import { SystemOffline } from '../screens/SystemOffline';
@@ -71,6 +72,8 @@ export function App() {
       <div key={shown} className={`kg-layer${leaving ? ' is-leaving' : ''}${offline ? ' is-hidden' : ''}`}>
         {shown === 'menu' ? (
           <MainMenu firstVisit={firstVisit} onOpen={open} onQuit={quit} />
+        ) : shown === 'episodes' ? (
+          <EpisodeEditor onBack={() => open('menu')} />
         ) : (
           <ScreenStub screen={shown} onBack={() => open('menu')} />
         )}
