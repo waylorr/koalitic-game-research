@@ -34,6 +34,7 @@ export function HudCanvas({ width, height, background, items, theme = THEME, mot
 
   useEffect(() => {
     let cancelled = false;
+    setInfo({ phases: '', value: '' });
     const app = new Application();
     (async () => {
       await app.init({ width, height, backgroundAlpha: 0, antialias: true, autoStart: false, resolution: Math.max(2, window.devicePixelRatio || 1), autoDensity: true, preference: 'webgl', useBackBuffer: true, preserveDrawingBuffer: true });

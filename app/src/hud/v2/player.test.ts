@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { evaluatePlayer, type ModuleState, type PlayerInput } from './player';
+import { evaluatePlayer, type ModuleLayout, type PlayerInput } from './player';
 
 const k = <V,>(t: number, v: V) => ({ id: `k${t}`, t, v });
 const input: PlayerInput = {
   record: { name: 'KOALITIC', level: 12, nextLevelXp: 5000, photo: 'p.jpg' },
   enterAt: 300,
   exitAt: 7000,
-  state: [k<ModuleState>(0, 'Open'), k<ModuleState>(4300, 'Compact'), k<ModuleState>(5500, 'Open')],
+  layout: [k<ModuleLayout>(0, 'Open'), k<ModuleLayout>(4300, 'Compact'), k<ModuleLayout>(5500, 'Open')],
+  hover: [],
+  disabled: [],
   xp: [k(0, 3250), k(2700, 3400)],
   pulses: [],
 };
@@ -23,12 +25,15 @@ describe('PLAYER PROFILE', () => {
     expect(settled.ratio).toBeCloseTo(3400 / 5000);
     expect(evaluatePlayer(2800, input)!.gains[0]!.text).toBe('+150 XP');
   });
-  it('follows the state track, with each state readable at rest', () => {
+  it('follows the layout track and the independent hover and disabled flags', () => {
     expect(evaluatePlayer(2000, input)!.phase).toBe('open');
     expect(evaluatePlayer(4900, input)!.phase).toBe('compact');
-    const pinned = evaluatePlayer(2000, { ...input, state: [k<ModuleState>(0, 'Pinned')] })!;
+    const compactHover = evaluatePlayer(2000, { ...input, layout: [k<ModuleLayout>(0, 'Compact')], hover: [k(0, true)] })!;
+    expect(compactHover.phase).toBe('compact+hover');
+    expect(compactHover.panel.hover).toBe(1);
+    const pinned = evaluatePlayer(2000, { ...input, layout: [k<ModuleLayout>(0, 'Pinned')] })!;
     expect(pinned.panel.pinned).toBe(1);
-    const disabled = evaluatePlayer(2000, { ...input, state: [k<ModuleState>(0, 'Disabled')] })!;
+    const disabled = evaluatePlayer(2000, { ...input, disabled: [k(0, true)] })!;
     expect(disabled.disabled).toBe(1);
   });
   it('glitches on events and stays clean at rest', () => {

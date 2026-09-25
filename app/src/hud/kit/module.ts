@@ -6,17 +6,24 @@ import type { PanelState } from './pixi';
 
 /**
  * HUD kit: the behaviour every rail module shares (Player Profile, Stamina,
- * Inventory…). Presence, the five workflow states, pulses and the ambient loop
- * are evaluated here once; a module only adds its own content on top.
+ * Inventory…). Evaluated here once; a module only adds its own content.
+ *   - Presence: enter / exit.
+ *   - State: one layout (COMPACT, OPEN, PINNED) plus two independent flags,
+ *     HOVER on/off and DISABLED on/off (so COMPACT + HOVER is possible).
+ *   - Reactions: value changes and pulses (a replaced value re-reveals).
+ *   - Ambient loop while visible.
  */
-export type ModuleState = 'Compact' | 'Open' | 'Pinned' | 'Hover' | 'Disabled';
-export const MODULE_STATES: readonly ModuleState[] = ['Compact', 'Open', 'Pinned', 'Hover', 'Disabled'];
-export type ModulePhase = 'hidden' | 'enter' | 'exit' | 'compact' | 'open' | 'pinned' | 'hover' | 'disabled';
+export type ModuleLayout = 'Compact' | 'Open' | 'Pinned';
+export const MODULE_LAYOUTS: readonly ModuleLayout[] = ['Compact', 'Open', 'Pinned'];
+/** Human-readable phase: 'enter', 'exit', or the layout with its flags, e.g. 'compact+hover'. */
+export type ModulePhase = string;
 
 export interface ModuleInput {
   readonly enterAt: number;
   readonly exitAt: number | null;
-  readonly state: Track<ModuleState>;
+  readonly layout: Track<ModuleLayout>;
+  readonly hover: Track<boolean>;
+  readonly disabled: Track<boolean>;
   /** Instants when a displayed value was replaced, so it reveals again with a glitch. */
   readonly pulses: readonly { readonly at: number }[];
 }
@@ -37,20 +44,25 @@ export interface ModuleShell {
   readonly glitch: number;
 }
 
-/** Visual axes of a module state: [open, pinned, hover, disabled]. */
-export const stateAxes = (s: ModuleState): readonly number[] =>
-  s === 'Compact' ? [0, 0, 0, 0] : s === 'Open' ? [1, 0, 0, 0] : s === 'Pinned' ? [1, 1, 0, 0] : s === 'Hover' ? [1, 0, 1, 0] : [1, 0, 0, 1];
+/** Visual axes of a layout: [open, pinned]. */
+export const layoutAxes = (s: ModuleLayout): readonly number[] => (s === 'Compact' ? [0, 0] : s === 'Open' ? [1, 0] : [1, 1]);
+const flagAxes = (on: boolean): readonly number[] => [on ? 1 : 0];
 
 export function moduleShell(t: number, input: ModuleInput, k: MotionKnobs, hOpen: number, hCompact: number, seed = 0): ModuleShell | null {
   const p = presence(t, input.enterAt, input.exitAt, k);
   if (!p) return null;
-  const state = stateWeights(input.state, t, 'Open', stateAxes, k);
-  const [open = 1, pinned = 0, hover = 0, disabled = 0] = state.visual;
+  const layout = stateWeights(input.layout, t, 'Open', layoutAxes, k);
+  const [open = 1, pinned = 0] = layout.visual;
+  const hoverSample = stateWeights(input.hover, t, false, flagAxes, k, 220);
+  const disabledSample = stateWeights(input.disabled, t, false, flagAxes, k);
+  const hover = hoverSample.visual[0] ?? 0;
+  const disabled = disabledSample.visual[0] ?? 0;
+  const flags = `${hoverSample.value ? '+hover' : ''}${disabledSample.value ? '+disabled' : ''}`;
   const idle = ambient(t, { ...k, ambient: k.ambient * (1 - disabled) }, seed);
   const pulses = input.pulses.reduce((g, pulse) => Math.max(g, pulseGlitch(t, pulse.at, k)), 0);
   return {
     p,
-    phase: p.phase !== 'shown' ? p.phase : (state.value.toLowerCase() as ModulePhase),
+    phase: p.phase !== 'shown' ? p.phase : layout.value.toLowerCase() + flags,
     h: p.height(hCompact + (hOpen - hCompact) * open),
     open,
     pinned,

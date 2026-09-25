@@ -7,32 +7,44 @@ import { PlayerPage } from './PlayerPage';
 const STATES: readonly NeonState[] = ['idle', 'selected', 'pressed', 'disabled'];
 
 type PageId = 'button' | 'theme' | 'motion' | 'pieces' | 'player';
+type SectionId = 'system' | 'kit' | 'hud';
 
-/** HUD elements by zone (WORKFLOW/catalog/components.json); built ones are selectable. */
-const ZONES: readonly { zone: string; items: readonly { name: string; page?: PageId }[] }[] = [
-  { zone: 'LEFT RAIL', items: [{ name: 'PLAYER PROFILE', page: 'player' }, { name: 'INVENTORY / LOADOUT' }, { name: 'GEAR RADIAL' }, { name: 'STAMINA' }, { name: 'TIME LEFT' }] },
-  { zone: 'TOP BAR', items: [{ name: 'SYSTEM ONLINE' }, { name: 'NAVIGATION TABS' }, { name: 'LOCATION HEADER' }] },
-  { zone: 'RIGHT RAIL', items: [{ name: 'ACTIVE MISSION' }, { name: 'PHOTO OPPORTUNITIES' }, { name: 'LOCATION / MINI MAP' }, { name: 'CODEX COMPACT' }] },
-  { zone: 'POV OVERLAYS', items: [{ name: 'WEATHER / LOCATION' }, { name: 'PERSON IDENTIFICATION' }, { name: 'SYSTEM NOTIFICATION' }, { name: 'PHOTO RESULT' }, { name: 'QUEST REVEAL' }, { name: 'LEVEL UP' }] },
+interface Entry { readonly name: string; readonly page?: PageId }
+
+/** HUD elements by zone (WORKFLOW/catalog/components.json); built ones open, the rest show as pending. */
+const ZONES: readonly { id: string; zone: string; items: readonly Entry[] }[] = [
+  { id: 'left', zone: 'LEFT RAIL', items: [{ name: 'PLAYER PROFILE', page: 'player' }, { name: 'INVENTORY / LOADOUT' }, { name: 'GEAR RADIAL' }, { name: 'STAMINA' }, { name: 'TIME LEFT' }] },
+  { id: 'top', zone: 'TOP BAR', items: [{ name: 'SYSTEM ONLINE' }, { name: 'NAVIGATION TABS' }, { name: 'LOCATION HEADER' }] },
+  { id: 'right', zone: 'RIGHT RAIL', items: [{ name: 'ACTIVE MISSION' }, { name: 'PHOTO OPPORTUNITIES' }, { name: 'LOCATION / MINI MAP' }, { name: 'CODEX COMPACT' }] },
+  { id: 'pov', zone: 'POV OVERLAYS', items: [{ name: 'WEATHER / LOCATION' }, { name: 'PERSON IDENTIFICATION' }, { name: 'SYSTEM NOTIFICATION' }, { name: 'PHOTO RESULT' }, { name: 'QUEST REVEAL' }, { name: 'LEVEL UP' }] },
 ];
 
+const SECTIONS: readonly { id: SectionId; title: string; hint: string; first: PageId }[] = [
+  { id: 'system', title: 'SYSTEM UI', hint: 'The app’s own interface', first: 'button' },
+  { id: 'kit', title: 'HUD KIT', hint: 'Theme, motion and pieces shared by the HUD', first: 'theme' },
+  { id: 'hud', title: 'HUD ELEMENTS', hint: 'What goes on the video, by zone', first: 'player' },
+];
+
+const SECTION_OF: Record<PageId, SectionId> = { button: 'system', theme: 'kit', motion: 'kit', pieces: 'kit', player: 'hud' };
 const TITLES: Record<PageId, string> = {
   button: 'SYSTEM UI · NEON BUTTON',
   theme: 'HUD KIT · THEME',
   motion: 'HUD KIT · MOTION',
   pieces: 'HUD KIT · PIECES',
-  player: 'HUD ELEMENT · LEFT RAIL · PLAYER PROFILE',
+  player: 'HUD ELEMENTS · LEFT RAIL · PLAYER PROFILE',
 };
 
 /**
- * ASSETS → UI COMPONENTS. SYSTEM UI is the app's own interface (never exported);
- * HUD KIT is the shared theme, motion and pieces; HUD ELEMENTS are what goes on
- * the video, by zone. Each element is approved here before it is used.
+ * ASSETS → UI COMPONENTS, navigated like a game menu: three sections, only the
+ * open one unfolds; inside HUD ELEMENTS each zone unfolds to list all of its
+ * elements (pending ones greyed). The page on the right uses the full width.
  */
 export function ComponentCatalog() {
   const [page, setPage] = useState<PageId>('player');
-  const item = (id: PageId, text: string, testId: string) => (
-    <button type="button" className={`kg-nav__item${page === id ? ' is-current' : ''}`} aria-current={page === id} onClick={() => setPage(id)} data-testid={testId}>{text}</button>
+  const [zone, setZone] = useState('left');
+  const section = SECTION_OF[page];
+  const sub = (id: PageId, text: string) => (
+    <button type="button" className={`kg-menu2__item${page === id ? ' is-current' : ''}`} aria-current={page === id} onClick={() => setPage(id)} data-testid={`catalog-item-${id}`}>{text}</button>
   );
   return (
     <KitProvider>
@@ -43,20 +55,30 @@ export function ComponentCatalog() {
       </div>
       <section className="kg-catalog" data-testid="catalog">
         <div className="kg-catalog__inner">
-          <nav className="kg-nav" aria-label="Components">
-            <div className="kg-nav__group">SYSTEM UI</div>
-            {item('button', 'NEON BUTTON', 'catalog-item-button')}
-            <div className="kg-nav__group">HUD KIT</div>
-            {item('theme', 'THEME', 'catalog-item-theme')}
-            {item('motion', 'MOTION', 'catalog-item-motion')}
-            {item('pieces', 'PIECES', 'catalog-item-pieces')}
-            <div className="kg-nav__group">HUD ELEMENTS</div>
-            {ZONES.map(zone => (
-              <div key={zone.zone} className="kg-nav__zone">
-                <div className="kg-nav__zone-name">{zone.zone}<small>{zone.items.filter(i => i.page).length}/{zone.items.length}</small></div>
-                {zone.items.map(entry => entry.page
-                  ? <div key={entry.name}>{item(entry.page, entry.name, `catalog-item-${entry.page}`)}</div>
-                  : null)}
+          <nav className="kg-menu2" aria-label="Components">
+            {SECTIONS.map(s => (
+              <div key={s.id} className={`kg-menu2__section${section === s.id ? ' is-open' : ''}`}>
+                <button type="button" className="kg-menu2__head" onClick={() => setPage(s.first)} data-testid={`catalog-section-${s.id}`}>
+                  <span className="kg-menu2__title">{s.title}</span>
+                  <small>{s.hint}</small>
+                </button>
+                {section === s.id && s.id === 'system' && <div className="kg-menu2__list">{sub('button', 'NEON BUTTON')}</div>}
+                {section === s.id && s.id === 'kit' && <div className="kg-menu2__list">{sub('theme', 'THEME')}{sub('motion', 'MOTION')}{sub('pieces', 'PIECES')}</div>}
+                {section === s.id && s.id === 'hud' && (
+                  <div className="kg-menu2__list">
+                    {ZONES.map(z => (
+                      <div key={z.id}>
+                        <button type="button" className={`kg-menu2__zone${zone === z.id ? ' is-open' : ''}`} onClick={() => setZone(zone === z.id ? '' : z.id)} data-testid={`catalog-zone-${z.id}`}>
+                          <span>{zone === z.id ? '▾' : '▸'} {z.zone}</span>
+                          <small>{z.items.filter(i => i.page).length}/{z.items.length}</small>
+                        </button>
+                        {zone === z.id && z.items.map(entry => entry.page
+                          ? <div key={entry.name}>{sub(entry.page, entry.name)}</div>
+                          : <div key={entry.name} className="kg-menu2__item is-pending">{entry.name}<small>SOON</small></div>)}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </nav>

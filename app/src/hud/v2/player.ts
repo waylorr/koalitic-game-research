@@ -5,7 +5,7 @@ import { popup, reactiveNumber } from '../kit/motion';
 import type { PanelState } from '../kit/pixi';
 import { DEFAULT_MOTION, type MotionKnobs } from '../kit/theme';
 
-export { MODULE_STATES, type ModuleState } from '../kit/module';
+export { MODULE_LAYOUTS, type ModuleLayout } from '../kit/module';
 
 /**
  * PLAYER PROFILE (Left Rail module). Presence, states, pulses and ambient come

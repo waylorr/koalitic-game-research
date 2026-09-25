@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { upsertKey, type Track } from '../../core/tracks';
 import { BOARD_LAYOUT } from '../../hud/kit/board';
-import { MODULE_STATES, type ModuleState } from '../../hud/kit/module';
+import { MODULE_LAYOUTS, type ModuleLayout } from '../../hud/kit/module';
 import type { SampleInput } from '../../hud/kit/sample';
 import type { MotionKnobs, Theme } from '../../hud/kit/theme';
 import type { HudItem } from '../../hud/registry';
@@ -9,9 +9,9 @@ import { HudCanvas } from '../../hud/v2/HudCanvas';
 import type { PlayerInput } from '../../hud/v2/player';
 import { BACKGROUND, PORTRAIT, fromHex, hex, key, keyId, useClock, useKit } from './kitState';
 
-const PLAYER: PlayerInput = { record: { name: 'KOALITIC', level: 12, nextLevelXp: 5000, photo: PORTRAIT }, enterAt: 0, exitAt: null, state: [key(0, 'Open')], xp: [key(0, 3250)], pulses: [] };
-const SAMPLE: SampleInput = { title: 'STAMINA', enterAt: 0, exitAt: null, state: [key(0, 'Open')], value: [key(0, 72)], pulses: [] };
-const STATE_LABEL: Record<ModuleState, string> = { Compact: 'COMPACT', Open: 'OPEN', Pinned: 'PINNED', Hover: 'HOVER', Disabled: 'DISABLED' };
+const PLAYER: PlayerInput = { record: { name: 'KOALITIC', level: 12, nextLevelXp: 5000, photo: PORTRAIT }, enterAt: 0, exitAt: null, layout: [key(0, 'Open')], hover: [], disabled: [], xp: [key(0, 3250)], pulses: [] };
+const SAMPLE: SampleInput = { title: 'STAMINA', enterAt: 0, exitAt: null, layout: [key(0, 'Open')], hover: [], disabled: [], value: [key(0, 72)], pulses: [] };
+const LAYOUT_LABEL: Record<ModuleLayout, string> = { Compact: 'COMPACT', Open: 'OPEN', Pinned: 'PINNED' };
 
 /** THEME: the colours and lines every HUD element takes. Changes show on every element at once. */
 export function KitThemePage() {
@@ -62,16 +62,14 @@ const KNOBS: [keyof MotionKnobs, string, number, number][] = [
   ['ambient', 'AMBIENT LOOP', 0, 2],
 ];
 
-const KIT_ANIMATIONS = [
-  ['ENTER', 'Born from a line → bar → panel → corners; content in reading order.'],
-  ['EXIT', 'Glitch burst, content goes, collapse to a line that burns out.'],
-  ['STATE CHANGE', 'Accordion to COMPACT, pin, hover light, dim; interruptible.'],
-  ['REACTION', 'A new value jumps: pop-up white-hot → colour, glitch, hot bar head.'],
-  ['PULSE', 'A replaced value (name, photo) glitches and decodes again.'],
-  ['AMBIENT', 'Loop while visible: sheen, micro-glitch, text flicker.'],
-];
+const KIT_GROUPS = [
+  { name: 'ENTER · EXIT', items: [['ENTER', 'Born from a line → bar → panel → corners; content in reading order.'], ['EXIT', 'Glitch burst, content goes, collapse to a line that burns out.']] },
+  { name: 'STATES', items: [['LAYOUT', 'COMPACT ↔ OPEN ↔ PINNED: accordion and pin; one at a time.'], ['FLAGS', 'HOVER on/off (cyan light) and DISABLED on/off (dim, calm), on top of any layout.']] },
+  { name: 'REACTIONS', items: [['VALUE', 'A new value jumps: pop-up white-hot → colour, glitch, hot bar head.'], ['PULSE', 'A replaced value (name, photo) glitches and decodes again.']] },
+  { name: 'AMBIENT', items: [['LOOP', 'While visible: sheen, micro-glitch, text flicker. Off when DISABLED.']] },
+] as const;
 
-/** MOTION: the kit's animations, tried live on a panel built only from kit parts, with the global knobs. */
+/** MOTION: the kit's animations, grouped, tried live on a panel built only from kit parts, plus the global knobs. */
 export function KitMotionPage() {
   const { theme, motion, setMotion } = useKit();
   const { t, now } = useClock(true);
@@ -79,42 +77,64 @@ export function KitMotionPage() {
   const at = () => Math.round(now.current);
   const addKey = <V,>(track: Track<V>, v: V) => upsertKey(track, at(), v, keyId);
   const value = input.value.at(-1)?.v ?? 0;
-  const stateNow = input.state.at(-1)?.v ?? 'Open';
-  const items: HudItem[] = [{ key: 'motion-sample', kind: 'sample', t, input, x: 60, y: 70, scale: 1.4 }];
+  const layoutNow = input.layout.at(-1)?.v ?? 'Open';
+  const hoverNow = input.hover.at(-1)?.v ?? false;
+  const disabledNow = input.disabled.at(-1)?.v ?? false;
+  const items: HudItem[] = [{ key: 'motion-sample', kind: 'sample', t, input, x: 50, y: 56, scale: 1.4 }];
   return (
     <div className="kg-page">
-      <p className="kg-page__intro">Layer 2 of the kit. The same animations drive every HUD element; the knobs retime all of them.</p>
+      <p className="kg-page__intro">Layer 2: the animations every HUD element shares, tried on a panel made only of kit parts. Knobs retime all elements.</p>
       <div className="kg-page__row">
-        <div className="kg-page__view" style={{ width: 600, height: 300 }} data-testid="kit-motion-view">
-          <HudCanvas width={600} height={300} background={BACKGROUND} items={items} theme={theme} motion={motion} />
+        <div className="kg-page__view" style={{ width: 520, height: 262 }} data-testid="kit-motion-view">
+          <HudCanvas width={520} height={262} background={BACKGROUND} items={items} theme={theme} motion={motion} />
         </div>
-        <div className="kg-knobs" data-testid="kit-motion-controls">
+        <form className="kg-props kg-props--narrow" onSubmit={e => e.preventDefault()}>
+          <fieldset>
+            <legend>ENTER · EXIT</legend>
+            <div className="kg-props__flags">
+              <button type="button" onClick={() => setInput(s => ({ ...s, enterAt: at(), exitAt: null }))} data-testid="kit-enter">ENTER</button>
+              <button type="button" onClick={() => setInput(s => (s.exitAt === null ? { ...s, exitAt: at() } : s))} data-testid="kit-exit">EXIT</button>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>STATES</legend>
+            <div className="kg-props__states">
+              {MODULE_LAYOUTS.map(layout => (
+                <button type="button" key={layout} className={layoutNow === layout ? 'is-on' : ''} onClick={() => setInput(s => ({ ...s, layout: addKey(s.layout, layout) }))}>{LAYOUT_LABEL[layout]}</button>
+              ))}
+            </div>
+            <div className="kg-props__flags">
+              <button type="button" className={hoverNow ? 'is-on' : ''} onClick={() => setInput(s => ({ ...s, hover: addKey(s.hover, !hoverNow) }))}>HOVER {hoverNow ? 'ON' : 'OFF'}</button>
+              <button type="button" className={disabledNow ? 'is-on' : ''} onClick={() => setInput(s => ({ ...s, disabled: addKey(s.disabled, !disabledNow) }))}>DISABLED {disabledNow ? 'ON' : 'OFF'}</button>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>REACTIONS</legend>
+            <div className="kg-props__states">
+              <button type="button" onClick={() => setInput(s => ({ ...s, value: addKey(s.value, Math.min(100, value + 15)) }))} data-testid="kit-plus">VALUE +15</button>
+              <button type="button" onClick={() => setInput(s => ({ ...s, value: addKey(s.value, Math.max(0, value - 25)) }))}>VALUE −25</button>
+              <button type="button" onClick={() => setInput(s => ({ ...s, pulses: [...s.pulses, { at: at() }] }))}>PULSE</button>
+            </div>
+          </fieldset>
+        </form>
+        <div className="kg-knobs kg-knobs--narrow" data-testid="kit-motion-controls">
+          <div className="kg-props__legend">GLOBAL KNOBS</div>
           {KNOBS.map(([name, text, min, max]) => (
             <label key={name} className="kg-knobs__range">
               <span>{text} <b>{motion[name].toFixed(2)}×</b></span>
               <input type="range" min={min} max={max} step={0.05} value={motion[name]} onChange={e => setMotion({ ...motion, [name]: Number(e.target.value) })} data-testid={`knob-${name}`} />
             </label>
           ))}
-          <div className="kg-props__label">TRY IT</div>
-          <div className="kg-props__seg">
-            <button type="button" onClick={() => setInput(s => ({ ...s, enterAt: at(), exitAt: null }))} data-testid="kit-enter">ENTER</button>
-            <button type="button" onClick={() => setInput(s => (s.exitAt === null ? { ...s, exitAt: at() } : s))} data-testid="kit-exit">EXIT</button>
-          </div>
-          <div className="kg-props__seg">
-            <button type="button" onClick={() => setInput(s => ({ ...s, value: addKey(s.value, Math.min(100, value + 15)) }))} data-testid="kit-plus">VALUE +15</button>
-            <button type="button" onClick={() => setInput(s => ({ ...s, value: addKey(s.value, Math.max(0, value - 25)) }))}>VALUE −25</button>
-          </div>
-          <div className="kg-props__states">
-            {MODULE_STATES.map(state => (
-              <button type="button" key={state} className={stateNow === state ? 'is-on' : ''} onClick={() => setInput(s => ({ ...s, state: addKey(s.state, state) }))}>{STATE_LABEL[state]}</button>
-            ))}
-            <button type="button" onClick={() => setInput(s => ({ ...s, pulses: [...s.pulses, { at: at() }] }))}>PULSE</button>
-          </div>
         </div>
       </div>
-      <ul className="kg-kitlist">
-        {KIT_ANIMATIONS.map(([name, text]) => <li key={name}><b>{name}</b>{text}</li>)}
-      </ul>
+      <div className="kg-kitlist">
+        {KIT_GROUPS.map(group => (
+          <div key={group.name}>
+            <h4>{group.name}</h4>
+            {group.items.map(([name, text]) => <p key={name}><b>{name}</b> {text}</p>)}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -127,7 +147,7 @@ export function KitPiecesPage() {
   const items: HudItem[] = [{ key: 'board', kind: 'board', t, photo: PORTRAIT, x: offset.x, y: offset.y, scale: 1 }];
   return (
     <div className="kg-page">
-      <p className="kg-page__intro">Layer 3 of the kit. Components are assembled from these pieces; restyle a piece and every component using it changes.</p>
+      <p className="kg-page__intro">Layer 3 of the kit. Components are assembled from these pieces; restyle a piece and every component using it changes. The panel frame is the default card: a component can bring its own card variant.</p>
       <div className="kg-page__view" style={{ width: 960, height: 310 }} data-testid="kit-pieces-view">
         <HudCanvas width={960} height={310} background={BACKGROUND} items={items} theme={theme} motion={motion} />
         <div className="kg-page__labels">

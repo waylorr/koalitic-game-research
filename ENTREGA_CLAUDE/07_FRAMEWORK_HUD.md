@@ -26,9 +26,9 @@ Acordado con el creador el 25-09-2026. Referencias:
 | Pieza | Quién decide | En el timeline |
 |---|---|---|
 | Presencia (ENTER y EXIT) | El episodio, cuándo | Keyframes de entrada y salida |
-| Estado | El episodio, cuándo | Pista discreta: COMPACT, OPEN, PINNED, HOVER, DISABLED |
+| Estado | El episodio, cuándo | Una forma (pista COMPACT, OPEN o PINNED, una a la vez) y dos interruptores independientes (pistas HOVER sí/no y DISABLED sí/no); por ejemplo, COMPACT + HOVER |
 | Valores | Data Library (ficha) y episodio (XP, Stamina…) | Pistas; un único valor alimenta cifra y barra |
-| Reacciones | El componente, solo | Nada: saltan al cambiar un valor (+150 XP, glitch, punta incandescente) |
+| Reacciones | El componente, solo | Nada: saltan al cambiar un valor (+150 XP, glitch, punta incandescente) o al reemplazarlo (PULSE: nombre o foto nuevos). PULSE no es un estado |
 | Ambiente | El componente, solo | Nada: reflejo, microglitch y parpadeo de texto mientras se ve |
 
 - HOVER no depende del cursor: el cursor de autoría nunca sale en el resultado, así que es un estado con keyframe.
@@ -38,7 +38,7 @@ Acordado con el creador el 25-09-2026. Referencias:
 
 | Tipo | Elementos | Estados y ciclo |
 |---|---|---|
-| Módulo de rail | Left Rail: Player Profile, Inventory/Loadout, Gear Radial, Stamina, Time Left. Right Rail: Active Mission, Photo Opportunities, Location/Mini Map, Codex Compact | Presentaciones ICONO, COMPACT y OPEN. Estados COMPACT, OPEN, PINNED, HOVER, DISABLED. Además, presencia |
+| Módulo de rail | Left Rail: Player Profile, Inventory/Loadout, Gear Radial, Stamina, Time Left. Right Rail: Active Mission, Photo Opportunities, Location/Mini Map, Codex Compact | Presentaciones ICONO, COMPACT y OPEN. Forma COMPACT/OPEN/PINNED más HOVER y DISABLED sí/no. Además, presencia |
 | Elemento de Top Bar | System Online, Navigation Tabs, Location Header | IDLE, HOVER, ACTIVE o SELECTED, DISABLED |
 | Etiqueta POV anclada | Weather/Location, Person Identification, System Notification | Hidden → Appear → Visible → Exit. Posición con keyframes (a mano); más adelante, tracking |
 | Tarjeta de evento POV | Photo Result, Quest Reveal, Level Up | Hidden → Appear (revelado largo por partes) → Visible → Exit |
@@ -62,16 +62,18 @@ Acordado con el creador el 25-09-2026. Referencias:
 
 ## 5. El catálogo (ASSETS → UI COMPONENTS)
 
+Se navega como un menú de juego: tres secciones grandes y solo se despliega la activa.
+
 - **SYSTEM UI:** la interfaz de la app, como el botón neón. No se exporta.
 - **HUD KIT:**
   - **THEME:** colores, barras de XP y Stamina, cristal y línea. Cambian en vivo en todos los elementos.
-  - **MOTION:** perillas globales y prueba de cada animación del kit sobre el panel de muestra.
-  - **PIECES:** todas las piezas en reposo.
+  - **MOTION:** las animaciones del kit, clasificadas en entrada y salida, estados, reacciones y ambiente, probadas sobre el panel de muestra. Incluye las perillas globales.
+  - **PIECES:** las piezas en reposo. La carta es la de por defecto; un componente puede traer su variante.
 - Tema y perillas se guardan en este navegador mientras llega la HUD Template.
-- **HUD ELEMENTS:** por zonas, con cuántos hay hechos. Cada elemento tiene estas pestañas:
-  - **STATES:** todos los estados en reposo, cada uno con su bucle de ambiente.
-  - **ANIMATIONS:** ENTER, EXIT, cada transición de estado, reacción y demo completa, con barra de tiempo.
-  - **EDIT VALUES:** cada cambio es un keyframe.
+- **HUD ELEMENTS:** cada zona se despliega con todos sus elementos; los pendientes salen en gris. Cada elemento tiene tres pestañas:
+  - **EDIT** (primera): valores, estado (forma más HOVER y DISABLED), entrada y salida, y reacciones. Cada cambio es un keyframe.
+  - **DEMO:** un fragmento de episodio con barra de tiempo.
+  - **ALL STATES:** resumen de todos los estados en reposo.
 
 ## 6. Editar sin animar a mano
 
