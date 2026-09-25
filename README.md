@@ -17,7 +17,7 @@ No es un juego 3D ni un editor de montaje de vídeo.
     - SYSTEM UI;
     - HUD KIT: tokens, movimiento y piezas;
     - HUD ELEMENTS por zonas.
-- **Editor de episodio (primera versión):** imagen de fondo, Left Rail y timeline con keyframes. Se añaden, mueven y borran; se reproduce y se busca cualquier instante. Se abre desde EPISODES.
+- **Editor de episodio (primera versión):** imagen o vídeo de fondo, Left Rail y timeline con keyframes. Se añaden, mueven y borran; se reproduce y se busca cualquier instante. Se abre desde EPISODES.
 - **Hechos en el catálogo:**
   - botón neón;
   - PLAYER PROFILE;
@@ -28,7 +28,6 @@ No es un juego 3D ni un editor de montaje de vídeo.
   - Rail OPEN;
   - Right Rail, Top Bar y overlays POV;
   - la lista de episodios y Configure HUD;
-  - vídeo de fondo en el editor;
   - guardar proyectos;
   - exportación.
 - **Motor de tiempo probado:** cada fotograma se calcula a partir del tiempo, así que se puede saltar a cualquier instante con el mismo resultado exacto.
@@ -83,5 +82,5 @@ npm run build && npm run e2e
 ```
 
 - `npm test` pasa las pruebas de lógica (34).
-- `npm run e2e` usa Chromium real: 35 comprobaciones de la app y 17 del laboratorio. La primera vez hace falta `npx playwright install chromium`.
+- `npm run e2e` usa Chromium real: 36 comprobaciones de la app y 17 del laboratorio. La primera vez hace falta `npx playwright install chromium`.
 - El prototipo anterior se prueba con `node WORKFLOW/smoke.mjs` y `node WORKFLOW/store-smoke.mjs`.

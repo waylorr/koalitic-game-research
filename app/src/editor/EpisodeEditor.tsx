@@ -11,7 +11,7 @@ import { EPISODE_FPS, TRACK_DEFS, deleteKey, demoEpisode, moveKey, railInput, se
 import './editor.css';
 
 /**
- * EPISODE EDITOR (first slice). A background image, the Left Rail HUD on top
+ * EPISODE EDITOR (first slice). A background image or video, the Left Rail HUD on top
  * and a timeline organised zone → component → property. Change a value in the
  * inspector and it becomes a keyframe at the playhead; keyframes can be
  * selected, dragged (snapping to frames) and deleted; play and scrub show the
@@ -37,7 +37,7 @@ function initialDoc(): EpisodeDoc {
     const raw = localStorage.getItem(DRAFT);
     if (raw) {
       const saved = JSON.parse(raw) as EpisodeDoc;
-      if (saved.version === 1 && saved.tracks) return { ...demo, ...saved, background: saved.background?.startsWith('blob:') ? BACKGROUND : saved.background, player: demo.player, modules: demo.modules, slots: demo.slots };
+      if (saved.version === 1 && saved.tracks) return { ...demo, ...saved, ...(saved.background?.startsWith('blob:') ? { background: BACKGROUND, backgroundKind: 'image' as const } : {}), player: demo.player, modules: demo.modules, slots: demo.slots };
     }
   } catch {
     // No draft or storage blocked: open the demo.
@@ -58,6 +58,10 @@ export function EpisodeEditor({ onBack }: { onBack: () => void }) {
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [selection, setSelection] = useState<Selection>(null);
+  const video = useRef<HTMLVideoElement>(null);
+  const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
+  const [muted, setMuted] = useState(false);
+  const isVideo = doc.backgroundKind === 'video';
   const past = useRef<EpisodeDoc[]>([]);
   const future = useRef<EpisodeDoc[]>([]);
   const [, bump] = useState(0);
@@ -108,6 +112,24 @@ export function EpisodeEditor({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     if (!playing) return;
     let frame = 0;
+    const clip = video.current;
+    if (docRef.current.backgroundKind === 'video' && clip) {
+      // The video is the clock: the HUD follows the frame on screen.
+      clip.currentTime = tRef.current / 1000;
+      clip.play().catch(() => setPlaying(false));
+      const follow = () => {
+        setT(Math.min(docRef.current.durationMs, clip.currentTime * 1000));
+        if (clip.ended || clip.currentTime * 1000 >= docRef.current.durationMs) { setPlaying(false); return; }
+        frame = requestAnimationFrame(follow);
+      };
+      frame = requestAnimationFrame(follow);
+      return () => {
+        cancelAnimationFrame(frame);
+        clip.pause();
+        // Paused: the HUD shows exactly the video frame on screen.
+        setT(Math.min(docRef.current.durationMs, clip.currentTime * 1000));
+      };
+    }
     let last: number | null = performance.now();
     // Own position: never read back the playhead from React, or slow frames lose time.
     let pos = tRef.current;
@@ -131,7 +153,9 @@ export function EpisodeEditor({ onBack }: { onBack: () => void }) {
 
   const seek = useCallback((ms: number) => {
     setPlaying(false);
-    setT(Math.max(0, Math.min(docRef.current.durationMs, snap(ms))));
+    const next = Math.max(0, Math.min(docRef.current.durationMs, snap(ms)));
+    setT(next);
+    if (video.current && docRef.current.backgroundKind === 'video') video.current.currentTime = next / 1000;
   }, []);
   const togglePlay = () => {
     sfx.unlock();
@@ -188,7 +212,22 @@ export function EpisodeEditor({ onBack }: { onBack: () => void }) {
 
   const loadImage = (file: File | undefined) => {
     if (!file) return;
-    commit({ ...docRef.current, background: URL.createObjectURL(file) });
+    setPlaying(false);
+    commit({ ...docRef.current, background: URL.createObjectURL(file), backgroundKind: 'image' });
+  };
+  const loadVideo = (file: File | undefined) => {
+    if (!file) return;
+    setPlaying(false);
+    commit({ ...docRef.current, background: URL.createObjectURL(file), backgroundKind: 'video' });
+    seek(0);
+  };
+  /** The episode lasts as long as its video. */
+  const onVideoMetadata = () => {
+    const clip = video.current;
+    if (!clip || !Number.isFinite(clip.duration)) return;
+    const durationMs = snap(clip.duration * 1000);
+    if (durationMs !== docRef.current.durationMs) commit({ ...docRef.current, durationMs }, false);
+    clip.currentTime = Math.min(tRef.current, durationMs) / 1000;
   };
 
   return (
@@ -198,16 +237,21 @@ export function EpisodeEditor({ onBack }: { onBack: () => void }) {
         <h1>EPISODE EDITOR</h1>
         <span className="ed__name">{doc.name}</span>
         <div className="ed__actions">
-          <label className="ed__btn">LOAD IMAGE<input type="file" accept="image/*" onChange={e => loadImage(e.target.files?.[0])} data-testid="editor-image" /></label>
+          <label className="ed__btn">IMAGE<input type="file" accept="image/*" onChange={e => loadImage(e.target.files?.[0])} data-testid="editor-image" /></label>
+          <label className="ed__btn">VIDEO<input type="file" accept="video/*" onChange={e => loadVideo(e.target.files?.[0])} data-testid="editor-video" /></label>
+          {isVideo && <button type="button" className="ed__btn" onClick={() => setMuted(m => !m)} data-testid="editor-mute">{muted ? 'MUTED' : 'SOUND'}</button>}
           <button type="button" className="ed__btn" onClick={undo} disabled={past.current.length === 0} data-testid="editor-undo">UNDO</button>
           <button type="button" className="ed__btn" onClick={redo} disabled={future.current.length === 0} data-testid="editor-redo">REDO</button>
-          <button type="button" className="ed__btn" onClick={() => { commit(demoEpisode(BACKGROUND, PLAYER_RECORD, RAIL_MODULES, GEAR_SLOTS)); setSelection(null); seek(0); }} data-testid="editor-reset">RESET DEMO</button>
+          <button type="button" className="ed__btn" onClick={() => { commit(demoEpisode(BACKGROUND, PLAYER_RECORD, RAIL_MODULES, GEAR_SLOTS)); setSelection(null); seek(0); }} data-testid="editor-reset">RESET</button>
           <button type="button" className="ed__btn ed__btn--back" onClick={() => { sfx.unlock(); sfx.back(); onBack(); }} data-testid="screen-back">← BACK</button>
         </div>
       </header>
 
       <div className="ed__viewer" style={{ width: VIEW.w, height: VIEW.h }} data-testid="editor-viewer">
-        <HudCanvas width={VIEW.w} height={VIEW.h} background={doc.background} items={items} theme={theme} motion={motion} />
+        {isVideo && (
+          <video ref={node => { video.current = node; if (node !== videoEl) setVideoEl(node); }} className="ed__video" src={doc.background} muted={muted} playsInline preload="auto" onLoadedMetadata={onVideoMetadata} onError={() => setPlaying(false)} data-testid="editor-video-el" />
+        )}
+        <HudCanvas width={VIEW.w} height={VIEW.h} background={isVideo ? undefined : doc.background} backgroundVideo={isVideo ? videoEl : null} items={items} theme={theme} motion={motion} />
         <span className="ed__safe" />
       </div>
 

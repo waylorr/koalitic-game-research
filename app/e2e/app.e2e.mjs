@@ -105,7 +105,7 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   fs.writeFileSync(path.join(outDir, 'app-player-states.png'), await page.locator('[data-testid=player-preview]').screenshot());
   fs.writeFileSync(path.join(outDir, 'app-player-edit.png'), await page.screenshot());
 
-  const phaseAt = async ms => { await page.evaluate(value => window.__kgPlayer.seek(value), ms); await page.waitForTimeout(120); return page.getAttribute('[data-testid=player-module]', 'data-phase'); };
+  const phaseAt = async ms => { await page.evaluate(value => window.__kgPlayer.seek(value), ms); await page.waitForTimeout(350); return page.getAttribute('[data-testid=player-module]', 'data-phase'); };
   await phaseAt(100);
   await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
   await page.waitForTimeout(300);
@@ -187,7 +187,7 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   await page.click('[data-testid=catalog-item-motion]');
   await page.waitForSelector('[data-testid=kit-motion-view] [data-testid=player-module][data-ready=yes]');
   await page.click('[data-testid=kit-plus]');
-  await page.waitForTimeout(1200);
+  await page.waitForFunction(() => document.querySelector('[data-testid=kit-motion-view] [data-testid=player-module]')?.dataset.xp === '87', null, { timeout: 5000 }).catch(() => {});
   const sampleValue = await page.getAttribute('[data-testid=kit-motion-view] [data-testid=player-module]', 'data-xp');
   fs.writeFileSync(path.join(outDir, 'app-kit-motion.png'), await page.screenshot());
   await page.click('[data-testid=catalog-item-pieces]');
@@ -262,6 +262,23 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   await editor.seek(5000);
   await page.waitForTimeout(800);
   fs.writeFileSync(path.join(outDir, 'app-episodes.png'), await page.screenshot());
+
+  // Video background: the episode takes the video's length and the video is the clock.
+  await page.setInputFiles('[data-testid=editor-video]', path.join(appDir, 'public', 'test-media', 'sync-counter-1080p30.webm'));
+  await page.waitForFunction(() => { const v = document.querySelector('[data-testid=editor-video-el]'); return v && v.readyState >= 2; }, null, { timeout: 15000 });
+  await page.waitForFunction(() => window.__kgEditor.doc().durationMs === 20000, null, { timeout: 5000 }).catch(() => {});
+  const videoDuration = await page.evaluate(() => window.__kgEditor.doc().durationMs);
+  await editor.seek(3000);
+  await page.waitForFunction(() => Math.abs(document.querySelector('[data-testid=editor-video-el]').currentTime - 3) < 0.05, null, { timeout: 4000 }).catch(() => {});
+  const seekedVideo = await page.evaluate(() => document.querySelector('[data-testid=editor-video-el]').currentTime);
+  await page.click('[data-testid=editor-play]');
+  await page.waitForFunction(() => window.__kgEditor.time() > 3600, null, { timeout: 8000 }).catch(() => {});
+  const wasPlaying = await page.evaluate(() => !document.querySelector('[data-testid=editor-video-el]').paused);
+  await page.click('[data-testid=editor-play]');
+  await page.waitForTimeout(400);
+  const sync = await page.evaluate(() => ({ hud: window.__kgEditor.time(), video: document.querySelector('[data-testid=editor-video-el]').currentTime * 1000, paused: !document.querySelector('[data-testid=editor-video-el]').paused ? false : true }));
+  fs.writeFileSync(path.join(outDir, 'app-episodes-video.png'), await page.screenshot());
+  check('EDITOR: a loaded video sets the length, follows the playhead and drives playback', videoDuration === 20000 && Math.abs(seekedVideo - 3) < 0.05 && wasPlaying && sync.paused && sync.hud > 3500 && Math.abs(sync.hud - sync.video) <= 34, `duration ${videoDuration} · seek ${seekedVideo.toFixed(2)} s · played ${wasPlaying} · paused: hud ${Math.round(sync.hud)} vs video ${Math.round(sync.video)} ms`);
   await page.goBack();
   await page.waitForSelector('[data-testid=main-menu]');
   check('browser back returns to the menu', true);

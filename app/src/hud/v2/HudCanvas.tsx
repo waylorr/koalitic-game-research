@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Application, Sprite, Texture } from 'pixi.js';
+import { Application, Sprite, Texture, VideoSource } from 'pixi.js';
 import { createDrawn, type Drawn, type HudItem } from '../registry';
 import { DEFAULT_MOTION, THEME, type MotionKnobs, type Theme } from '../kit/theme';
 import { useStageScale } from '../../ui/Stage';
@@ -16,6 +16,8 @@ interface Props {
   readonly width: number;
   readonly height: number;
   readonly background?: string;
+  /** A playing or paused video drawn as the background (takes precedence over `background`). */
+  readonly backgroundVideo?: HTMLVideoElement | null;
   readonly items: readonly HudItem[];
   readonly theme?: Theme;
   readonly motion?: MotionKnobs;
@@ -26,7 +28,7 @@ interface Props {
  * the canvas is redrawn only when the items change, from their evaluators.
  * A theme change rebuilds the elements so every piece takes the new look.
  */
-export function HudCanvas({ width, height, background, items, theme = THEME, motion = DEFAULT_MOTION }: Props) {
+export function HudCanvas({ width, height, background, backgroundVideo, items, theme = THEME, motion = DEFAULT_MOTION }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const scene = useRef<{ app: Application; bg: Sprite; drawn: Map<string, Drawn>; theme: Theme } | null>(null);
   const [ready, setReady] = useState(0);
@@ -65,20 +67,46 @@ export function HudCanvas({ width, height, background, items, theme = THEME, mot
     };
   }, [width, height]);
 
+  const fitBackground = (current: { bg: Sprite }, w: number, h: number) => {
+    const cover = Math.max(width / w, height / h);
+    current.bg.scale.set(cover);
+    current.bg.position.set((width - w * cover) / 2, (height - h * cover) / 2);
+  };
+
   useEffect(() => {
     const current = scene.current;
-    if (!current || !background) return;
+    if (!current) return;
+    if (backgroundVideo) {
+      // The video is drawn inside the canvas, so glass blurs it and a future export sees it.
+      const source = new VideoSource({ resource: backgroundVideo, autoPlay: false, autoLoad: true });
+      const texture = new Texture({ source });
+      const apply = () => {
+        current.bg.texture = texture;
+        fitBackground(current, backgroundVideo.videoWidth || width, backgroundVideo.videoHeight || height);
+        setReady(r => r + 1);
+      };
+      if (backgroundVideo.readyState >= 1) apply();
+      else backgroundVideo.addEventListener('loadedmetadata', apply, { once: true });
+      return () => {
+        backgroundVideo.removeEventListener('loadedmetadata', apply);
+        current.bg.texture = Texture.EMPTY;
+        texture.destroy(false);
+      };
+    }
+    if (!background) {
+      current.bg.texture = Texture.EMPTY;
+      setReady(r => r + 1);
+      return;
+    }
     let alive = true;
     loadTexture(background).then(texture => {
       if (!alive) return;
-      const cover = Math.max(width / texture.width, height / texture.height);
       current.bg.texture = texture;
-      current.bg.scale.set(cover);
-      current.bg.position.set((width - texture.width * cover) / 2, (height - texture.height * cover) / 2);
+      fitBackground(current, texture.width, texture.height);
       setReady(r => r + 1);
     });
     return () => { alive = false; };
-  }, [background, sceneId, width, height]);
+  }, [background, backgroundVideo, sceneId, width, height]);
 
   useEffect(() => {
     const current = scene.current;
@@ -127,6 +155,7 @@ export function HudCanvas({ width, height, background, items, theme = THEME, mot
   useEffect(() => {
     const current = scene.current;
     if (!current) return;
+    if (backgroundVideo && current.bg.texture.source instanceof VideoSource) current.bg.texture.source.update();
     const results = items.map(item => current.drawn.get(item.key)?.draw(item, motion) ?? { phase: 'hidden', value: null });
     current.app.render();
     const next = { phases: results.map(r => r.phase).join(','), value: results[0]?.value === null || results[0] === undefined ? '' : String(results[0].value) };

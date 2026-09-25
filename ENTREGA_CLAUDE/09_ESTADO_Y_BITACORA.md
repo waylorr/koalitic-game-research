@@ -46,14 +46,14 @@ Este documento es el **punto de entrada para retomar el trabajo sin contexto**, 
 | LEFT RAIL · DOCK (perfil cerrado + iconos + despliegue lateral) | `app/src/hud/v2/rail.ts`, `RailPixi.ts` | ✅ v2 |
 | Stamina, Time Left, Inventory | — | ⏳ Hoy usan el panel de muestra del kit |
 | Rail OPEN/PINNED, Right Rail, Top Bar, overlays POV | — | ⏳ |
-| **Episode Editor** (primera versión): imagen de fondo, Left Rail, timeline zona → componente → propiedad con keyframes (añadir, mover con ajuste a fotograma, borrar, deshacer), inspector, reproducir y buscar | `app/src/editor/` (se abre desde EPISODES) | ✅ Con una pista por propiedad del rail; borrador en el navegador |
+| **Episode Editor** (primera versión): imagen o **vídeo** de fondo, Left Rail, timeline zona → componente → propiedad con keyframes (añadir, mover con ajuste a fotograma, borrar, deshacer), inspector, reproducir y buscar | `app/src/editor/` (se abre desde EPISODES) | ✅ Con una pista por propiedad del rail; borrador en el navegador |
 | Pantallas Episodes (lista), Configure HUD | `ScreenStub.tsx` | ⏳ Configure HUD solo tiene la cabecera; EPISODES abre directamente el editor con un episodio demo |
 | Data Library, Media, guardar/abrir proyecto | — | ⏳ Diseñado en 05 §3, no implementado |
 | Exportación (vídeo con alfa) | — | ⏳ Fuera de alcance hasta nueva decisión |
 
 **Pruebas actuales:**
 - lógica: 34 pruebas;
-- app en navegador: 35 comprobaciones;
+- app en navegador: 36 comprobaciones;
 - laboratorio: 17 comprobaciones;
 - el prototipo `WORKFLOW` sigue en verde.
 
@@ -100,7 +100,7 @@ Este documento es el **punto de entrada para retomar el trabajo sin contexto**, 
 - **Workflow de referencias** (08): el creador preparará piezas aisladas sobre negro, hojas de estados y un clip por animación; Claude las convierte en presets.
 - Ramas: `main` estable, `koalitic-game-0.1` de trabajo, `archive/main-h0` con el `main` antiguo. A partir de aquí se trabaja en `main`, por indicación del creador.
 - **Episode Editor, primera versión** (`app/src/editor/`):
-  - fondo con cualquier imagen (LOAD IMAGE); el vídeo llega después, porque el motor ya lo soporta (laboratorio);
+  - fondo con cualquier imagen (IMAGE) o vídeo (VIDEO). El vídeo se dibuja dentro del lienzo PixiJS: el cristal lo desenfoca y una futura exportación lo verá. Al reproducir, el vídeo es el reloj; al pausar, el HUD muestra exactamente el fotograma del vídeo. La duración del episodio pasa a ser la del vídeo. Sonido activable (SOUND/MUTED);
   - el Left Rail en DOCK con el Gear Radial;
   - un timeline con cinco pistas: rail en pantalla, módulo abierto, XP, objeto del radial y stamina.
   - Cambiar un valor en el inspector crea un keyframe en el cabezal. Los keyframes se arrastran (se ajustan a fotogramas de 30 fps), se borran con Supr, se añaden con doble clic en su carril y todo se deshace con Ctrl+Z.
@@ -141,7 +141,11 @@ Medidas del HUD PixiJS (25-09):
 - el radial pasa paso a paso por cada sector (2 → 3 → 4 al saltar tres);
 - el rail abre un solo módulo cada vez.
 
+Medidas del editor (25-09):
+- vídeo de prueba VP9 1080p30: al pausar, HUD y vídeo en el mismo milisegundo; al reproducir, el tiempo del vídeo avanza igual que el reloj real.
+
 Límites conocidos:
+- sin GPU (entorno de pruebas), cada fotograma del editor tarda en dibujarse y el HUD va algo por detrás del vídeo mientras reproduce; en pausa coinciden. Medir en el equipo del creador;
 - las pruebas corren sin GPU y en un Chromium sin H.264; el rendimiento real hay que medirlo en el Chrome o Edge del creador;
 - una comprobación del laboratorio (sincronía con el vídeo, ≤ 1 fotograma) falló dos veces por 36 ms con la máquina cargada y pasó a la tercera; vigilarla.
 
@@ -170,7 +174,7 @@ Además:
 
 ## 8. Siguientes pasos (orden recomendado)
 
-1. **Editor:** fondo de vídeo (el reloj de vídeo ya está probado en el laboratorio), zoom del timeline, más componentes en el timeline (PLAYER PROFILE, overlays POV con posición anclada) y guardar/abrir el episodio como archivo (H1).
+1. **Editor:** zoom del timeline, más componentes en el timeline (PLAYER PROFILE, overlays POV con posición anclada) y guardar/abrir el episodio como archivo (H1).
 2. **Modo REFERENCIA** en el catálogo: la imagen del creador semitransparente encima del componente, para calcarlo (08 §7).
 3. **Fidelidad del GEAR RADIAL** con `configure_hud.webp`, usando ese modo y las referencias aisladas que prepare el creador (08 §3).
 4. **Stamina** (barra por segmentos ámbar), **Time Left** (reloj rojo) e **Inventory** reales, que sustituyen al panel de muestra.

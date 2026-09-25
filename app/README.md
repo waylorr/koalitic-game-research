@@ -12,7 +12,7 @@ Aplicación de autoría de KOALITIC GAME. Estado general y siguientes pasos: [`.
     - PIECES: piezas, iconos y casillas.
   - **HUD ELEMENTS por zonas:** RAIL · DOCK, PLAYER PROFILE y GEAR RADIAL. Cada uno con EDIT, DEMO y ALL STATES.
 - **EPISODE EDITOR** (`#episodes`, `src/editor/`):
-  - imagen de fondo (LOAD IMAGE), Left Rail sobre ella, inspector y timeline con cinco pistas;
+  - imagen (IMAGE) o vídeo (VIDEO) de fondo, Left Rail encima, inspector y timeline con cinco pistas. El vídeo es el reloj al reproducir y fija la duración;
   - cambiar un valor crea un keyframe en el cabezal; doble clic en un carril también;
   - los keyframes se arrastran con ajuste a fotograma; Supr borra; Ctrl+Z / Ctrl+Y deshacen y rehacen;
   - espacio reproduce y las flechas avanzan fotograma a fotograma;

@@ -5,7 +5,7 @@ import type { PlayerRecordView } from '../hud/v2/player';
 import type { RailInput, RailModuleDef } from '../hud/v2/rail';
 
 /**
- * Episode document of the editor (first slice): a background image and the
+ * Episode document of the editor (first slice): a background image or video and the
  * keyframed tracks of the Left Rail, organised zone → component → property as
  * the timeline shows them. Record values (player, loadout) come from the Data
  * Library; the episode only decides WHEN things change (CLAUDE.md).
@@ -29,6 +29,8 @@ export interface EpisodeDoc {
   readonly name: string;
   readonly durationMs: Ms;
   readonly background: string;
+  /** The background is a still image or a video; a video also sets the episode duration and is the clock while playing. */
+  readonly backgroundKind?: 'image' | 'video';
   readonly player: PlayerRecordView;
   readonly modules: readonly RailModuleDef[];
   readonly slots: readonly GearSlot[];
