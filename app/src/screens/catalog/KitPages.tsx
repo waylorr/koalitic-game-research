@@ -6,7 +6,7 @@ import type { SampleInput } from '../../hud/kit/sample';
 import type { MotionKnobs, Theme } from '../../hud/kit/theme';
 import type { HudItem } from '../../hud/registry';
 import { HudCanvas } from '../../hud/v2/HudCanvas';
-import { BACKGROUND, PORTRAIT, fromHex, hex, key, keyId, useClock, useKit } from './kitState';
+import { BACKGROUND, PORTRAIT, fromHex, hex, key, keyId, useClock, useKit } from '../../design/TokensProvider';
 import { GALLERY_LABELS, gallery } from './samples';
 
 const SAMPLE: SampleInput = { title: 'STAMINA', enterAt: 0, exitAt: null, layout: [key(0, 'Open')], hover: [], disabled: [], value: [key(0, 72)], pulses: [] };
@@ -21,7 +21,7 @@ export function KitThemePage() {
   const colors: [keyof Theme['color'], string][] = [['red', 'ACCENT'], ['cyan', 'DATA'], ['text', 'TEXT'], ['dim', 'LABELS'], ['edge', 'EDGE'], ['glass', 'GLASS'], ['white', 'HOT'], ['disabled', 'DISABLED']];
   return (
     <div className="kg-page">
-      <p className="kg-page__intro">Layer 1 of the kit, on every HUD element at once. Each new component joins this screen automatically.</p>
+      <p className="kg-page__intro">Layer 1: the shared design tokens. They restyle every HUD element here AND the app's own menus around it (SYSTEM UI). Each new component joins this screen automatically.</p>
       <div className="kg-page__row">
         <div className="kg-page__view" style={{ width: 720, height: 360 }} data-testid="kit-theme-view">
           <HudCanvas width={720} height={360} background={BACKGROUND} items={gallery(4000 + t)} theme={theme} motion={motion} />

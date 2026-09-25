@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { TokensProvider } from '../design/TokensProvider';
 import { MainMenu } from '../screens/MainMenu';
 import { ScreenStub } from '../screens/ScreenStub';
 import { SystemOffline } from '../screens/SystemOffline';
@@ -64,6 +65,7 @@ export function App() {
 
   const background = screen === 'menu' ? 'menu' : 'screen';
   return (
+    <TokensProvider>
     <Stage background={BACKGROUNDS[background]}>
       <Backdrop images={BACKGROUNDS} active={background} dimmed={offline} />
       <div key={shown} className={`kg-layer${leaving ? ' is-leaving' : ''}${offline ? ' is-hidden' : ''}`}>
@@ -76,5 +78,6 @@ export function App() {
       {offline && <SystemOffline onReboot={reboot} />}
       <div className="kg-app__boot" />
     </Stage>
+    </TokensProvider>
   );
 }

@@ -134,7 +134,7 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   const landed = await page.getAttribute('[data-testid=player-module]', 'data-xp');
   fs.writeFileSync(path.join(outDir, 'app-gear.png'), await page.screenshot());
   // DEMO keys a jump of three sectors at 3.3 s: scrubbing shows each step (2, 3, then 4).
-  const selectedAt = async ms => { await page.evaluate(value => window.__kgPlayer.seek(value), ms); await page.waitForTimeout(150); return page.getAttribute('[data-testid=player-module]', 'data-xp'); };
+  const selectedAt = async ms => { await page.evaluate(value => window.__kgPlayer.seek(value), ms); await page.waitForTimeout(350); return page.getAttribute('[data-testid=player-module]', 'data-xp'); };
   await selectedAt(3000);
   await page.waitForSelector('[data-testid=player-module][data-ready=yes]');
   await page.waitForTimeout(300);
@@ -176,6 +176,13 @@ const pixelDiff = (page, a, b) => page.evaluate(async ([a64, b64]) => {
   const themeDiff = await pixelDiff(page, before, after);
   fs.writeFileSync(path.join(outDir, 'app-kit-theme.png'), await page.screenshot());
   check('changing the theme restyles the HUD elements', themeDiff.visible > 400, `${themeDiff.visible} pixels changed`);
+  await page.fill('[data-testid=kit-theme-controls] input[type=range]', '0.4');
+  const shared = await page.evaluate(() => ({
+    red: getComputedStyle(document.documentElement).getPropertyValue('--kg-red').trim(),
+    glass: getComputedStyle(document.documentElement).getPropertyValue('--kg-glass-alpha').trim(),
+    menuBorder: getComputedStyle(document.querySelector('.kg-menu2__section.is-open .kg-menu2__head')).borderTopColor,
+  }));
+  check('the same tokens restyle the app menus (SYSTEM UI)', shared.red === '#00ff66' && shared.glass === '0.4' && shared.menuBorder === 'rgb(0, 255, 102)', JSON.stringify(shared));
   await page.click('[data-testid=kit-reset]');
   await page.click('[data-testid=catalog-item-motion]');
   await page.waitForSelector('[data-testid=kit-motion-view] [data-testid=player-module][data-ready=yes]');

@@ -1,7 +1,7 @@
 import type { FocusEvent, KeyboardEvent } from 'react';
 import type { PlayerInput } from '../../hud/v2/player';
 import { ElementPage, type EditContext, type ElementDef } from './ElementPage';
-import { PORTRAIT, key } from './kitState';
+import { PORTRAIT, key } from '../../design/TokensProvider';
 
 const BASE: PlayerInput = {
   record: { name: 'KOALITIC', level: 12, nextLevelXp: 5000, photo: PORTRAIT },

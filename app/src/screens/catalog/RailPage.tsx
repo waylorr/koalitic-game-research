@@ -3,7 +3,7 @@ import { upsertKey, type Track } from '../../core/tracks';
 import type { HudItem } from '../../hud/registry';
 import { HudCanvas } from '../../hud/v2/HudCanvas';
 import type { RailInput } from '../../hud/v2/rail';
-import { BACKGROUND, key, keyId, useClock, useKit } from './kitState';
+import { BACKGROUND, key, keyId, useClock, useKit } from '../../design/TokensProvider';
 import { RAIL_MODULES, RAIL_SAMPLE } from './samples';
 
 /**

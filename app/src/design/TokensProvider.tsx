@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { DEFAULT_MOTION, THEME, type MotionKnobs, type Theme } from '../../hud/kit/theme';
+import { DEFAULT_MOTION, THEME, applyCssVariables, type MotionKnobs, type Theme } from './tokens';
 
 /**
- * The theme and motion knobs being tried in the catalog. Every canvas in the
- * catalog reads them, so a change shows at once on every HUD element. Kept in
+ * The live design tokens and motion knobs for the whole app. Mounted at the
+ * app root: every HUD canvas reads them and they are written as CSS variables,
+ * so a THEME change restyles the menus (SYSTEM UI) and the HUD at once. Kept in
  * this browser only (a convenience); saving them for real belongs to the HUD
  * Template.
  */
@@ -15,7 +16,7 @@ interface KitState {
   reset(): void;
 }
 
-const STORAGE = 'koalitic.kit.v1';
+const STORAGE = 'koalitic.kit.v2';
 const Ctx = createContext<KitState | null>(null);
 
 function load(): { theme: Theme; motion: MotionKnobs } {
@@ -34,11 +35,12 @@ function load(): { theme: Theme; motion: MotionKnobs } {
   return { theme: THEME, motion: DEFAULT_MOTION };
 }
 
-export function KitProvider({ children }: { children: ReactNode }) {
+export function TokensProvider({ children }: { children: ReactNode }) {
   const initial = useRef(load());
   const [theme, setTheme] = useState<Theme>(initial.current.theme);
   const [motion, setMotion] = useState<MotionKnobs>(initial.current.motion);
   useEffect(() => {
+    applyCssVariables(theme);
     try {
       localStorage.setItem(STORAGE, JSON.stringify({ theme, motion }));
     } catch {
@@ -54,7 +56,7 @@ export function KitProvider({ children }: { children: ReactNode }) {
 
 export function useKit(): KitState {
   const kit = useContext(Ctx);
-  if (!kit) throw new Error('useKit outside KitProvider');
+  if (!kit) throw new Error('useKit outside TokensProvider');
   return kit;
 }
 

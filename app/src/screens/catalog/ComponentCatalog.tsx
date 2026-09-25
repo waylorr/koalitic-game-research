@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Icons, NeonButton, type NeonState } from '../../ui/NeonButton';
 import { KitMotionPage, KitPiecesPage, KitThemePage } from './KitPages';
-import { KitProvider } from './kitState';
 import { GearPage } from './GearPage';
 import { PlayerPage } from './PlayerPage';
 import { RailPage } from './RailPage';
@@ -23,7 +22,7 @@ const ZONES: readonly { id: string; zone: string; items: readonly Entry[] }[] = 
 
 const SECTIONS: readonly { id: SectionId; title: string; hint: string; first: PageId }[] = [
   { id: 'system', title: 'SYSTEM UI', hint: 'The app’s own interface', first: 'button' },
-  { id: 'kit', title: 'HUD KIT', hint: 'Theme, motion and pieces shared by the HUD', first: 'theme' },
+  { id: 'kit', title: 'HUD KIT', hint: 'Tokens, motion and pieces shared by app and HUD', first: 'theme' },
   { id: 'hud', title: 'HUD ELEMENTS', hint: 'What goes on the video, by zone', first: 'player' },
 ];
 
@@ -51,7 +50,7 @@ export function ComponentCatalog() {
     <button type="button" className={`kg-menu2__item${page === id ? ' is-current' : ''}`} aria-current={page === id} onClick={() => setPage(id)} data-testid={`catalog-item-${id}`}>{text}</button>
   );
   return (
-    <KitProvider>
+    <>
       <div className="kg-tabs" role="tablist" aria-label="Asset views">
         <button type="button" className="kg-tab" role="tab" disabled>MEDIA<small>SOON</small></button>
         <button type="button" className="kg-tab" role="tab" disabled>DATA LIBRARY<small>SOON</small></button>
@@ -92,7 +91,7 @@ export function ComponentCatalog() {
           </div>
         </div>
       </section>
-    </KitProvider>
+    </>
   );
 }
 

@@ -3,7 +3,7 @@ import { upsertKey, type Track } from '../../core/tracks';
 import { MODULE_LAYOUTS, type ModuleInput, type ModuleLayout } from '../../hud/kit/module';
 import type { HudItem } from '../../hud/registry';
 import { HudCanvas } from '../../hud/v2/HudCanvas';
-import { BACKGROUND, key, keyId, useClock, useKit } from './kitState';
+import { BACKGROUND, key, keyId, useClock, useKit } from '../../design/TokensProvider';
 
 /**
  * Catalog page shared by every rail module (PLAYER PROFILE, GEAR RADIAL, …):

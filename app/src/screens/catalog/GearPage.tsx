@@ -1,6 +1,6 @@
 import type { GearInput } from '../../hud/v2/gear';
 import { ElementPage, type EditContext, type ElementDef } from './ElementPage';
-import { key } from './kitState';
+import { key } from '../../design/TokensProvider';
 import { GEAR_SLOTS as SLOTS } from './samples';
 
 const BASE: GearInput = { slots: SLOTS, enterAt: 0, exitAt: null, layout: [key(0, 'Open')], hover: [], disabled: [], selection: [key(0, 0)], pulses: [] };

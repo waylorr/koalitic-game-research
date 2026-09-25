@@ -3,7 +3,7 @@ import type { PlayerInput } from '../../hud/v2/player';
 import type { RailInput, RailModuleDef } from '../../hud/v2/rail';
 import type { SampleInput } from '../../hud/kit/sample';
 import type { HudItem } from '../../hud/registry';
-import { PORTRAIT, key } from './kitState';
+import { PORTRAIT, key } from '../../design/TokensProvider';
 
 /**
  * Demo data for the catalog (the Data Library will provide the real records)
